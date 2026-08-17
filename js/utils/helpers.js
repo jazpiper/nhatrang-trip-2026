@@ -1,0 +1,78 @@
+export function formatVND(num) {
+  if (!num) return '0 VND';
+  return num.toLocaleString() + ' VND';
+}
+
+export function formatKRW(numVND) {
+  if (!numVND) return '약 0원';
+  const krw = Math.round((numVND * (typeof DEFAULT_EXCHANGE_RATE !== 'undefined' ? DEFAULT_EXCHANGE_RATE : 0.054)) / 100) * 100;
+  return '약 ' + krw.toLocaleString() + '원';
+}
+
+export function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+export function getIntensityStars(level) {
+  const total = 5;
+  return '⚡'.repeat(Math.min(level, total));
+}
+
+export function showToast(msg, duration = 2500) {
+  const toastContainer = document.getElementById('toastContainer');
+  if (!toastContainer) return;
+  const toast = document.createElement('div');
+  toast.className = 'toast-msg';
+  toast.textContent = msg;
+  toastContainer.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'fadeOut 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+export function fallbackCopy(text, callback) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    if (callback) callback();
+    else showToast('📋 주소가 복사되었습니다!');
+  } catch (e) {
+    prompt('주소를 복사하세요:', text);
+  }
+  ta.remove();
+}
+
+export function copyAddress(addressText, btnEl) {
+  if (!addressText) return;
+  const notifySuccess = () => {
+    showToast('📋 베트남어 주소가 복사되었습니다! 그랩(Grab)에 붙여넣으세요.');
+    if (btnEl) {
+      const originalHtml = btnEl.innerHTML;
+      btnEl.classList.add('copied');
+      btnEl.innerHTML = '<span>✓</span> 복사 완료!';
+      setTimeout(() => {
+        btnEl.classList.remove('copied');
+        btnEl.innerHTML = originalHtml;
+      }, 2000);
+    }
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(addressText).then(notifySuccess).catch(() => fallbackCopy(addressText, notifySuccess));
+  } else {
+    fallbackCopy(addressText, notifySuccess);
+  }
+}

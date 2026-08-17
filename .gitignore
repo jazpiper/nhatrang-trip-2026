@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Google Drive
+*.gdoc
+*.gsheet
+.tmp.drivedownload
+.tmp.driveupload
+
+# 에이전트 작업 산출물 (로컬 절대경로 · 개인 계정 정보 포함)
+.agents/
+scratch/
+ORIGINAL_REQUEST.md
+
+# 로컬 개발 편의 파일
+.vscode/
+.idea/
+*.log

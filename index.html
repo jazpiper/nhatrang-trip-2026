@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>나트랑 여행 플래너 2026 🌴 | 부부 여행 (9/19 ~ 9/25)</title>
+  <meta name="description" content="2026년 9월 19일부터 9월 25일까지 나트랑 부부 여행을 위한 에어비앤비 스타일 액티비티, 숙소, 맛집 큐레이션 플래너">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <!-- Brand Logo -->
+      <a href="#" class="brand-logo" title="나트랑 여행 2026">
+        <span class="logo-icon">🌴</span>
+        <span>NhaTrang 2026</span>
+        <span class="brand-badge">9/19 - 9/25</span>
+      </a>
+
+      <!-- Center Tabs (Activities, Stays, Gourmet) -->
+      <nav class="header-nav-tabs" aria-label="메인 카테고리">
+        <button class="nav-tab-btn active" data-tab="activities">
+          <span>🤿 액티비티</span>
+          <span class="tab-badge" style="background: #E6F7F8; color: #008489;">엄선 43선</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="gourmet">
+          <span>🍜 로컬 맛집</span>
+          <span class="tab-badge" style="background: #E6F7F8; color: #008489;">Google 검증 113곳</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="stays">
+          <span>🏨 숙소</span>
+          <span class="tab-badge" style="background: #E6F7F8; color: #008489;">4개 테마 24선</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="shopping">
+          <span>🛍️ 짝퉁/쇼핑</span>
+          <span class="tab-badge" style="background: #FFF0F2; color: #FF385C;">실전 시세 18곳</span>
+        </button>
+      </nav>
+
+      <!-- Right Action Tools -->
+      <div class="header-actions">
+        <!-- Currency Converter Toggle -->
+        <button class="action-pill-btn" id="openCalcBtn" title="동/원화 간편 환율 계산기">
+          <span>💱</span>
+          <span>환율 계산</span>
+        </button>
+
+        <!-- Weather & Tip Guide -->
+        <button class="action-pill-btn" id="openGuideBtn" title="9월 나트랑 날씨 & 여행 꿀팁">
+          <span>💡</span>
+          <span>9월 가이드</span>
+        </button>
+
+        <!-- Wishlist Toggle -->
+        <button class="action-pill-btn wishlist-btn" id="wishlistToggleBtn" title="찜한 항목 모아보기">
+          <span>♥</span>
+          <span>찜</span>
+          <span class="wishlist-count" id="wishlistCount">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container hero-content">
+      <div class="hero-title-area">
+        <h1 id="heroTitle">나트랑 부부 힐링 여행 🌴</h1>
+        <p class="hero-subtitle" id="heroSubtitle">
+          <span>2026년 9월 19일 (금) ~ 9월 25일 (목)</span>
+          <span class="dot-separator">•</span>
+          <span>6박 7일 일정</span>
+          <span class="dot-separator">•</span>
+          <span id="heroSubtitleDesc">호핑, 스파, 빈원더스, 선셋 크루즈 큐레이션</span>
+        </p>
+      </div>
+      <div class="hero-tags" id="heroTagsArea">
+        <span class="hero-stat-pill"><span class="icon">✨</span> 엄선된 43개 리얼 액티비티</span>
+        <span class="hero-stat-pill"><span class="icon">💆</span> 프라이빗 스파 & 머드온천</span>
+        <span class="hero-stat-pill"><span class="icon">⛵</span> 럭셔리 선셋 크루즈 & 호핑</span>
+        <span class="hero-stat-pill"><span class="icon">🏜️</span> 달랏 / 무이네 근교투어</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Activity Category Scroll Bar -->
+  <nav class="category-filter-section" id="activityCategoryNav" aria-label="액티비티 카테고리 필터">
+    <div class="container category-scroll-container">
+      <button class="category-item-btn active" data-category="all">
+        <span class="cat-icon">✨</span>
+        <span>전체 액티비티 (43곳)</span>
+      </button>
+      <button class="category-item-btn" data-category="hopping">
+        <span class="cat-icon">🤿</span>
+        <span>호핑 & 스노클링</span>
+      </button>
+      <button class="category-item-btn" data-category="mudbath">
+        <span class="cat-icon">♨️</span>
+        <span>머드 온천 & 스파</span>
+      </button>
+      <button class="category-item-btn" data-category="vinwonders">
+        <span class="cat-icon">🎡</span>
+        <span>빈원더스 테마파크</span>
+      </button>
+      <button class="category-item-btn" data-category="spa">
+        <span class="cat-icon">💆</span>
+        <span>릴렉스 스파 마사지</span>
+      </button>
+      <button class="category-item-btn" data-category="cruise">
+        <span class="cat-icon">⛵</span>
+        <span>선셋 크루즈</span>
+      </button>
+      <button class="category-item-btn" data-category="culture">
+        <span class="cat-icon">🏛️</span>
+        <span>역사 & 문화 유적</span>
+      </button>
+      <button class="category-item-btn" data-category="nightlife">
+        <span class="cat-icon">🍸</span>
+        <span>비치바 & 나이트</span>
+      </button>
+      <button class="category-item-btn" data-category="shopping">
+        <span class="cat-icon">🛍️</span>
+        <span>마켓 & 라탄 쇼핑</span>
+      </button>
+      <button class="category-item-btn" data-category="cafe">
+        <span class="cat-icon">☕</span>
+        <span>감성 카페 투어</span>
+      </button>
+      <button class="category-item-btn" data-category="cooking">
+        <span class="cat-icon">🍳</span>
+        <span>쿠킹 클래스</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Gourmet Category Scroll Bar -->
+  <nav class="category-filter-section" id="gourmetCategoryNav" style="display: none;" aria-label="맛집 카테고리 필터">
+    <div class="container category-scroll-container">
+      <button class="category-item-btn active" data-gcategory="all">
+        <span class="cat-icon">🌟</span>
+        <span>전체 맛집 (113곳)</span>
+      </button>
+      <button class="category-item-btn" data-gcategory="banhxeo">
+        <span class="cat-icon">🥞</span>
+        <span>반쎄오·반깐·넴느엉</span>
+      </button>
+      <button class="category-item-btn" data-gcategory="pho">
+        <span class="cat-icon">🍜</span>
+        <span>쌀국수·분짜·분까</span>
+      </button>
+      <button class="category-item-btn" data-gcategory="seafood">
+        <span class="cat-icon">🦞</span>
+        <span>해산물·조개·BBQ</span>
+      </button>
+      <button class="category-item-btn" data-gcategory="rice">
+        <span class="cat-icon">🍚</span>
+        <span>가정식·껌땀·닭고기밥</span>
+      </button>
+      <button class="category-item-btn" data-gcategory="banhmi">
+        <span class="cat-icon">🥖</span>
+        <span>정통 반미 노포</span>
+      </button>
+      <button class="category-item-btn" data-gcategory="fruit">
+        <span class="cat-icon">🥭</span>
+        <span>생과일·카페·쩨디저트</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Stay Theme Filter Bar -->
+  <nav class="category-filter-section" id="stayCategoryNav" style="display: none;" aria-label="숙소 테마 필터">
+    <div class="container category-scroll-container">
+      <button class="category-item-btn active" data-scategory="all">
+        <span class="cat-icon">🏨</span>
+        <span>전체 숙소 (24곳)</span>
+      </button>
+      <button class="category-item-btn" data-scategory="welcome">
+        <span class="cat-icon">🌙</span>
+        <span>9/19 웰컴 0.5박 (<5만)</span>
+      </button>
+      <button class="category-item-btn" data-scategory="luxury">
+        <span class="cat-icon">👑</span>
+        <span>9/20~22 5성급 럭셔리</span>
+      </button>
+      <button class="category-item-btn" data-scategory="poolvilla">
+        <span class="cat-icon">🏊</span>
+        <span>9/22~24 가성비 풀빌라</span>
+      </button>
+      <button class="category-item-btn" data-scategory="goodbye">
+        <span class="cat-icon">🛍️</span>
+        <span>9/24 출국 전 0.5박 (<5만)</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Shopping Category Scroll Bar -->
+  <nav class="category-filter-section" id="shoppingCategoryNav" style="display: none;" aria-label="쇼핑 카테고리 필터">
+    <div class="container category-scroll-container">
+      <button class="category-item-btn active" data-shopcategory="all">
+        <span class="cat-icon">🛍️</span>
+        <span>전체 쇼핑 (18곳)</span>
+      </button>
+      <button class="category-item-btn" data-shopcategory="boutique_mirror">
+        <span class="cat-icon">👑</span>
+        <span>명품 & 미러급 샵</span>
+      </button>
+      <button class="category-item-btn" data-shopcategory="dam_market">
+        <span class="cat-icon">🏛️</span>
+        <span>담시장 특화 상점</span>
+      </button>
+      <button class="category-item-btn" data-shopcategory="night_market">
+        <span class="cat-icon">🌙</span>
+        <span>야시장 스트릿 쇼핑</span>
+      </button>
+      <button class="category-item-btn" data-shopcategory="crocs_shoes">
+        <span class="cat-icon">👟</span>
+        <span>크록스 & 슈즈 전문</span>
+      </button>
+      <button class="category-item-btn" data-shopcategory="casual_sportswear">
+        <span class="cat-icon">👕</span>
+        <span>스포츠 & 스트릿웨어</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Filter & Search Toolbar -->
+  <section class="toolbar-section">
+    <div class="container toolbar-inner">
+      <!-- Search Input -->
+      <div class="search-capsule">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="액티비티 검색 (예: 스노클링, 마사지, 인생샷, 아이리조트)..." />
+        <button class="search-clear-btn" id="searchClearBtn" title="검색어 지우기">✕</button>
+      </div>
+
+      <!-- Tag Filters for Activities -->
+      <div class="tag-chips-wrapper" id="activityTagChips">
+        <button class="tag-chip-btn active" data-tag="all">전체 태그</button>
+        <button class="tag-chip-btn" data-tag="wife">💖 와이프 추천</button>
+        <button class="tag-chip-btn" data-tag="photo">📸 인생샷 스팟</button>
+        <button class="tag-chip-btn" data-tag="spa">💆 힐링 & 스파</button>
+        <button class="tag-chip-btn" data-tag="rain">☔ 비오는 날 강추</button>
+      </div>
+
+      <!-- Tag Filters for Gourmet -->
+      <div class="tag-chips-wrapper" id="gourmetTagChips" style="display: none;">
+        <button class="tag-chip-btn active" data-gtag="all">전체 태그</button>
+        <button class="tag-chip-btn" data-gtag="line">🔥 현지인 줄서는 집</button>
+        <button class="tag-chip-btn" data-gtag="ac">❄️ 에어컨 완비</button>
+        <button class="tag-chip-btn" data-gtag="breakfast">🌅 아침식사 추천</button>
+        <button class="tag-chip-btn" data-gtag="seafood">🦞 해산물 정찰제</button>
+        <button class="tag-chip-btn" data-gtag="night">🌙 야식/맥주 추천</button>
+      </div>
+
+      <!-- Tag Filters for Stays -->
+      <div class="tag-chips-wrapper" id="stayTagChips" style="display: none;">
+        <button class="tag-chip-btn active" data-stag="all">전체 태그</button>
+        <button class="tag-chip-btn" data-stag="pool">🏊 수영장/인피니티풀</button>
+        <button class="tag-chip-btn" data-stag="beach">🌊 오션뷰/비치</button>
+        <button class="tag-chip-btn" data-stag="private_pool">🏡 단독 프라이빗풀</button>
+        <button class="tag-chip-btn" data-stag="budget">💰 5만원 이하 알짜</button>
+        <button class="tag-chip-btn" data-stag="shopping">🛍️ 야시장/쇼핑 인접</button>
+      </div>
+
+      <!-- Tag Filters for Shopping -->
+      <div class="tag-chips-wrapper" id="shoppingTagChips" style="display: none;">
+        <button class="tag-chip-btn active" data-shoptag="all">전체 태그</button>
+        <button class="tag-chip-btn" data-shoptag="ac">❄️ 에어컨 완비</button>
+        <button class="tag-chip-btn" data-shoptag="fixed">🏷️ 정찰제 / 편안함</button>
+        <button class="tag-chip-btn" data-shoptag="transfer">💳 계좌이체/GLN 가능</button>
+        <button class="tag-chip-btn" data-shoptag="bargain">🔥 흥정필수 (호가 반값)</button>
+        <button class="tag-chip-btn" data-shoptag="mirror_tier">👑 미러급/SA급</button>
+        <button class="tag-chip-btn" data-shoptag="value">💰 가성비 갓템</button>
+      </div>
+
+      <!-- Controls: Sort & View Toggle -->
+      <div class="toolbar-controls">
+        <select class="sort-select" id="sortSelect" aria-label="정렬 기준">
+          <option value="recommended">추천순 정렬</option>
+          <option value="rating">평점 높은 순</option>
+          <option value="price-asc">가격 낮은 순</option>
+          <option value="price-desc">가격 높은 순</option>
+        </select>
+
+        <div id="viewToggleButtons" style="display: flex; gap: 8px;">
+          <button class="view-toggle-btn active" id="viewGridBtn" title="카드 그리드 뷰">
+            <span>▦</span> <span>카드 뷰</span>
+          </button>
+          <button class="view-toggle-btn" id="viewTimelineBtn" title="6박 7일 타임라인 뷰">
+            <span>📅</span> <span>일정 뷰</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Activities Grid View -->
+  <main class="activities-section" id="activitiesGridSection">
+    <div class="container">
+      <div class="results-info-bar">
+        <span id="resultCountText">총 <strong>43</strong>개의 추천 액티비티</span>
+        <span>💡 카드를 클릭하면 상세 정보, 준비물, 부부 팁 및 메모를 작성할 수 있습니다.</span>
+      </div>
+
+      <!-- Grid Cards Container -->
+      <div class="cards-grid" id="cardsGridContainer">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Main Gourmet Grid View -->
+  <main class="activities-section" id="gourmetGridSection" style="display: none;">
+    <div class="container">
+      <div class="results-info-bar">
+        <span id="gourmetResultCountText">총 <strong>113</strong>개의 현지인 찐 맛집</span>
+        <span>📍 모든 식당은 실제 구글 지도 평점·리뷰 검증 완료 및 원클릭 구글 지도·사진 연동을 지원합니다.</span>
+      </div>
+
+      <!-- Gourmet Grid Cards Container -->
+      <div class="cards-grid" id="gourmetCardsGridContainer">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Main Stays Grid View -->
+  <main class="activities-section" id="staysGridSection" style="display: none;">
+    <div class="container">
+      <div class="results-info-bar">
+        <span id="stayResultCountText">총 <strong>24</strong>개의 테마별 추천 숙소</span>
+        <span>🏨 9/19 웰컴부터 럭셔리 호캉스, 가성비 풀빌라, 9/24 굿바이 0.5박까지 엄선된 숙소 리스트입니다.</span>
+      </div>
+
+      <!-- Stays Grid Cards Container -->
+      <div class="cards-grid" id="staysCardsGridContainer">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Main Shopping Grid View -->
+  <main class="activities-section" id="shoppingGridSection" style="display: none;">
+    <div class="container">
+      <div class="results-info-bar">
+        <span id="shoppingResultCountText">총 <strong>18</strong>개의 검증 쇼핑 스팟</span>
+        <span>💡 품목별 적정 흥정 시세표, 한국 커뮤니티 평판 분석, 세관 반입 팁을 원클릭으로 확인하세요.</span>
+      </div>
+
+      <!-- Shopping Grid Cards Container -->
+      <div class="cards-grid" id="shoppingCardsGridContainer">
+        <!-- Rendered dynamically by js/components/shopping.js -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Timeline Schedule View (Day 1 - Day 7) -->
+  <section class="timeline-section" id="timelineSection">
+    <div class="container">
+      <div class="timeline-header">
+        <h2>📅 6박 7일 추천 일정 타임라인 (9/19 ~ 9/25)</h2>
+        <p>각 날짜별 이동 동선과 추천 액티비티 매핑입니다. 항목을 클릭하면 세부 내용을 볼 수 있습니다.</p>
+      </div>
+
+      <div class="timeline-container" id="timelineContainer">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Activity Detail Modal -->
+  <div class="modal-overlay" id="detailModal" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <button class="modal-close-btn" id="modalCloseBtn" aria-label="닫기">✕</button>
+
+      <!-- Image Gallery -->
+      <div class="modal-gallery-grid" id="modalGallery"></div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <div class="modal-header-section">
+          <div class="modal-badges-row">
+            <span class="card-badge-top-left" id="modalBadge">인기 No.1</span>
+            <span class="mini-tag" id="modalCategory">호핑 & 스노클링</span>
+            <span class="card-badge-day" id="modalDay">Day 3 (9/21 일)</span>
+          </div>
+          <h2 class="modal-title" id="modalTitle">액티비티 제목</h2>
+          <p class="modal-title-en" id="modalTitleEn">Activity English Title</p>
+
+          <div class="modal-meta-grid">
+            <div class="meta-item">
+              <span class="label">평점</span>
+              <span class="value" id="modalRating">★ 4.95 (300+)</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">소요 시간</span>
+              <span class="value" id="modalDuration">약 4시간</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">추천 시간대</span>
+              <span class="value" id="modalBestTime">오전 09:00</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">위치</span>
+              <span class="value" id="modalLocation">혼문섬 해양생물보호구역</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-section-block">
+          <div class="highlight-banner" id="modalHighlight"></div>
+        </div>
+
+        <div class="modal-section-block">
+          <div class="couple-tip-box">
+            <h4>💡 우리 부부 맞춤 꿀팁</h4>
+            <p id="modalCoupleTip"></p>
+          </div>
+        </div>
+
+        <div class="modal-section-block">
+          <h3>📋 상세 포함 사항</h3>
+          <ul class="checklist-ul" id="modalIncludedList"></ul>
+        </div>
+
+        <div class="modal-section-block">
+          <h3>🚫 불포함 사항</h3>
+          <ul class="checklist-ul" id="modalNotIncludedList"></ul>
+        </div>
+
+        <div class="modal-section-block">
+          <h3>🎒 꼭 챙길 준비물</h3>
+          <ul class="checklist-ul" id="modalWhatToBringList"></ul>
+        </div>
+
+        <!-- Couple Note Section -->
+        <div class="couple-notes-container">
+          <h4>📝 우리 부부의 메모 (자동 저장)</h4>
+          <textarea id="modalNoteInput" placeholder="예: '9/21 오전 예약 확정하기', '스노클링 후 샤워하고 마사지 받으러 가기' 등 메모를 남겨보세요."></textarea>
+          <span class="note-save-status" id="modalNoteStatus"></span>
+        </div>
+
+        <!-- Modal Bottom Sticky Bar -->
+        <div class="modal-footer-bar">
+          <div class="modal-price-display">
+            <span class="vnd" id="modalPriceVnd">890,000 VND</span>
+            <span class="krw" id="modalPriceKrw">(약 48,000원)</span>
+            <span class="price-sub" id="modalPricePer">/ 1인 기준</span>
+          </div>
+
+          <div class="modal-actions-group">
+            <button class="btn-secondary-link" id="modalHeartBtn">♡ 찜하기</button>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary-link" id="modalMapLink">📍 구글 맵 보기</a>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary-reserve" id="modalReserveLink">예약 정보 확인 ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gourmet Detail Modal (Google Maps Focused) -->
+  <div class="modal-overlay" id="gourmetModal" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <button class="modal-close-btn" id="gourmetModalCloseBtn" aria-label="닫기">✕</button>
+
+      <!-- Google Photos Hero Action Banner -->
+      <div id="gourmetModalPhotoBanner" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); color: white; padding: 28px 24px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+        <div>
+          <div style="font-size: 0.8rem; color: #94A3B8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Google Maps Verified Live Photos</div>
+          <div style="font-size: 1.25rem; font-weight: 800; margin-top: 4px;">📸 구글 지도 실제 방문객 사진 보기</div>
+          <div style="font-size: 0.85rem; color: #CBD5E1; margin-top: 2px;">실시간 현장 음식 사진, 메뉴판, 매장 내부를 구글맵에서 확인하세요.</div>
+        </div>
+        <a href="#" target="_blank" rel="noopener noreferrer" id="gourmetModalPhotosBtn" class="btn-primary-reserve" style="background: #FF385C; box-shadow: 0 4px 14px rgba(255, 56, 92, 0.4);">
+          구글 실시간 사진 갤러리 ↗
+        </a>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <div class="modal-header-section">
+          <div class="modal-badges-row">
+            <span class="card-badge-top-left" id="gourmetModalBadge">현지인 1위</span>
+            <span class="mini-tag" id="gourmetModalCategory">반쎄오 & 반깐</span>
+            <span class="mini-tag" style="background: #E6F7F8; color: #008489; font-weight: 700;">📍 Google Maps 인증</span>
+          </div>
+          <h2 class="modal-title" id="gourmetModalTitle">식당 이름</h2>
+          <p class="modal-title-en" id="gourmetModalNameVi" style="color: var(--color-ocean); font-weight: 600;">베트남 공식 상호</p>
+
+          <div class="modal-meta-grid">
+            <div class="meta-item">
+              <span class="label">구글 평점</span>
+              <span class="value" id="gourmetModalRating">★ 4.6 (구글 리뷰)</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">영업 시간</span>
+              <span class="value" id="gourmetModalHours">15:00 ~ 21:00</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">가격대</span>
+              <span class="value" id="gourmetModalPriceRange">3.5만 ~ 6만 동</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">추천 방문</span>
+              <span class="value" id="gourmetModalMeal">저녁 야식</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Google Address Box with Copy Button -->
+        <div class="modal-section-block">
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 14px 18px; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div>
+              <div style="font-size: 0.75rem; color: var(--color-text-secondary); font-weight: 700; text-transform: uppercase;">그랩(Grab) 목적지 주소</div>
+              <div id="gourmetModalAddress" style="font-size: 0.95rem; font-weight: 700; color: var(--color-text-primary); margin-top: 2px;">주소</div>
+            </div>
+            <button class="btn-copy-address" id="gourmetCopyAddressBtn" style="padding: 6px 14px; background: white; border: 1px solid var(--color-border-medium); border-radius: var(--radius-pill); font-size: 0.8rem; font-weight: 700; color: var(--color-text-primary);" title="베트남어 주소 복사하기">
+              📋 주소 복사
+            </button>
+          </div>
+        </div>
+
+        <!-- Highlight Banner -->
+        <div class="modal-section-block">
+          <div class="highlight-banner" id="gourmetModalHighlight"></div>
+        </div>
+
+        <!-- Description -->
+        <div class="modal-section-block">
+          <h3>🍽️ 식당 소개 & 맛의 특징</h3>
+          <p id="gourmetModalDesc" style="font-size: 0.92rem; line-height: 1.6; color: var(--color-text-primary);"></p>
+        </div>
+
+        <!-- Signature Menu List -->
+        <div class="modal-section-block">
+          <h3>⭐ 대표 추천 시그니처 메뉴</h3>
+          <ul class="checklist-ul" id="gourmetModalMenuList"></ul>
+        </div>
+
+        <!-- Local Tip Box -->
+        <div class="modal-section-block">
+          <div class="couple-tip-box">
+            <h4>💡 현지인 100% 즐기는 로컬 꿀팁</h4>
+            <p id="gourmetModalTip"></p>
+          </div>
+        </div>
+
+        <!-- Couple Gourmet Note -->
+        <div class="couple-notes-container">
+          <h4>📝 우리 부부의 맛집 메모 (자동 저장)</h4>
+          <textarea id="gourmetNoteInput" placeholder="예: 'Day 3 호핑 끝나고 저녁에 꼭 가기!', '맛조개 모닝글로리 2접시 시키기' 등 메모를 남겨보세요."></textarea>
+          <span class="note-save-status" id="gourmetNoteStatus"></span>
+        </div>
+
+        <!-- Modal Bottom Sticky Bar -->
+        <div class="modal-footer-bar">
+          <div class="modal-price-display">
+            <span class="vnd" id="gourmetModalAvgPrice">50,000 VND</span>
+            <span class="krw" id="gourmetModalAvgKrw">(약 2,700원)</span>
+            <span class="price-sub" id="gourmetModalPricePer">/ 1인 예상</span>
+          </div>
+
+          <div class="modal-actions-group">
+            <button class="btn-secondary-link" id="gourmetModalHeartBtn">♡ 찜하기</button>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary-link" id="gourmetModalOfficialBtn">
+              🌐 식당 공식 페이지 ↗
+            </a>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary-reserve" id="gourmetModalMapBtn" style="background: #008489;">
+              📍 구글 지도로 길찾기 ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stay Detail Modal -->
+  <div class="modal-overlay" id="stayModal" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <button class="modal-close-btn" id="stayModalCloseBtn" aria-label="닫기">✕</button>
+
+      <!-- Stay Image Gallery (Main Image + Interactive Thumbnails) -->
+      <div class="stay-gallery-container" id="stayModalGallery">
+        <div class="gallery-main-img-wrap">
+          <img id="stayModalMainImg" src="" alt="숙소 전경" />
+        </div>
+        <div class="gallery-thumbs-row" id="stayModalThumbs">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Stay Modal Body -->
+      <div class="modal-body">
+        <div class="modal-header-section">
+          <div class="modal-badges-row">
+            <span class="card-badge-top-left" id="stayModalBadge">가성비 1위</span>
+            <span class="mini-tag" id="stayModalCategory" style="background: #E8F5E9; color: #2E7D32; font-weight: 700;">호텔</span>
+            <span class="mini-tag" id="stayModalThemeBadge" style="background: #E0F2FE; color: #0369A1; font-weight: 700;">9/19 웰컴 0.5박</span>
+          </div>
+          <h2 class="modal-title" id="stayModalTitle">숙소 이름</h2>
+          <p class="modal-title-en" id="stayModalNameVi" style="color: var(--color-ocean); font-weight: 600;">🇻🇳 베트남 공식 상호</p>
+
+          <div class="modal-meta-grid">
+            <div class="meta-item">
+              <span class="label">구글 지도 평점</span>
+              <span class="value" id="stayModalRating">★ 4.3 (3,200개)</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">1박 예상 요금</span>
+              <span class="value" id="stayModalPriceRange">550,000 ~ 850,000 VND</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">체크인 / 체크아웃</span>
+              <span class="value" id="stayModalCheckInOut">입실 14:00 / 퇴실 12:00</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">위치 / 권역</span>
+              <span class="value" id="stayModalLocation">시내 중심 / 탄랍</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Google Address Box with 1-Click Copy Button -->
+        <div class="modal-address-box">
+          <div class="address-text-group">
+            <span class="icon">📍</span>
+            <div>
+              <div class="address-sub-label">그랩(Grab) 및 택시 목적지 주소</div>
+              <span class="address" id="stayModalAddress">베트남 공식 도로명 주소</span>
+            </div>
+          </div>
+          <button class="btn-copy-address" id="stayCopyAddressBtn" title="베트남어 주소 복사하기">
+            <span>📋</span> 주소 복사
+          </button>
+        </div>
+
+        <!-- Highlight Box -->
+        <div class="modal-highlight-box" style="background: #F0FDF4; border-left-color: #16A34A;">
+          <span class="icon">✨</span>
+          <p id="stayModalHighlight">핵심 추천 하이라이트</p>
+        </div>
+
+        <!-- Key Amenities List -->
+        <div class="modal-section-block">
+          <h3>✨ 핵심 부대시설 & 서비스</h3>
+          <ul class="checklist-ul" id="stayModalAmenitiesList">
+            <!-- Rendered dynamically -->
+          </ul>
+        </div>
+
+        <!-- Highlights & Features List -->
+        <div class="modal-section-block">
+          <h3>🌟 숙소 특장점 & 추천 이유</h3>
+          <ul class="checklist-ul" id="stayModalHighlightsList">
+            <!-- Rendered dynamically -->
+          </ul>
+        </div>
+
+        <!-- Nearby Spots List -->
+        <div class="modal-section-block">
+          <h3>🗺️ 인근 도보 스팟 & 주변 맛집 연결</h3>
+          <ul class="checklist-ul" id="stayModalNearbyList">
+            <!-- Rendered dynamically -->
+          </ul>
+        </div>
+
+        <!-- Local / Couple Tips -->
+        <div class="modal-section-block">
+          <div class="couple-tip-box">
+            <h4>💡 우리 부부 맞춤 투숙 & 예약 팁</h4>
+            <p id="stayModalTip"></p>
+          </div>
+        </div>
+
+        <!-- Couple Stay Note -->
+        <div class="couple-notes-container">
+          <h4>📝 우리 부부의 숙소 메모 (자동 저장)</h4>
+          <textarea id="stayNoteInput" placeholder="예: '9/19 밤 11시 늦은 체크인 알림 완료', '고층 오션뷰 요청하기' 등 메모를 남겨보세요."></textarea>
+          <span class="note-save-status" id="stayNoteStatus"></span>
+        </div>
+
+        <!-- Modal Bottom Sticky Bar -->
+        <div class="modal-footer-bar">
+          <div class="modal-price-display">
+            <span class="vnd" id="stayModalAvgPrice">650,000 VND</span>
+            <span class="krw" id="stayModalAvgKrw">(약 36,000원)</span>
+            <span class="price-sub" id="stayModalPricePer">/ 1박 기준</span>
+          </div>
+
+          <div class="modal-actions-group">
+            <button class="btn-secondary-link" id="stayModalHeartBtn">♡ 찜하기</button>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary-link" id="stayModalMapBtn">
+              📍 구글 지도 ↗
+            </a>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary-reserve btn-trip-dot-com" id="stayModalTripBtn" style="background: #2563EB;">
+              🏨 트립닷컴 예약 ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shopping Detail Modal -->
+  <div class="modal-overlay" id="shoppingModal" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <button class="modal-close-btn" id="shoppingModalCloseBtn" aria-label="닫기">✕</button>
+
+      <!-- Shopping Image Gallery -->
+      <div class="stay-gallery-container" id="shoppingModalGallery">
+        <div class="gallery-main-img-wrap">
+          <img id="shoppingModalMainImg" src="" alt="매장 전경" />
+        </div>
+        <div class="gallery-thumbs-row" id="shoppingModalThumbs">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Shopping Modal Body -->
+      <div class="modal-body">
+        <div class="modal-header-section">
+          <div class="modal-badges-row">
+            <span class="card-badge-top-left" id="shoppingModalBadge">미러급 1위</span>
+            <span class="mini-tag" id="shoppingModalCategory" style="background: #E8F5E9; color: #2E7D32; font-weight: 700;">크록스 & 슈즈</span>
+            <span class="mini-tag" id="shoppingModalQualityBadge" style="background: #FEF3C7; color: #92400E; font-weight: 700;">미러급/SA급</span>
+            <span class="mini-tag" id="shoppingModalAcBadge" style="background: #E0F2FE; color: #0369A1; font-weight: 700;">❄️ 에어컨 완비</span>
+          </div>
+          <h2 class="modal-title" id="shoppingModalTitle">매장 이름</h2>
+          <p class="modal-title-en" id="shoppingModalNameVi" style="color: var(--color-ocean); font-weight: 600;">🇻🇳 베트남 공식 상호</p>
+
+          <div class="modal-meta-grid">
+            <div class="meta-item">
+              <span class="label">구글 지도 평점</span>
+              <span class="value" id="shoppingModalRating">★ 4.8 (380개)</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">영업 시간</span>
+              <span class="value" id="shoppingModalHours">08:30 - 21:30</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">예상 가격대</span>
+              <span class="value" id="shoppingModalPriceRange">200,000 ~ 280,000 VND</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">위치 / 권역</span>
+              <span class="value" id="shoppingModalLocation">시내 중심가</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Google Address Box with 1-Click Copy Button -->
+        <div class="modal-address-box">
+          <div class="address-text-group">
+            <span class="icon">📍</span>
+            <div>
+              <div class="address-sub-label">그랩(Grab) 및 택시 목적지 주소</div>
+              <span class="address" id="shoppingModalAddress">베트남 공식 도로명 주소</span>
+            </div>
+          </div>
+          <button class="btn-copy-address" id="shoppingCopyAddressBtn" title="베트남어 주소 복사하기">
+            <span>📋</span> 주소 복사
+          </button>
+        </div>
+
+        <!-- Highlight Box -->
+        <div class="modal-highlight-box" style="background: #F0FDF4; border-left-color: #16A34A;">
+          <span class="icon">✨</span>
+          <p id="shoppingModalHighlight">핵심 추천 하이라이트</p>
+        </div>
+
+        <!-- Store Facilities & Perks -->
+        <div class="modal-section-block">
+          <h3>🏪 매장 편의시설 & 결제 혜택</h3>
+          <div class="shopping-facilities-box" id="shoppingModalFacilities">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Real-Time Bargaining Master Table -->
+        <div class="modal-section-block">
+          <h3>🏷️ 품목별 실전 흥정 가이드 & 적정 시세표</h3>
+          <div class="bargain-table-wrap" id="shoppingModalBargainingTable">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Korean Community Review Analysis Panel -->
+        <div class="modal-section-block">
+          <h3>💬 한국인 커뮤니티 실구매자 평판 분석</h3>
+          <div class="sentiment-panel-wrap" id="shoppingModalSentimentPanel">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Customs Clearance Caution Box -->
+        <div class="modal-section-block">
+          <h3>✈️ 한국 세관 통관 & 안전 귀국 가이드</h3>
+          <div class="customs-warning-box" id="shoppingModalCustomsGuide">
+            <span id="shoppingCustomsWarningText">자가사용 목적 1인 소량 반입을 준수하고 박스/택을 제거하세요.</span>
+          </div>
+        </div>
+
+        <!-- Store Introduction & Description -->
+        <div class="modal-section-block">
+          <h3>📖 매장 소개 & 특징</h3>
+          <p id="shoppingModalDesc" style="line-height: 1.6; color: var(--color-text-secondary); font-size: 0.95rem;"></p>
+        </div>
+
+        <!-- Local / Couple Tips -->
+        <div class="modal-section-block">
+          <div class="couple-tip-box">
+            <h4>💡 우리 부부 맞춤 실전 쇼핑 팁</h4>
+            <p id="shoppingModalTip"></p>
+          </div>
+        </div>
+
+        <!-- Couple Shopping Note -->
+        <div class="couple-notes-container">
+          <h4>📝 우리 부부의 쇼핑 메모 (자동 저장)</h4>
+          <textarea id="shoppingNoteInput" placeholder="예: '크록스 240/270 사이즈 문의', '지비츠 추가 서비스 받기' 등 메모를 남겨보세요."></textarea>
+          <span class="note-save-status" id="shoppingNoteStatus"></span>
+        </div>
+
+        <!-- Modal Bottom Sticky Bar -->
+        <div class="modal-footer-bar">
+          <div class="modal-price-display">
+            <span class="vnd" id="shoppingModalAvgPrice">240,000 VND</span>
+            <span class="krw" id="shoppingModalAvgKrw">(약 13,000원)</span>
+            <span class="price-sub" id="shoppingModalPricePer">/ 평균 기준</span>
+          </div>
+
+          <div class="modal-actions-group">
+            <button class="btn-secondary-link" id="shoppingModalHeartBtn">♡ 찜하기</button>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary-link" id="shoppingModalPhotosBtn">
+              📸 실시간 사진 ↗
+            </a>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary-reserve" id="shoppingModalMapBtn" style="background: #FF385C;">
+              📍 구글 지도로 길찾기 ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Currency Calculator Modal -->
+  <div class="modal-overlay" id="calcModal" role="dialog" aria-modal="true">
+    <div class="modal-box tool-modal-box">
+      <button class="modal-close-btn" id="calcCloseBtn" aria-label="닫기">✕</button>
+      <h2 style="margin-bottom: 8px;">💱 베트남 동 ↔ 원화 계산기</h2>
+      <p style="color: var(--color-text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+        실시간 기준 환율: 100,000 VND ≈ 약 5,400 KRW
+      </p>
+
+      <div class="calc-input-group">
+        <label for="calcVndInput">베트남 동 (VND)</label>
+        <div class="calc-input-box">
+          <input type="text" id="calcVndInput" placeholder="100,000" />
+          <span class="currency-label">VND</span>
+        </div>
+        <div class="calc-preset-pills">
+          <button class="calc-preset-btn" data-vnd="50000">5만동 (2.7천원)</button>
+          <button class="calc-preset-btn" data-vnd="100000">10만동 (5.4천원)</button>
+          <button class="calc-preset-btn" data-vnd="300000">30만동 (1.6만원)</button>
+          <button class="calc-preset-btn" data-vnd="500000">50만동 (2.7만원)</button>
+          <button class="calc-preset-btn" data-vnd="1000000">100만동 (5.4만원)</button>
+        </div>
+      </div>
+
+      <div class="calc-input-group">
+        <label for="calcKrwInput">대한민국 원 (KRW)</label>
+        <div class="calc-input-box">
+          <input type="text" id="calcKrwInput" placeholder="5,400" />
+          <span class="currency-label">원</span>
+        </div>
+      </div>
+
+      <div class="calc-quick-rule">
+        💡 <strong>현지에서 1초 만에 원화 계산하는 꿀팁!</strong><br>
+        베트남 동 가격에서 <strong>'0 하나를 빼고 2로 나누면'</strong> 대략적인 원화 금액이 됩니다.<br>
+        <em>예: 200,000 동 → 20,000 ÷ 2 = 약 10,000원!</em>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9월 여행 가이드 & 팁 모달 -->
+  <div class="modal-overlay" id="guideModal" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 680px; padding: 32px;">
+      <button class="modal-close-btn" id="guideCloseBtn" aria-label="닫기">✕</button>
+      <h2 style="margin-bottom: 6px;">🌴 9월 나트랑 여행 필수 가이드</h2>
+      <p style="color: var(--color-text-secondary); margin-bottom: 24px; font-size: 0.9rem;">
+        2026.09.19 ~ 09.25 부부 여행을 위한 완벽 대비 체크리스트
+      </p>
+
+      <div class="modal-section-block">
+        <h3>⛅ 9월 나트랑 날씨 & 복장</h3>
+        <div class="highlight-banner" style="background: #EFF6FF; border-left-color: #3B82F6; color: #1E40AF;">
+          평균 기온 25°C ~ 32°C. 맑은 날씨가 주를 이루며, 늦은 오후나 밤에 30분~1시간 정도 소나기(스콜)가 지나갈 수 있습니다. 얇고 시원한 린넨 룩, 통풍 잘되는 원피스, 얇은 바람막이나 가디건(실내 에어컨 대비)을 챙기시면 좋습니다.
+        </div>
+      </div>
+
+      <div class="modal-section-block">
+        <h3>📱 현지 필수 추천 앱</h3>
+        <ul class="checklist-ul">
+          <li><span class="bullet">🚗</span> <strong>그랩 (Grab):</strong> 바가지 없는 필수 호출 앱 (카드 미리 등록)</li>
+          <li><span class="bullet">💳</span> <strong>트래블로그 / 트래블월렛:</strong> VPBank, TPBank 수수료 0원 현금 인출</li>
+          <li><span class="bullet">🗺️</span> <strong>구글 맵 (Google Maps):</strong> 오프라인 지도 다운로드 권장</li>
+          <li><span class="bullet">💬</span> <strong>파파고 (Papago):</strong> 베트남어 이미지 번역 & 음성 번역</li>
+        </ul>
+      </div>
+
+      <div class="modal-section-block">
+        <h3>🎒 꼭 챙겨야 할 필수 아이템</h3>
+        <ul class="checklist-ul">
+          <li><span class="bullet">🚿</span> <strong>샤워기 필터:</strong> 동남아 호텔 배관 특성상 필수 챙김</li>
+          <li><span class="bullet">🦟</span> <strong>모기 기피제:</strong> 소프펠(Soffell) 현지 약국 구매 가능</li>
+          <li><span class="bullet">📱</span> <strong>방수팩 & 아쿠아슈즈:</strong> 호핑투어 및 워터파크용</li>
+          <li><span class="bullet">🧴</span> <strong>선크림 & 알로에 수딩젤:</strong> 자외선 차단 및 피부 진정</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>Nha Trang Trip 2026</strong> | 2026.09.19 ~ 2026.09.25
+        <p style="margin-top: 4px;">나트랑 부부 여행 플래너 · 개인 소장용</p>
+      </div>
+      <div class="footer-love">
+        <span>Made with ❤️ for our Vietnam Vacation</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="./data.js"></script>
+  <script src="./gourmet-data.js"></script>
+  <script src="./stays-data.js"></script>
+  <script src="./shopping-data.js"></script>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
