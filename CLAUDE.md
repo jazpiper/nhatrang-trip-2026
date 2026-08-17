@@ -27,7 +27,8 @@ python3 -m http.server 8000
 데이터 스크립트가 `js/app.js`보다 뒤로 가면 해당 탭이 통째로 죽는다 (`test-frontend.js` Suite 2가 5개 전부 순서를 검증).
 
 ```
-index.html         단일 진입점. 5개 탭의 모든 정적 마크업 + 모달 + 하드코딩 카운트 뱃지
+index.html         단일 진입점. 5개 탭 정적 마크업 + 모달 template + 하드코딩 카운트 뱃지
+                   모달은 <template class="modal-tpl">에 있고 크롬은 buildModals()가 생성
 style.css          Airbnb 스타일 디자인 토큰 (단일 파일)
 data.js            NHA_TRANG_ACTIVITIES(43) + NHA_TRANG_SCHEDULE(7일) + DEFAULT_EXCHANGE_RATE
 gourmet-data.js    NHA_TRANG_GOURMETS(113)   — module.exports 있음
@@ -159,9 +160,12 @@ https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}
 체크리스트:
 1. `<domain>-data.js`에 `module.exports` 이중 export를 넣었는가
 2. `index.html` 스크립트 태그를 `js/app.js` **앞**에 넣었는가
-3. 새 클래스를 `style.css`에 먼저 선언했는가
-4. `getFiltered<Domain>()`을 `js/app.js` 하단 export 목록에 추가했는가
-5. `test-<domain>.js`가 재구현본이 아니라 실제 함수를 `require()`해서 돌리는가
+3. 새 클래스를 `style.css`에 **먼저** 선언했는가 (Suite 4b가 잡는다)
+4. `DOMAINS` 테이블에 항목을 추가했는가 — 이것만 하면 탭 전환·카테고리/태그 바인딩·검색·정렬·필터 초기화·모달 닫기·노트 저장이 전부 자동으로 붙는다
+5. 모달은 `index.html`에 `<template class="modal-tpl" data-modal="..." data-close="...">`로 추가한다. overlay/box/close 버튼은 `buildModals()`가 만들어주므로 직접 쓰지 마라
+6. `getFiltered<Domain>()`과 `render<Domain>()`을 `js/app.js` 하단 export 목록에 추가했는가
+7. `test-render-snapshot.js`의 `DOMAINS`/`MODAL_OPENERS`에 새 도메인을 등록하고 골든을 기록했는가
+8. `test-<domain>.js`가 재구현본이 아니라 실제 함수를 `require()`해서 돌리는가
 
 ## 작업 완료 전 체크
 
