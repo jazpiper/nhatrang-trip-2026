@@ -245,6 +245,53 @@
     }).sort(cfg.compare);
   }
 
+  // --- 3.6 Generic Render Pipeline ---
+  // 5개 renderX가 공유하던 "컨테이너/카운트 엘리먼트 조회 -> getFilteredX 호출 ->
+  // 카운트 갱신 -> 빈 상태 처리 -> 카드 HTML 생성 -> 클릭/찜 바인딩" 골격만 여기
+  // 하나로 모은다. 카드 템플릿, 카운트 문구, 빈 상태 마크업, 리셋 버튼 id, 클릭 시
+  // 무시할 셀렉터는 도메인마다 완전히 다르므로 cfg 콜백/필드로 그대로 유지하고
+  // 절대 통일하지 않는다 (통일하면 렌더 출력이 바뀌어 test-render-snapshot.js가 깨짐).
+  function renderDomainGrid(cfg) {
+    const container = document.getElementById(cfg.gridContainerId);
+    const countEl = document.getElementById(cfg.countTextId);
+    if (!container) return;
+
+    const list = cfg.getFiltered();
+    if (countEl) {
+      countEl.innerHTML = cfg.countHtml(list.length);
+    }
+
+    if (list.length === 0) {
+      container.innerHTML = cfg.emptyHtml();
+      const resetBtn = document.getElementById(cfg.resetBtnId);
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          window.dispatchEvent(new CustomEvent('reset-filters'));
+        });
+      }
+      return;
+    }
+
+    container.innerHTML = list.map(cfg.cardTemplate).join('');
+
+    container.querySelectorAll(cfg.cardSelector).forEach(card => {
+      card.addEventListener('click', (e) => {
+        if ((cfg.ignoreSelectors || ['.card-heart-btn']).some(sel => e.target.closest(sel))) return;
+        const id = card.dataset.id;
+        const item = cfg.findItem(id);
+        if (item) cfg.openModal(item);
+      });
+    });
+
+    container.querySelectorAll('.card-heart-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        cfg.toggleWishlist(btn.dataset.id);
+        cfg.rerender();
+      });
+    });
+  }
+
   // --- 4. Activities Domain Logic ---
   function activitiesTagMatch(item, tag) {
     const tagMap = {
@@ -292,52 +339,24 @@
     });
   }
 
-  function renderCards() {
-    const cardsGrid = document.getElementById('cardsGridContainer');
-    const resultCountText = document.getElementById('resultCountText');
-    if (!cardsGrid) return;
+  function activityCardTemplate(item) {
+    const isWish = state.wishlist.includes(item.id);
+    const userNote = state.notes[item.id];
+    const tagBadges = (item.tags || []).slice(0, 3).map(t => {
+      let label = t;
+      if (t === 'wife' || t === '와이프추천' || t === '와이프픽' || t === '인기추천') label = '💖 인기 추천';
+      if (t === 'photo' || t === '인생샷') label = '📸 인생샷';
+      if (t === 'spa' || t === '스파' || t === '힐링') label = '💆 힐링 스파';
+      if (t === 'rain' || t === '비오는날') label = '☔ 비오는날 추천';
+      return `<span class="card-tag-pill">${escapeHtml(label)}</span>`;
+    }).join('');
 
-    const list = getFilteredActivities();
-    if (resultCountText) {
-      resultCountText.innerHTML = `총 <strong>${list.length}</strong>개의 추천 액티비티`;
+    let dayBadge = '';
+    if (item.suggestedDay) {
+      dayBadge = item.suggestedDay.split(' ')[0] || '';
     }
 
-    if (list.length === 0) {
-      cardsGrid.innerHTML = `
-        <div class="empty-state">
-          <div class="icon">🔍</div>
-          <h3>조건에 맞는 액티비티가 없습니다</h3>
-          <p>필터 조건을 초기화하거나 다른 검색어로 찾아보세요.</p>
-          <button class="btn-reset-filters" id="btnResetFilters">필터 전체 초기화</button>
-        </div>
-      `;
-      const resetBtn = document.getElementById('btnResetFilters');
-      if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-          window.dispatchEvent(new CustomEvent('reset-filters'));
-        });
-      }
-      return;
-    }
-
-    cardsGrid.innerHTML = list.map(item => {
-      const isWish = state.wishlist.includes(item.id);
-      const userNote = state.notes[item.id];
-      const tagBadges = (item.tags || []).slice(0, 3).map(t => {
-        let label = t;
-        if (t === 'wife' || t === '와이프추천' || t === '와이프픽' || t === '인기추천') label = '💖 인기 추천';
-        if (t === 'photo' || t === '인생샷') label = '📸 인생샷';
-        if (t === 'spa' || t === '스파' || t === '힐링') label = '💆 힐링 스파';
-        if (t === 'rain' || t === '비오는날') label = '☔ 비오는날 추천';
-        return `<span class="card-tag-pill">${escapeHtml(label)}</span>`;
-      }).join('');
-
-      let dayBadge = '';
-      if (item.suggestedDay) {
-        dayBadge = item.suggestedDay.split(' ')[0] || '';
-      }
-
-      return `
+    return `
         <div class="activity-card" data-id="${item.id}">
           <div class="card-media-wrapper">
             <img class="card-img" src="${item.imageUrl || (item.images && item.images[0]) || ''}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=600&q=80'" />
@@ -374,23 +393,30 @@
           </div>
         </div>
       `;
-    }).join('');
+  }
 
-    cardsGrid.querySelectorAll('.activity-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('.card-heart-btn')) return;
-        const id = card.dataset.id;
-        const activity = NHA_TRANG_ACTIVITIES.find(a => a.id === id);
-        if (activity) openActivityModal(activity);
-      });
-    });
-
-    cardsGrid.querySelectorAll('.card-heart-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleWishlist(btn.dataset.id);
-        renderCards();
-      });
+  function renderCards() {
+    renderDomainGrid({
+      gridContainerId: 'cardsGridContainer',
+      countTextId: 'resultCountText',
+      getFiltered: getFilteredActivities,
+      countHtml: (n) => `총 <strong>${n}</strong>개의 추천 액티비티`,
+      emptyHtml: () => `
+        <div class="empty-state">
+          <div class="icon">🔍</div>
+          <h3>조건에 맞는 액티비티가 없습니다</h3>
+          <p>필터 조건을 초기화하거나 다른 검색어로 찾아보세요.</p>
+          <button class="btn-reset-filters" id="btnResetFilters">필터 전체 초기화</button>
+        </div>
+      `,
+      resetBtnId: 'btnResetFilters',
+      cardTemplate: activityCardTemplate,
+      cardSelector: '.activity-card',
+      ignoreSelectors: ['.card-heart-btn'],
+      findItem: (id) => NHA_TRANG_ACTIVITIES.find(a => a.id === id),
+      openModal: openActivityModal,
+      toggleWishlist: toggleWishlist,
+      rerender: renderCards
     });
   }
 
@@ -653,44 +679,16 @@
     });
   }
 
-  function renderGourmets() {
-    const gourmetCardsGrid = document.getElementById('gourmetCardsGridContainer');
-    const gourmetResultCountText = document.getElementById('gourmetResultCountText');
-    if (!gourmetCardsGrid) return;
+  function gourmetCardTemplate(item) {
+    const isWish = (state.gourmetWishlist || []).includes(item.id);
+    const userNote = (state.gourmetNotes || {})[item.id];
+    const tagBadges = (item.tags || []).slice(0, 3).map(t => `<span class="card-tag-pill">${escapeHtml(t)}</span>`).join('');
 
-    const list = getFilteredGourmets();
-    if (gourmetResultCountText) {
-      gourmetResultCountText.innerHTML = `총 <strong>${list.length}</strong>개의 현지인 찐 맛집`;
-    }
+    const sigPreview = (item.signatureMenu && item.signatureMenu.length > 0)
+      ? (typeof item.signatureMenu[0] === 'string' ? item.signatureMenu[0] : item.signatureMenu[0].name)
+      : '';
 
-    if (list.length === 0) {
-      gourmetCardsGrid.innerHTML = `
-        <div class="empty-state">
-          <div class="icon">🍜</div>
-          <h3>조건에 맞는 맛집이 없습니다</h3>
-          <p>필터 조건을 초기화하거나 다른 메뉴·식당 이름으로 찾아보세요.</p>
-          <button class="btn-reset-filters" id="btnResetGourmetFilters">필터 전체 초기화</button>
-        </div>
-      `;
-      const resetBtn = document.getElementById('btnResetGourmetFilters');
-      if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-          window.dispatchEvent(new CustomEvent('reset-filters'));
-        });
-      }
-      return;
-    }
-
-    gourmetCardsGrid.innerHTML = list.map(item => {
-      const isWish = (state.gourmetWishlist || []).includes(item.id);
-      const userNote = (state.gourmetNotes || {})[item.id];
-      const tagBadges = (item.tags || []).slice(0, 3).map(t => `<span class="card-tag-pill">${escapeHtml(t)}</span>`).join('');
-      
-      const sigPreview = (item.signatureMenu && item.signatureMenu.length > 0)
-        ? (typeof item.signatureMenu[0] === 'string' ? item.signatureMenu[0] : item.signatureMenu[0].name)
-        : '';
-
-      return `
+    return `
         <div class="activity-card gourmet-card" data-id="${item.id}">
           <div class="card-media-wrapper" style="background: #1E293B; min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; padding: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; z-index: 2;">
@@ -737,23 +735,30 @@
           </div>
         </div>
       `;
-    }).join('');
+  }
 
-    gourmetCardsGrid.querySelectorAll('.gourmet-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('.card-heart-btn')) return;
-        const id = card.dataset.id;
-        const gourmet = NHA_TRANG_GOURMETS.find(g => g.id === id);
-        if (gourmet) openGourmetModal(gourmet);
-      });
-    });
-
-    gourmetCardsGrid.querySelectorAll('.card-heart-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleGourmetWishlist(btn.dataset.id);
-        renderGourmets();
-      });
+  function renderGourmets() {
+    renderDomainGrid({
+      gridContainerId: 'gourmetCardsGridContainer',
+      countTextId: 'gourmetResultCountText',
+      getFiltered: getFilteredGourmets,
+      countHtml: (n) => `총 <strong>${n}</strong>개의 현지인 찐 맛집`,
+      emptyHtml: () => `
+        <div class="empty-state">
+          <div class="icon">🍜</div>
+          <h3>조건에 맞는 맛집이 없습니다</h3>
+          <p>필터 조건을 초기화하거나 다른 메뉴·식당 이름으로 찾아보세요.</p>
+          <button class="btn-reset-filters" id="btnResetGourmetFilters">필터 전체 초기화</button>
+        </div>
+      `,
+      resetBtnId: 'btnResetGourmetFilters',
+      cardTemplate: gourmetCardTemplate,
+      cardSelector: '.gourmet-card',
+      ignoreSelectors: ['.card-heart-btn'],
+      findItem: (id) => NHA_TRANG_GOURMETS.find(g => g.id === id),
+      openModal: openGourmetModal,
+      toggleWishlist: toggleGourmetWishlist,
+      rerender: renderGourmets
     });
   }
 
@@ -930,42 +935,14 @@
     });
   }
 
-  function renderStays() {
-    const staysCardsGrid = document.getElementById('staysCardsGridContainer');
-    const stayResultCountText = document.getElementById('stayResultCountText');
-    if (!staysCardsGrid) return;
-    
-    const list = getFilteredStays();
-    if (stayResultCountText) {
-      stayResultCountText.innerHTML = `총 <strong>${list.length}</strong>개의 테마별 추천 숙소`;
-    }
+  function stayCardTemplate(item) {
+    const isWish = (state.stayWishlist || []).includes(item.id);
+    const userNote = (state.stayNotes || {})[item.id];
+    const mainImg = (item.photos && item.photos[0]) || 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80';
+    const themeLabel = item.themeName ? item.themeName.split(' ')[0] : '추천 숙소';
+    const amenitiesBadges = (item.amenities || []).slice(0, 3).map(a => `<span class="card-tag-pill">${escapeHtml(a)}</span>`).join('');
 
-    if (list.length === 0) {
-      staysCardsGrid.innerHTML = `
-        <div class="empty-state">
-          <div class="icon">🏨</div>
-          <h3>조건에 맞는 숙소가 없습니다</h3>
-          <p>필터 조건을 초기화하거나 다른 검색어로 찾아보세요.</p>
-          <button class="btn-reset-filters" id="btnResetStaysFilters">필터 전체 초기화</button>
-        </div>
-      `;
-      const resetBtn = document.getElementById('btnResetStaysFilters');
-      if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-          window.dispatchEvent(new CustomEvent('reset-filters'));
-        });
-      }
-      return;
-    }
-
-    staysCardsGrid.innerHTML = list.map(item => {
-      const isWish = (state.stayWishlist || []).includes(item.id);
-      const userNote = (state.stayNotes || {})[item.id];
-      const mainImg = (item.photos && item.photos[0]) || 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80';
-      const themeLabel = item.themeName ? item.themeName.split(' ')[0] : '추천 숙소';
-      const amenitiesBadges = (item.amenities || []).slice(0, 3).map(a => `<span class="card-tag-pill">${escapeHtml(a)}</span>`).join('');
-
-      return `
+    return `
         <div class="activity-card stay-card" data-id="${item.id}">
           <div class="card-media-wrapper">
             <img class="card-img" src="${mainImg}" alt="${escapeHtml(item.nameKo)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80'" />
@@ -1005,23 +982,30 @@
           </div>
         </div>
       `;
-    }).join('');
+  }
 
-    staysCardsGrid.querySelectorAll('.stay-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('.card-heart-btn')) return;
-        const id = card.dataset.id;
-        const stay = NHA_TRANG_STAYS.find(s => s.id === id);
-        if (stay) openStayModal(stay);
-      });
-    });
-
-    staysCardsGrid.querySelectorAll('.card-heart-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleStayWishlist(btn.dataset.id);
-        renderStays();
-      });
+  function renderStays() {
+    renderDomainGrid({
+      gridContainerId: 'staysCardsGridContainer',
+      countTextId: 'stayResultCountText',
+      getFiltered: getFilteredStays,
+      countHtml: (n) => `총 <strong>${n}</strong>개의 테마별 추천 숙소`,
+      emptyHtml: () => `
+        <div class="empty-state">
+          <div class="icon">🏨</div>
+          <h3>조건에 맞는 숙소가 없습니다</h3>
+          <p>필터 조건을 초기화하거나 다른 검색어로 찾아보세요.</p>
+          <button class="btn-reset-filters" id="btnResetStaysFilters">필터 전체 초기화</button>
+        </div>
+      `,
+      resetBtnId: 'btnResetStaysFilters',
+      cardTemplate: stayCardTemplate,
+      cardSelector: '.stay-card',
+      ignoreSelectors: ['.card-heart-btn'],
+      findItem: (id) => NHA_TRANG_STAYS.find(s => s.id === id),
+      openModal: openStayModal,
+      toggleWishlist: toggleStayWishlist,
+      rerender: renderStays
     });
   }
 
@@ -1236,43 +1220,15 @@
     });
   }
 
-  function renderShopping() {
-    const shoppingCardsGrid = document.getElementById('shoppingCardsGridContainer');
-    const shoppingResultCountText = document.getElementById('shoppingResultCountText');
-    if (!shoppingCardsGrid) return;
+  function shoppingCardTemplate(item) {
+    const isWish = (state.shoppingWishlist || []).includes(item.id);
+    const userNote = (state.shoppingNotes || {})[item.id];
+    const mainImg = (item.photos && item.photos[0]) || 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80';
+    const tagPills = (item.tags || []).slice(0, 3).map(t => `<span class="card-tag-pill">${escapeHtml(t)}</span>`).join('');
+    const qualityTierBadge = item.qualityTier ? `<span class="shopping-badge-tier">${escapeHtml(item.qualityTier)}</span>` : '';
+    const acBadge = item.hasAirConditioning ? `<span class="shopping-badge-ac">❄️ 에어컨</span>` : '';
 
-    const list = getFilteredShopping();
-    if (shoppingResultCountText) {
-      shoppingResultCountText.innerHTML = `총 <strong>${list.length}</strong>개의 검증 쇼핑 스팟`;
-    }
-
-    if (list.length === 0) {
-      shoppingCardsGrid.innerHTML = `
-        <div class="empty-state">
-          <div class="icon">🛍️</div>
-          <h3>조건에 맞는 쇼핑 스팟이 없습니다</h3>
-          <p>필터 조건을 초기화하거나 다른 검색어로 찾아보세요.</p>
-          <button class="btn-reset-filters" id="btnResetShoppingFilters">필터 전체 초기화</button>
-        </div>
-      `;
-      const resetBtn = document.getElementById('btnResetShoppingFilters');
-      if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-          window.dispatchEvent(new CustomEvent('reset-filters'));
-        });
-      }
-      return;
-    }
-
-    shoppingCardsGrid.innerHTML = list.map(item => {
-      const isWish = (state.shoppingWishlist || []).includes(item.id);
-      const userNote = (state.shoppingNotes || {})[item.id];
-      const mainImg = (item.photos && item.photos[0]) || 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80';
-      const tagPills = (item.tags || []).slice(0, 3).map(t => `<span class="card-tag-pill">${escapeHtml(t)}</span>`).join('');
-      const qualityTierBadge = item.qualityTier ? `<span class="shopping-badge-tier">${escapeHtml(item.qualityTier)}</span>` : '';
-      const acBadge = item.hasAirConditioning ? `<span class="shopping-badge-ac">❄️ 에어컨</span>` : '';
-
-      return `
+    return `
         <div class="activity-card shopping-card" data-id="${item.id}">
           <div class="card-media-wrapper">
             <img class="card-img" src="${mainImg}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80'" />
@@ -1313,23 +1269,30 @@
           </div>
         </div>
       `;
-    }).join('');
+  }
 
-    shoppingCardsGrid.querySelectorAll('.shopping-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('.card-heart-btn')) return;
-        const id = card.dataset.id;
-        const spot = NHA_TRANG_SHOPPING.find(s => s.id === id);
-        if (spot) openShoppingModal(spot);
-      });
-    });
-
-    shoppingCardsGrid.querySelectorAll('.card-heart-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleShoppingWishlist(btn.dataset.id);
-        renderShopping();
-      });
+  function renderShopping() {
+    renderDomainGrid({
+      gridContainerId: 'shoppingCardsGridContainer',
+      countTextId: 'shoppingResultCountText',
+      getFiltered: getFilteredShopping,
+      countHtml: (n) => `총 <strong>${n}</strong>개의 검증 쇼핑 스팟`,
+      emptyHtml: () => `
+        <div class="empty-state">
+          <div class="icon">🛍️</div>
+          <h3>조건에 맞는 쇼핑 스팟이 없습니다</h3>
+          <p>필터 조건을 초기화하거나 다른 검색어로 찾아보세요.</p>
+          <button class="btn-reset-filters" id="btnResetShoppingFilters">필터 전체 초기화</button>
+        </div>
+      `,
+      resetBtnId: 'btnResetShoppingFilters',
+      cardTemplate: shoppingCardTemplate,
+      cardSelector: '.shopping-card',
+      ignoreSelectors: ['.card-heart-btn'],
+      findItem: (id) => NHA_TRANG_SHOPPING.find(s => s.id === id),
+      openModal: openShoppingModal,
+      toggleWishlist: toggleShoppingWishlist,
+      rerender: renderShopping
     });
   }
 
@@ -1719,52 +1682,20 @@
     });
   }
 
-  function renderCurrency() {
-    const gridContainer = document.getElementById('currencyCardsGridContainer');
-    const countText = document.getElementById('currencyResultCountText');
-    if (!gridContainer) return;
+  function currencyCardTemplate(item) {
+    const isWish = (state.currencyWishlist || []).includes(item.id);
+    const userNote = (state.currencyNotes || {})[item.id];
+    const feeBadgeClass = item.feeFree ? 'free' : 'exchange';
+    const feeBadgeText = item.feeFree ? '🎁 수수료 0원' : '💱 최우대 환율';
 
-    const list = getFilteredCurrency();
-    if (countText) {
-      countText.innerHTML = `총 <strong>${list.length}</strong>개의 검증 환전소 & 수수료 무료 ATM`;
-    }
-
-    if (list.length === 0) {
-      gridContainer.innerHTML = `
-        <div class="empty-state" style="grid-column: 1 / -1; padding: 48px 24px; text-align: center;">
-          <div class="icon" style="font-size: 3rem; margin-bottom: 12px;">💱</div>
-          <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 8px;">조건에 맞는 환전소나 ATM이 없습니다</h3>
-          <p style="color: var(--color-text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
-            선택하신 카테고리 또는 태그를 변경하거나 검색어를 초기화해보세요.
-          </p>
-          <button class="btn-primary-reserve" id="btnResetCurrencyFilters" style="padding: 10px 22px; background: #059669;">
-            전체 보기 및 필터 초기화
-          </button>
-        </div>
-      `;
-      const resetBtn = document.getElementById('btnResetCurrencyFilters');
-      if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-          window.dispatchEvent(new CustomEvent('reset-filters'));
-        });
-      }
-      return;
-    }
-
-    gridContainer.innerHTML = list.map(item => {
-      const isWish = (state.currencyWishlist || []).includes(item.id);
-      const userNote = (state.currencyNotes || {})[item.id];
-      const feeBadgeClass = item.feeFree ? 'free' : 'exchange';
-      const feeBadgeText = item.feeFree ? '🎁 수수료 0원' : '💱 최우대 환율';
-
-      const cardPills = (item.supportedCards || []).slice(0, 4).map(c => `
+    const cardPills = (item.supportedCards || []).slice(0, 4).map(c => `
         <span class="supported-card-pill">${escapeHtml(c)}</span>
       `).join('');
-      const morePill = (item.supportedCards || []).length > 4 ? `
+    const morePill = (item.supportedCards || []).length > 4 ? `
         <span class="supported-card-pill more">+${(item.supportedCards || []).length - 4}</span>
       ` : '';
 
-      return `
+    return `
         <div class="activity-card currency-card" data-id="${item.id}">
           <div class="card-media-wrapper">
             <img class="card-img" src="${escapeHtml(item.coverImage || (item.images || [])[0] || '')}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=800&q=80'" />
@@ -1808,24 +1739,34 @@
           </div>
         </div>
       `;
-    }).join('');
+  }
 
-    gridContainer.querySelectorAll('.currency-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('.card-heart-btn') || e.target.closest('.btn-currency-map') || e.target.closest('.btn-currency-photos')) return;
-        const spotId = card.dataset.id;
-        const spot = (typeof NHA_TRANG_CURRENCY !== 'undefined' ? NHA_TRANG_CURRENCY : []).find(s => s.id === spotId);
-        if (spot) openCurrencyModal(spot);
-      });
-    });
-
-    gridContainer.querySelectorAll('.card-heart-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const id = btn.dataset.id;
-        toggleCurrencyWishlist(id);
-        renderCurrency();
-      });
+  function renderCurrency() {
+    renderDomainGrid({
+      gridContainerId: 'currencyCardsGridContainer',
+      countTextId: 'currencyResultCountText',
+      getFiltered: getFilteredCurrency,
+      countHtml: (n) => `총 <strong>${n}</strong>개의 검증 환전소 & 수수료 무료 ATM`,
+      emptyHtml: () => `
+        <div class="empty-state" style="grid-column: 1 / -1; padding: 48px 24px; text-align: center;">
+          <div class="icon" style="font-size: 3rem; margin-bottom: 12px;">💱</div>
+          <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 8px;">조건에 맞는 환전소나 ATM이 없습니다</h3>
+          <p style="color: var(--color-text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+            선택하신 카테고리 또는 태그를 변경하거나 검색어를 초기화해보세요.
+          </p>
+          <button class="btn-primary-reserve" id="btnResetCurrencyFilters" style="padding: 10px 22px; background: #059669;">
+            전체 보기 및 필터 초기화
+          </button>
+        </div>
+      `,
+      resetBtnId: 'btnResetCurrencyFilters',
+      cardTemplate: currencyCardTemplate,
+      cardSelector: '.currency-card',
+      ignoreSelectors: ['.card-heart-btn', '.btn-currency-map', '.btn-currency-photos'],
+      findItem: (id) => (typeof NHA_TRANG_CURRENCY !== 'undefined' ? NHA_TRANG_CURRENCY : []).find(s => s.id === id),
+      openModal: openCurrencyModal,
+      toggleWishlist: toggleCurrencyWishlist,
+      rerender: renderCurrency
     });
   }
 
@@ -2144,7 +2085,17 @@
       activeModalField: 'activeModalActivity',
       modalId: 'detailModal', modalCloseBtnId: 'modalCloseBtn', closeModal: () => closeActivityModal(),
       noteInputIds: ['modalNoteInput', 'noteInput'], noteStatusIds: ['modalNoteStatus', 'noteStatus'],
-      copyAddressBtnId: null
+      copyAddressBtnId: null,
+      gridSectionId: 'activitiesGridSection',
+      placeholder: '액티비티 검색 (예: 스노클링, 마사지, 인생샷, 아이리조트)...',
+      heroTitle: '나트랑 힐링 여행 가이드 🌴',
+      heroSubtitle: '호핑, 스파, 빈원더스, 선셋 크루즈 큐레이션',
+      heroPills: `
+          <span class="hero-stat-pill"><span class="icon">✨</span> 엄선된 43개 리얼 액티비티</span>
+          <span class="hero-stat-pill"><span class="icon">💆</span> 프라이빗 스파 & 머드온천</span>
+          <span class="hero-stat-pill"><span class="icon">⛵</span> 럭셔리 선셋 크루즈 & 호핑</span>
+          <span class="hero-stat-pill"><span class="icon">🏜️</span> 달랏 / 무이네 근교투어</span>
+        `
     },
     {
       key: 'gourmet',
@@ -2156,7 +2107,17 @@
       activeModalField: 'activeModalGourmet',
       modalId: 'gourmetModal', modalCloseBtnId: 'gourmetModalCloseBtn', closeModal: () => closeGourmetModal(),
       noteInputIds: ['gourmetNoteInput'], noteStatusIds: ['gourmetNoteStatus'],
-      copyAddressBtnId: 'gourmetCopyAddressBtn'
+      copyAddressBtnId: 'gourmetCopyAddressBtn',
+      gridSectionId: 'gourmetGridSection',
+      placeholder: '로컬 맛집 & 메뉴 검색 (예: 반쎄오, 뚝배기쌀국수, 탄스엉, 망고)...',
+      heroTitle: '나트랑 현지인 찐 로컬 맛집 🍜',
+      heroSubtitle: '구글 지도 실시간 평점 & 리뷰 검증 완료 현지 맛집 큐레이션',
+      heroPills: `
+          <span class="hero-stat-pill"><span class="icon">📍</span> Google Maps 실시간 연동 검증</span>
+          <span class="hero-stat-pill"><span class="icon">🔥</span> 현지인 & 스페셜티 113곳</span>
+          <span class="hero-stat-pill"><span class="icon">🦞</span> 바가지 없는 해산물 정찰제</span>
+          <span class="hero-stat-pill"><span class="icon">🥭</span> 특A급 생망고 & 솔트커피</span>
+        `
     },
     {
       key: 'stays',
@@ -2168,7 +2129,17 @@
       activeModalField: 'activeModalStay',
       modalId: 'stayModal', modalCloseBtnId: 'stayModalCloseBtn', closeModal: () => closeStayModal(),
       noteInputIds: ['stayNoteInput'], noteStatusIds: ['stayNoteStatus'],
-      copyAddressBtnId: 'stayCopyAddressBtn'
+      copyAddressBtnId: 'stayCopyAddressBtn',
+      gridSectionId: 'staysGridSection',
+      placeholder: '숙소명, 지역, 편의시설 검색 (예: 인터컨티넨탈, 풀빌라, 인피니티풀, 야시장)...',
+      heroTitle: '나트랑 테마별 추천 숙소 & 리조트 🏨',
+      heroSubtitle: '입국 웰컴 0.5박부터 5성급 럭셔리, 감성 풀빌라, 출국 전 0.5박 큐레이션',
+      heroPills: `
+          <span class="hero-stat-pill"><span class="icon">✨</span> 4개 테마별 엄선 24선</span>
+          <span class="hero-stat-pill"><span class="icon">👑</span> 5성급 럭셔리 호캉스 & 리조트</span>
+          <span class="hero-stat-pill"><span class="icon">🏊</span> 프라이빗 단독 온수/인피니티 풀빌라</span>
+          <span class="hero-stat-pill"><span class="icon">💰</span> 5만원 이하 시내 중심 0.5박 알짜 호텔</span>
+        `
     },
     {
       key: 'shopping',
@@ -2180,7 +2151,17 @@
       activeModalField: 'activeModalShopping',
       modalId: 'shoppingModal', modalCloseBtnId: 'shoppingModalCloseBtn', closeModal: () => closeShoppingModal(),
       noteInputIds: ['shoppingNoteInput'], noteStatusIds: ['shoppingNoteStatus'],
-      copyAddressBtnId: 'shoppingCopyAddressBtn'
+      copyAddressBtnId: 'shoppingCopyAddressBtn',
+      gridSectionId: 'shoppingGridSection',
+      placeholder: '쇼핑 스팟, 브랜드, 품목 검색 (예: 켄켄크록스, 담시장, 미스앤미스터, 스투시, 탑젤리)...',
+      heroTitle: '나트랑 짝퉁 & 패션 쇼핑 가이드 🛍️',
+      heroSubtitle: '담시장, 야시장, 미러급 부티크부터 실전 흥정 시세표 & 세관 유의사항 총정리',
+      heroPills: `
+          <span class="hero-stat-pill"><span class="icon">👑</span> 미러급 & SA급 하이엔드 샵</span>
+          <span class="hero-stat-pill"><span class="icon">🏷️</span> 품목별 실전 흥정 적정가 가이드</span>
+          <span class="hero-stat-pill"><span class="icon">❄️</span> 에어컨 완비 & 한국 계좌이체 매장</span>
+          <span class="hero-stat-pill"><span class="icon">✈️</span> 한국 세관 통관 & 주의사항 완벽 대비</span>
+        `
     },
     {
       key: 'currency',
@@ -2192,7 +2173,17 @@
       activeModalField: 'activeModalCurrency',
       modalId: 'currencyModal', modalCloseBtnId: 'currencyModalCloseBtn', closeModal: () => closeCurrencyModal(),
       noteInputIds: ['currencyNoteInput'], noteStatusIds: ['currencyNoteStatus'],
-      copyAddressBtnId: 'currencyCopyAddressBtn'
+      copyAddressBtnId: 'currencyCopyAddressBtn',
+      gridSectionId: 'currencyGridSection',
+      placeholder: '환전소, 은행명, 카드사 검색 (예: VPBank, TPBank, 김청, 트래블로그, 100달러)...',
+      heroTitle: '나트랑 환전 & 수수료 무료 ATM 가이드 💱',
+      heroSubtitle: '5대 여행 체크카드 맞춤 수수료 0원 ATM & 실전 환율 계산기',
+      heroPills: `
+          <span class="hero-stat-pill"><span class="icon">🏧</span> 5대 카드 수수료 0원 ATM 8곳</span>
+          <span class="hero-stat-pill"><span class="icon">💎</span> 김청·김빈 100달러 우대 환전</span>
+          <span class="hero-stat-pill"><span class="icon">🛡️</span> DCC 이중환전 차단 완벽 가이드</span>
+          <span class="hero-stat-pill"><span class="icon">💱</span> 실시간 양방향 환율 계산기</span>
+        `
     }
   ];
 
@@ -2207,47 +2198,31 @@
   // --- 9. Tab Switching & UI Controller ---
   function switchMainTab(tab) {
     state.currentTab = tab;
-    
+
     const navTabs = document.querySelectorAll('.nav-tab-btn');
     navTabs.forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tab);
     });
 
+    const domain = getDomain(tab);
     const isActivities = tab === 'activities';
-    const isGourmet = tab === 'gourmet';
-    const isStays = tab === 'stays';
-    const isShopping = tab === 'shopping';
     const isCurrency = tab === 'currency';
 
     // Toggle Category Bars
-    const activityCategoryNav = document.getElementById('activityCategoryNav');
-    const gourmetCategoryNav = document.getElementById('gourmetCategoryNav');
-    const stayCategoryNav = document.getElementById('stayCategoryNav');
-    const shoppingCategoryNav = document.getElementById('shoppingCategoryNav');
-    const currencyCategoryNav = document.getElementById('currencyCategoryNav');
-    
-    if (activityCategoryNav) activityCategoryNav.style.display = isActivities ? 'block' : 'none';
-    if (gourmetCategoryNav) gourmetCategoryNav.style.display = isGourmet ? 'block' : 'none';
-    if (stayCategoryNav) stayCategoryNav.style.display = isStays ? 'block' : 'none';
-    if (shoppingCategoryNav) shoppingCategoryNav.style.display = isShopping ? 'block' : 'none';
-    if (currencyCategoryNav) currencyCategoryNav.style.display = isCurrency ? 'block' : 'none';
+    DOMAINS.forEach(d => {
+      const nav = document.getElementById(d.categoryNavId);
+      if (nav) nav.style.display = d.key === tab ? 'block' : 'none';
+    });
 
     // Toggle Tag Chips
-    const activityTagChips = document.getElementById('activityTagChips');
-    const gourmetTagChips = document.getElementById('gourmetTagChips');
-    const stayTagChips = document.getElementById('stayTagChips');
-    const shoppingTagChips = document.getElementById('shoppingTagChips');
-    const currencyTagChips = document.getElementById('currencyTagChips');
-    
-    if (activityTagChips) activityTagChips.style.display = isActivities ? 'flex' : 'none';
-    if (gourmetTagChips) gourmetTagChips.style.display = isGourmet ? 'flex' : 'none';
-    if (stayTagChips) stayTagChips.style.display = isStays ? 'flex' : 'none';
-    if (shoppingTagChips) shoppingTagChips.style.display = isShopping ? 'flex' : 'none';
-    if (currencyTagChips) currencyTagChips.style.display = isCurrency ? 'flex' : 'none';
-    
+    DOMAINS.forEach(d => {
+      const chips = document.getElementById(d.tagChipsId);
+      if (chips) chips.style.display = d.key === tab ? 'flex' : 'none';
+    });
+
     const toolbarSection = document.querySelector('.toolbar-section');
     if (toolbarSection) toolbarSection.style.display = 'block';
-    
+
     const viewToggleButtons = document.getElementById('viewToggleButtons');
     if (viewToggleButtons) viewToggleButtons.style.display = isActivities ? 'flex' : 'none';
 
@@ -2269,114 +2244,32 @@
     const heroTitle = document.getElementById('heroTitle');
     const heroSubtitleDesc = document.getElementById('heroSubtitleDesc');
     const heroTagsArea = document.getElementById('heroTagsArea');
-    
-    const activitiesSection = document.getElementById('activitiesGridSection');
+
+    if (searchInput) searchInput.placeholder = domain.placeholder;
+    if (heroTitle) heroTitle.textContent = domain.heroTitle;
+    if (heroSubtitleDesc) heroSubtitleDesc.textContent = domain.heroSubtitle;
+    if (heroTagsArea) heroTagsArea.innerHTML = domain.heroPills;
+
+    // Section display: 자기 탭의 gridSection만 block, 나머지는 전부 none.
+    // activities만 grid/timeline 두 뷰가 하나의 gridSectionId를 공유하므로 예외 처리한다.
     const timelineSection = document.getElementById('timelineSection');
-    const gourmetSection = document.getElementById('gourmetGridSection');
-    const staysSection = document.getElementById('staysGridSection');
-    const shoppingSection = document.getElementById('shoppingGridSection');
-    const currencySection = document.getElementById('currencyGridSection');
+    DOMAINS.forEach(d => {
+      if (d.key === tab) return;
+      const section = document.getElementById(d.gridSectionId);
+      if (section) section.style.display = 'none';
+    });
 
     if (isActivities) {
-      if (searchInput) searchInput.placeholder = '액티비티 검색 (예: 스노클링, 마사지, 인생샷, 아이리조트)...';
-      if (heroTitle) heroTitle.textContent = '나트랑 힐링 여행 가이드 🌴';
-      if (heroSubtitleDesc) heroSubtitleDesc.textContent = '호핑, 스파, 빈원더스, 선셋 크루즈 큐레이션';
-      if (heroTagsArea) {
-        heroTagsArea.innerHTML = `
-          <span class="hero-stat-pill"><span class="icon">✨</span> 엄선된 43개 리얼 액티비티</span>
-          <span class="hero-stat-pill"><span class="icon">💆</span> 프라이빗 스파 & 머드온천</span>
-          <span class="hero-stat-pill"><span class="icon">⛵</span> 럭셔리 선셋 크루즈 & 호핑</span>
-          <span class="hero-stat-pill"><span class="icon">🏜️</span> 달랏 / 무이네 근교투어</span>
-        `;
-      }
+      const activitiesSection = document.getElementById(domain.gridSectionId);
       if (activitiesSection) activitiesSection.style.display = state.currentView === 'grid' ? 'block' : 'none';
       if (timelineSection) timelineSection.style.display = state.currentView === 'timeline' ? 'block' : 'none';
-      if (gourmetSection) gourmetSection.style.display = 'none';
-      if (staysSection) staysSection.style.display = 'none';
-      if (shoppingSection) shoppingSection.style.display = 'none';
-      if (currencySection) currencySection.style.display = 'none';
-      
-      if (state.currentView === 'grid') renderCards();
-      else renderTimeline();
-      
-    } else if (isGourmet) {
-      if (searchInput) searchInput.placeholder = '로컬 맛집 & 메뉴 검색 (예: 반쎄오, 뚝배기쌀국수, 탄스엉, 망고)...';
-      if (heroTitle) heroTitle.textContent = '나트랑 현지인 찐 로컬 맛집 🍜';
-      if (heroSubtitleDesc) heroSubtitleDesc.textContent = '구글 지도 실시간 평점 & 리뷰 검증 완료 현지 맛집 큐레이션';
-      if (heroTagsArea) {
-        heroTagsArea.innerHTML = `
-          <span class="hero-stat-pill"><span class="icon">📍</span> Google Maps 실시간 연동 검증</span>
-          <span class="hero-stat-pill"><span class="icon">🔥</span> 현지인 & 스페셜티 113곳</span>
-          <span class="hero-stat-pill"><span class="icon">🦞</span> 바가지 없는 해산물 정찰제</span>
-          <span class="hero-stat-pill"><span class="icon">🥭</span> 특A급 생망고 & 솔트커피</span>
-        `;
-      }
-      if (activitiesSection) activitiesSection.style.display = 'none';
+    } else {
       if (timelineSection) timelineSection.style.display = 'none';
-      if (gourmetSection) gourmetSection.style.display = 'block';
-      if (staysSection) staysSection.style.display = 'none';
-      if (shoppingSection) shoppingSection.style.display = 'none';
-      if (currencySection) currencySection.style.display = 'none';
-      renderGourmets();
-      
-    } else if (isStays) {
-      if (searchInput) searchInput.placeholder = '숙소명, 지역, 편의시설 검색 (예: 인터컨티넨탈, 풀빌라, 인피니티풀, 야시장)...';
-      if (heroTitle) heroTitle.textContent = '나트랑 테마별 추천 숙소 & 리조트 🏨';
-      if (heroSubtitleDesc) heroSubtitleDesc.textContent = '입국 웰컴 0.5박부터 5성급 럭셔리, 감성 풀빌라, 출국 전 0.5박 큐레이션';
-      if (heroTagsArea) {
-        heroTagsArea.innerHTML = `
-          <span class="hero-stat-pill"><span class="icon">✨</span> 4개 테마별 엄선 24선</span>
-          <span class="hero-stat-pill"><span class="icon">👑</span> 5성급 럭셔리 호캉스 & 리조트</span>
-          <span class="hero-stat-pill"><span class="icon">🏊</span> 프라이빗 단독 온수/인피니티 풀빌라</span>
-          <span class="hero-stat-pill"><span class="icon">💰</span> 5만원 이하 시내 중심 0.5박 알짜 호텔</span>
-        `;
-      }
-      if (activitiesSection) activitiesSection.style.display = 'none';
-      if (timelineSection) timelineSection.style.display = 'none';
-      if (gourmetSection) gourmetSection.style.display = 'none';
-      if (staysSection) staysSection.style.display = 'block';
-      if (shoppingSection) shoppingSection.style.display = 'none';
-      if (currencySection) currencySection.style.display = 'none';
-      renderStays();
-    } else if (isShopping) {
-      if (searchInput) searchInput.placeholder = '쇼핑 스팟, 브랜드, 품목 검색 (예: 켄켄크록스, 담시장, 미스앤미스터, 스투시, 탑젤리)...';
-      if (heroTitle) heroTitle.textContent = '나트랑 짝퉁 & 패션 쇼핑 가이드 🛍️';
-      if (heroSubtitleDesc) heroSubtitleDesc.textContent = '담시장, 야시장, 미러급 부티크부터 실전 흥정 시세표 & 세관 유의사항 총정리';
-      if (heroTagsArea) {
-        heroTagsArea.innerHTML = `
-          <span class="hero-stat-pill"><span class="icon">👑</span> 미러급 & SA급 하이엔드 샵</span>
-          <span class="hero-stat-pill"><span class="icon">🏷️</span> 품목별 실전 흥정 적정가 가이드</span>
-          <span class="hero-stat-pill"><span class="icon">❄️</span> 에어컨 완비 & 한국 계좌이체 매장</span>
-          <span class="hero-stat-pill"><span class="icon">✈️</span> 한국 세관 통관 & 주의사항 완벽 대비</span>
-        `;
-      }
-      if (activitiesSection) activitiesSection.style.display = 'none';
-      if (timelineSection) timelineSection.style.display = 'none';
-      if (gourmetSection) gourmetSection.style.display = 'none';
-      if (staysSection) staysSection.style.display = 'none';
-      if (shoppingSection) shoppingSection.style.display = 'block';
-      if (currencySection) currencySection.style.display = 'none';
-      renderShopping();
-    } else if (isCurrency) {
-      if (searchInput) searchInput.placeholder = '환전소, 은행명, 카드사 검색 (예: VPBank, TPBank, 김청, 트래블로그, 100달러)...';
-      if (heroTitle) heroTitle.textContent = '나트랑 환전 & 수수료 무료 ATM 가이드 💱';
-      if (heroSubtitleDesc) heroSubtitleDesc.textContent = '5대 여행 체크카드 맞춤 수수료 0원 ATM & 실전 환율 계산기';
-      if (heroTagsArea) {
-        heroTagsArea.innerHTML = `
-          <span class="hero-stat-pill"><span class="icon">🏧</span> 5대 카드 수수료 0원 ATM 8곳</span>
-          <span class="hero-stat-pill"><span class="icon">💎</span> 김청·김빈 100달러 우대 환전</span>
-          <span class="hero-stat-pill"><span class="icon">🛡️</span> DCC 이중환전 차단 완벽 가이드</span>
-          <span class="hero-stat-pill"><span class="icon">💱</span> 실시간 양방향 환율 계산기</span>
-        `;
-      }
-      if (activitiesSection) activitiesSection.style.display = 'none';
-      if (timelineSection) timelineSection.style.display = 'none';
-      if (gourmetSection) gourmetSection.style.display = 'none';
-      if (staysSection) staysSection.style.display = 'none';
-      if (shoppingSection) shoppingSection.style.display = 'none';
-      if (currencySection) currencySection.style.display = 'block';
-      renderCurrency();
+      const section = document.getElementById(domain.gridSectionId);
+      if (section) section.style.display = 'block';
     }
+
+    domain.render();
   }
 
   function setViewMode(mode) {
