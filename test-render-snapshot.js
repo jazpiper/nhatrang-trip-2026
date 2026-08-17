@@ -66,6 +66,7 @@ const DOMAINS = [
     container: 'cardsGridContainer',
     count: 'resultCountText',
     catField: 'actCategory', tagField: 'actTag',
+    wishField: 'wishlist', data: () => NHA_TRANG_ACTIVITIES,
     sampleCat: 'hopping', sampleTag: 'wife', sampleQuery: '스노클링'
   },
   {
@@ -74,6 +75,7 @@ const DOMAINS = [
     container: 'gourmetCardsGridContainer',
     count: 'gourmetResultCountText',
     catField: 'gourmetCategory', tagField: 'gourmetTag',
+    wishField: 'gourmetWishlist', data: () => NHA_TRANG_GOURMETS,
     sampleCat: 'banhxeo', sampleTag: 'line', sampleQuery: '반쎄오'
   },
   {
@@ -82,6 +84,7 @@ const DOMAINS = [
     container: 'staysCardsGridContainer',
     count: 'stayResultCountText',
     catField: 'stayCategory', tagField: 'stayTag',
+    wishField: 'stayWishlist', data: () => NHA_TRANG_STAYS,
     sampleCat: 'welcome', sampleTag: 'pool', sampleQuery: '인터컨티넨탈'
   },
   {
@@ -90,6 +93,7 @@ const DOMAINS = [
     container: 'shoppingCardsGridContainer',
     count: 'shoppingResultCountText',
     catField: 'shoppingCategory', tagField: 'shoppingTag',
+    wishField: 'shoppingWishlist', data: () => NHA_TRANG_SHOPPING,
     sampleCat: 'boutique_mirror', sampleTag: 'ac', sampleQuery: '크록스'
   },
   {
@@ -98,6 +102,7 @@ const DOMAINS = [
     container: 'currencyCardsGridContainer',
     count: 'currencyResultCountText',
     catField: 'currencyCategory', tagField: 'currencyTag',
+    wishField: 'currencyWishlist', data: () => NHA_TRANG_CURRENCY,
     sampleCat: 'atm_zero_fee', sampleTag: 'fee_free', sampleQuery: '김청'
   }
 ];
@@ -111,12 +116,23 @@ function statesFor(d) {
     { name: 'tag', patch: { [d.tagField]: d.sampleTag } },
     { name: 'search', patch: { searchQuery: d.sampleQuery } },
     { name: 'sort-rating', patch: { sortBy: 'rating' } },
+    // Price sorts read a different field per domain (priceVnd / avgPriceVnd /
+    // pricePerNightVnd) and the rating tie-breaker multiplier differs too, so
+    // both directions are pinned — a unified comparator must not flatten them.
+    { name: 'sort-price-asc', patch: { sortBy: 'price-asc' } },
+    { name: 'sort-price-desc', patch: { sortBy: 'price-desc' } },
+    // Seeded with two real ids so this exercises the wishlist branch rather than
+    // collapsing into the same empty state as the case below.
+    { name: 'wishlist-only', patch: { wishlistOnly: true, [d.wishField]: d.data().slice(0, 2).map(x => x.id) } },
     { name: 'empty', patch: { searchQuery: NO_MATCH } }
   ];
 }
 
 function capture(d, state) {
   app.resetStateFilters();
+  // resetStateFilters() deliberately leaves wishlist arrays alone (they are user
+  // data, not filters), so clear it here to keep cases independent.
+  app.state[d.wishField] = [];
   Object.assign(app.state, state.patch);
   d.render();
   const out = [
