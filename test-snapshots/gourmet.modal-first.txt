@@ -1,0 +1,41 @@
+<!-- modal: gourmet | item: banh-xeo-85 -->
+gourmetModalAddress
+    text="85 Tô Hiến Thành, Tân Lập, Nha Trang, Khánh Hòa"
+gourmetModalAvgKrw
+    text="(약 2,600원)"
+gourmetModalAvgPrice
+    text="48,000 VND"
+gourmetModalBadge
+    text="현지인 1위 통오징어 반쎄오"
+gourmetModalCategory
+    text="반쎄오 & 반깐 & 넴느엉"
+gourmetModalDesc
+    text="다낭·호치민식 얇은 반쎄오와 달리 나트랑 특유의 도톰하면서도 겉은 크리스피하고 속은 촉촉한 바다 향 가득 반쎄오 전문점입니다. 한국어 메뉴판이 완비되어 있습니다."
+gourmetModalHeartBtn
+    text="♡ 찜하기"
+gourmetModalHighlight
+    text="작은 무쇠 팬에 나트랑 한치 통오징어와 통새우를 넣고 튀기듯 바삭하게 구워내는 찐 로컬 반쎄오의 정석!"
+gourmetModalHours
+    text="15:00 - 21:00"
+gourmetModalMapBtn
+    href="https://www.google.com/maps/search/?api=1&query=B%C3%A1nh%20X%C3%A8o%20Ch%E1%BA%A3o%2085%20(85%20T%C3%B4%20Hi%E1%BA%BFn%20Th%C3%A0nh)%20Nha%20Trang"
+gourmetModalMeal
+    text="점심 / 저녁"
+gourmetModalMenuList
+    html="<li><span class=\"bullet\">⭐</span> <strong>통오징어 &amp; 새우 반쎄오 (Bánh Xèo Mực Tôm - 45,000 VND)</strong></li><li><span class=\"bullet\">⭐</span> <strong>스페셜 모둠 반쎄오 (Bánh Xèo Đặc Biệt - 55,000 VND)</strong></li><li><span class=\"bullet\">⭐</span> <strong>소고기 반쎄오 (Bánh Xèo Thịt Bò - 40,000 VND)</strong></li>"
+gourmetModalNameVi
+    text="Bánh Xèo Chảo 85 (85 Tô Hiến Thành)"
+gourmetModalOfficialBtn
+    href="#"
+gourmetModalPhotosBtn
+    href="#"
+gourmetModalPricePer
+    text="/ 1인 예상"
+gourmetModalPriceRange
+    text="48,000 VND 내외"
+gourmetModalRating
+    text="★ 4.1 (780개 구글 리뷰)"
+gourmetModalTip
+    text="라이스페이퍼에 상추, 겨자잎, 반쎄오 조각, 절인 그린망고 채를 듬뿍 올려 쌈 싸듯 말아 특제 느억맘에 찍어드세요. 1인당 2판 추천!"
+gourmetModalTitle
+    text="반쎄오 85 (Bánh Xèo Chảo 85)"

@@ -1,0 +1,54 @@
+<!-- modal: shopping | item: audrey-sport-athleisure -->
+shoppingCustomsWarningText
+    text="자가사용 목적 1인 소량 반입을 준수하고 영수증 및 포장 박스/택을 분리하세요."
+shoppingModalAcBadge
+    text="❄️ 에어컨 완비"
+    style={display:inline-block}
+shoppingModalAddress
+    text="56 Nguyễn Thiện Thuật, Tân Lập, Nha Trang, Khánh Hòa 650000"
+shoppingModalAvgKrw
+    text="(약 10,400원)"
+shoppingModalAvgPrice
+    text="190,000 VND"
+shoppingModalBadge
+    text="룰루레몬 레깅스 & 래시가드"
+shoppingModalBargainingTable
+    html="\n          <table class=\"bargain-table\">\n            <thead>\n              <tr>\n                <th>품목</th>\n                <th>상인 호가 (부르는 값)</th>\n                <th>추천 적정가 (흥정 목표)</th>\n                <th>실전 꿀팁</th>\n              </tr>\n            </thead>\n            <tbody>\n              \n                <tr>\n                  <td><strong>룰루레몬 스타일 무봉제 버터 레깅스</strong></td>\n                  <td class=\"price-asking\">-</td>\n                  <td class=\"price-target\">-</td>\n                  <td style=\"font-size: 0.85rem; color: var(--color-text-secondary);\">Y존 무봉제 라인 및 사방 스판 텐션 확인 후 피팅.</td>\n                </tr>\n              \n                <tr>\n                  <td><strong>자외선 차단 롱슬리브 래시가드</strong></td>\n                  <td class=\"price-asking\">-</td>\n                  <td class=\"price-target\">-</td>\n                  <td style=\"font-size: 0.85rem; color: var(--color-text-secondary);\">UPF 50+ 원단 및 지퍼 부드러움 점검.</td>\n                </tr>\n              \n            </tbody>\n          </table>\n        "
+shoppingModalCategory
+    text="스포츠 & 스트릿웨어"
+shoppingModalDesc
+    text="요가, 필라테스, 헬스 및 물놀이에 최적화된 여성 애슬레저 전문 매장입니다. 고품질 탄성 원단의 레깅스와 브라탑을 갖추고 있습니다."
+shoppingModalFacilities
+    html="<span class=\"facility-pill\">에어컨 완비</span><span class=\"facility-pill\">피팅룸</span><span class=\"facility-pill\">사이즈별 진열</span><span class=\"facility-pill\">정찰제</span><span class=\"facility-pill\">VND 현금</span><span class=\"facility-pill\">원화 계좌이체</span><span class=\"facility-pill\">GLN QR</span>"
+shoppingModalHeartBtn
+    text="♡ 찜하기"
+shoppingModalHighlight
+    text="버터 같은 착용감! 룰루레몬 스타일 프리미엄 레깅스 & 래시가드 애슬레저 전문점"
+shoppingModalHours
+    text="09:00 - 21:30"
+shoppingModalLocation
+    text="시내 중심가 (응우옌티엔투앗 거리)"
+shoppingModalMainImg
+    src="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80"
+shoppingModalMapBtn
+    href="https://www.google.com/maps/search/?api=1&query=Audrey%20Sport%20Nha%20Trang%20Nha%20Trang"
+shoppingModalNameVi
+    text="Audrey Sport Nha Trang (Audrey Sport & Athleisure)"
+shoppingModalPhotosBtn
+    href="#"
+shoppingModalPricePer
+    text="/ 평균 기준"
+shoppingModalPriceRange
+    text="190,000 VND 내외"
+shoppingModalQualityBadge
+    text="고급 의류 & 정교한 택작업"
+shoppingModalRating
+    text="★ 4.8 (310개 구글 리뷰)"
+shoppingModalSentimentPanel
+    html="\n          <div class=\"pros-cons-grid\">\n            <div class=\"pros-box\">\n              <h4>👍 한국인 여행자 칭찬 포인트</h4>\n              <ul>\n                <li><span class=\"bullet\">✔</span> 원단 촉감이 버터처럼 부드럽고 쫀쫀함</li><li><span class=\"bullet\">✔</span> 에어컨 가동 피팅룸에서 직접 착용 가능</li><li><span class=\"bullet\">✔</span> 계좌이체 지원</li>\n              </ul>\n            </div>\n            <div class=\"cons-box\">\n              <h4>⚠️ 주의 및 아쉬운 점</h4>\n              <ul>\n                <li><span class=\"bullet\">✕</span> 인기 색상(블랙, 더스티핑크) 빠른 품절 주의</li>\n              </ul>\n            </div>\n          </div>\n          \n            <div style=\"margin-top: 14px; padding: 12px 16px; background: #F8FAFC; border-radius: var(--radius-md); font-size: 0.88rem; color: var(--color-ocean); font-weight: 700;\">\n              📢 커뮤니티 총평: 룰루레몬/안다르 느낌의 편안한 레깅스와 물놀이용 래시가드를 1만원대에 득템하는 가성비 성지.\n            </div>\n          \n          \n            <div style=\"margin-top: 8px; padding: 10px 14px; background: #FEF2F2; border-left: 4px solid #EF4444; border-radius: 4px; font-size: 0.85rem; color: #991B1B;\">\n              🚨 호객/눈탱이 방지: 정찰제 매장으로 정직한 가격 책정.\n            </div>\n          \n        "
+shoppingModalThumbs
+    html="\n        <div class=\"gallery-thumb active\" data-index=\"0\">\n          <img src=\"https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80\" alt=\"매장 사진 1\" loading=\"lazy\" />\n        </div>\n      "
+shoppingModalTip
+    text="호핑투어 가기 전날 방문하여 래시가드나 물놀이용 레깅스를 맞추면 매우 유용합니다."
+shoppingModalTitle
+    text="오드리 스포츠 & 애슬레저 (Audrey Sport)"

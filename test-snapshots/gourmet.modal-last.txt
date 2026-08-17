@@ -1,0 +1,41 @@
+<!-- modal: gourmet | item: che-khuc-bach-gold -->
+gourmetModalAddress
+    text="06 Chung Cư Ngô Gia Tự, Tân Lập, Nha Trang, Khánh Hòa"
+gourmetModalAvgKrw
+    text="(약 1,400원)"
+gourmetModalAvgPrice
+    text="25,000 VND"
+gourmetModalBadge
+    text="고소한 구운 아몬드 & 치즈 젤리 쩨 명가"
+gourmetModalCategory
+    text="생과일·카페·쩨디저트"
+gourmetModalDesc
+    text="너무 달지 않고 깔끔한 뒷맛 덕분에 나트랑 중고등·대학생과 젊은 직장인들의 방과 후 아지트로 사랑받는 숨은 로컬 디저트 찐맛집입니다."
+gourmetModalHeartBtn
+    text="♡ 찜하기"
+gourmetModalHighlight
+    text="고소한 생우유와 치즈로 굳혀낸 부드러운 쿡박(판나코타 젤리)에 달콤한 롱안 육수와 갓 볶은 슬라이스 아몬드를 듬뿍 뿌려 씹는 맛을 살린 청량한 디저트!"
+gourmetModalHours
+    text="15:00 - 22:30"
+gourmetModalMapBtn
+    href="https://www.google.com/maps/search/?api=1&query=Gold%20-%20Ch%C3%A8%20Kh%C3%BAc%20B%E1%BA%A1ch%20(06%20Chung%20C%C6%B0%20Ng%C3%B4%20Gia%20T%E1%BB%B1)%20Nha%20Trang"
+gourmetModalMeal
+    text="점심 / 저녁"
+gourmetModalMenuList
+    html="<li><span class=\"bullet\">⭐</span> <strong>프리미엄 아몬드 쿡박 쩨 (Chè Khúc Bạch Hạnh Nhân Phô Mai - 25,000 VND)</strong></li><li><span class=\"bullet\">⭐</span> <strong>믹스 과일 롱안 쿡박 쩨 (Chè Khúc Bạch Nhãn Trái Cây - 28,000 VND)</strong></li><li><span class=\"bullet\">⭐</span> <strong>말차 &amp; 치즈 듀얼 쿡박 (Chè Khúc Bạch Matcha Phô Mai - 28,000 VND)</strong></li><li><span class=\"bullet\">⭐</span> <strong>패션후르츠 우뭇가사리 젤리 (Thạch Đông Sương Chanh Dây - 20,000 VND)</strong></li>"
+gourmetModalNameVi
+    text="Gold - Chè Khúc Bạch (06 Chung Cư Ngô Gia Tự)"
+gourmetModalOfficialBtn
+    href="#"
+gourmetModalPhotosBtn
+    href="#"
+gourmetModalPricePer
+    text="/ 1인 예상"
+gourmetModalPriceRange
+    text="25,000 VND 내외"
+gourmetModalRating
+    text="★ 4.4 (230개 구글 리뷰)"
+gourmetModalTip
+    text="바삭하게 구운 슬라이스 아몬드가 눅눅해지기 전에 젤리와 국물을 함께 떠먹어야 고소함과 쫄깃함의 조화를 제대로 즐길 수 있습니다."
+gourmetModalTitle
+    text="골드 쩨 쿡박 (Gold - Chè Khúc Bạch - 수제 아몬드 치즈 젤리 쩨)"

@@ -1,0 +1,52 @@
+<!-- modal: currency | item: kim-chung-gold -->
+currencyModal
+    style={display:flex}
+currencyModalAddress
+    text="51 Ngô Gia Tự, Phường Tân Lập, Nha Trang, Khánh Hòa 650000"
+currencyModalAtmSteps
+    html="\n          <div class=\"atm-steps-box\">\n            <div class=\"atm-step-item\"><span class=\"step-badge\">1</span><span><strong>지폐 상태 확인:</strong> 2013년 이후 발행 빳빳한 $100 신권(낙서/찢김 없음) 제시</span></div>\n            <div class=\"atm-step-item\"><span class=\"step-badge\">2</span><span><strong>환율 호가 확인:</strong> 매장 내 계산기에 직원이 찍어주는 환율 확인</span></div>\n            <div class=\"atm-step-item\"><span class=\"step-badge\">3</span><span><strong>계수기 대조:</strong> 지폐 계수기 앞에서 금액 확인 후 즉시 가방 안쪽에 수납</span></div>\n          </div>\n        "
+currencyModalBadge
+    text="한국인 최다 이용 & 100달러 최고 우대"
+currencyModalCardsList
+    html="\n        <div class=\"supported-card-item\">\n          <span class=\"card-icon\">💳</span>\n          <span class=\"card-name\">현금 환전 (카드 인출 불가)</span>\n          <span class=\"card-status-badge free\">수수료 0원</span>\n        </div>\n      \n        <div class=\"supported-card-item\">\n          <span class=\"card-icon\">💳</span>\n          <span class=\"card-name\">한국 원화 계좌이체</span>\n          <span class=\"card-status-badge free\">수수료 0원</span>\n        </div>\n      "
+currencyModalCategory
+    text="시내 대표 금은방"
+currencyModalDccGuide
+    html="\n        <div class=\"dcc-warning-box\">\n          <div class=\"dcc-warning-header\">\n            <span>🛡️ DCC(원화 이중결제) 차단 필수 수칙</span>\n          </div>\n          <p>ATM 화면 또는 POS 단말기에서 통화 선택 창이 뜰 경우 <strong>반드시 [Without Conversion] 및 [VND]</strong>를 선택하세요. 원화(KRW) 선택 시 3~8% 불필요한 바가지 수수료가 발생합니다.</p>\n        </div>\n      "
+currencyModalDesc
+    text="나트랑 시내 쏨모이 시장 인근 응오지아뜨 거리에 위치한 가장 대표적인 금은방 환전소입니다. 100달러 신권 지폐를 가장 높은 환율로 쳐주며, 한국 5만원권 지폐도 즉시 베트남 동으로 바꿀 수 있습니다."
+currencyModalFacilities
+    html="\n        <span class=\"facility-chip\">✓ 에어컨 완비</span>\n      \n        <span class=\"facility-chip\">✓ 지폐 계수기 현장 확인</span>\n      \n        <span class=\"facility-chip\">✓ 한국어 간단 소통 가능</span>\n      \n        <span class=\"facility-chip\">✓ 원화 계좌이체 QR</span>\n      "
+currencyModalFeeBadge
+    text="현지 수수료 0 VND"
+    style={background:#ECFDF5;color:#059669}
+currencyModalFeePolicy
+    text="환전 수수료 없음 (시장 최고 우대 환율 적용)"
+currencyModalHeartBtn
+    text="♡ 찜하기"
+currencyModalHighlightText
+    text="나트랑에서 한국인 여행객이 가장 많이 찾는 환전 1번지, 100달러 신권 최고 환율!"
+currencyModalHours
+    text="07:30 - 20:00 (연중무휴)"
+currencyModalLimitsBox
+    html="\n        <div class=\"limit-info-box\">\n          <div class=\"limit-row\"><strong>인출/환전 한도:</strong> <span>제한 없음 (현금 환전 / 고액 환전 가능)</span></div>\n          <div class=\"limit-row\"><strong>지원 통화/수단:</strong> <span>USD 100달러 신권, KRW 5만원권 원화, EUR, JPY, VND</span></div>\n        </div>\n      "
+currencyModalLocation
+    text="시내 중심가 (쏨모이 시장 인근 / 응오지아뜨 거리)"
+currencyModalMainImg
+    src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80"
+currencyModalMapBtn
+    href="https://www.google.com/maps/search/?api=1&query=Ti%E1%BB%87m%20V%C3%A0ng%20Kim%20Chung%2051%20Ng%C3%B4%20Gia%20T%E1%BB%B1%20T%C3%A2n%20L%E1%BA%ADp%20Nha%20Trang"
+currencyModalNameVi
+    text="🇻🇳 Tiệm Vàng Kim Chung Nha Trang"
+currencyModalPhotosBtn
+    href="https://www.google.com/maps/search/?api=1&query=Ti%E1%BB%87m%20V%C3%A0ng%20Kim%20Chung%2051%20Ng%C3%B4%20Gia%20T%E1%BB%B1%20T%C3%A2n%20L%E1%BA%ADp%20Nha%20Trang%20%EC%82%AC%EC%A7%84"
+currencyModalRatesBox
+    html="\n        <div class=\"exchange-perks-list\">\n          \n            <div class=\"perk-item\"><span class=\"perk-icon\">✨</span><span>100달러 신권(2013년 이후 발행 빳빳한 지폐) 기준 나트랑 시내 최고 환율 적용</span></div>\n          \n            <div class=\"perk-item\"><span class=\"perk-icon\">✨</span><span>한국 원화 5만원권 지폐 현금 및 계좌이체 환전 즉시 지원</span></div>\n          \n            <div class=\"perk-item\"><span class=\"perk-icon\">✨</span><span>바로 맞은편 김빈(Kim Vinh) 금은방과 실시간 호가 비교 가능</span></div>\n          \n        </div>\n      "
+currencyModalRating
+    text="★ 4.6 (1,450개 리뷰)"
+currencyModalThumbs
+    html="\n        <div class=\"gallery-thumb active\" data-idx=\"0\">\n          <img src=\"https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"김청 금은방 (Kim Chung Gold Shop) 사진 1\" loading=\"lazy\" />\n        </div>\n      \n        <div class=\"gallery-thumb \" data-idx=\"1\">\n          <img src=\"https://images.unsplash.com/photo-1580519542036-c47de6196ba5?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"김청 금은방 (Kim Chung Gold Shop) 사진 2\" loading=\"lazy\" />\n        </div>\n      \n        <div class=\"gallery-thumb \" data-idx=\"2\">\n          <img src=\"https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"김청 금은방 (Kim Chung Gold Shop) 사진 3\" loading=\"lazy\" />\n        </div>\n      "
+currencyModalTip
+    text="지폐에 낙서나 찢어짐이 있으면 환율이 깎일 수 있으니 한국에서 깨끗한 100달러 신권을 준비하세요. 환전 후 즉시 카운터 앞에서 계수기 금액을 확인하세요."
+currencyModalTitle
+    text="김청 금은방 (Kim Chung Gold Shop)"

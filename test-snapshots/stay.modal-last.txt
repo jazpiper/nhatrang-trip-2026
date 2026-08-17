@@ -1,0 +1,47 @@
+<!-- modal: stay | item: stay_24 -->
+stayModalAddress
+    text="4H-5H Quân Trấn, Hùng Vương, Lộc Thọ, Nha Trang, Khánh Hòa"
+stayModalAmenitiesList
+    html="<li><span class=\"bullet\">✔</span> 24시간 프론트 데스크</li><li><span class=\"bullet\">✔</span> 무료 수하물 보관</li><li><span class=\"bullet\">✔</span> 루프탑 소형 수영장</li><li><span class=\"bullet\">✔</span> 강력한 냉방 에어컨</li><li><span class=\"bullet\">✔</span> 온수 샤워 &amp; 어메니티</li><li><span class=\"bullet\">✔</span> 공항 택시 예약</li>"
+stayModalAvgKrw
+    text="(약 22,900원)"
+stayModalAvgPrice
+    text="420,000 VND"
+stayModalBadge
+    text="추천"
+stayModalCategory
+    text="호텔"
+stayModalCheckInOut
+    text="입실 14:00 / 퇴실 12:00"
+stayModalHeartBtn
+    text="♡ 찜하기"
+stayModalHighlight
+    text="1박 2만원대 압도적 가성비! 짐 보관, 샤워, 에어컨 침대 휴식이라는 0.5박의 본질에 100% 충실"
+stayModalHighlightsList
+    html="<li><span class=\"bullet\">✔</span> 1박 2만원대 압도적 가성비! 짐 보관, 샤워, 에어컨 침대 휴식이라는 0.5박의 본질에 100% 충실</li><li><span class=\"bullet\">✔</span> 나트랑 여행자의 거리 군쩐(Quân Trấn) 골목에 있어 야시장, 약국 쇼핑, 마사지 도보 2~3분 완벽</li><li><span class=\"bullet\">✔</span> 밤 10시까지 안전하게 짐을 보관해주고 로비에서 공항 그랩 차량 호출을 친절히 지원</li>"
+stayModalLocation
+    text="시내 중심 / 야시장 인근 / 4H-5H Quan Tran, Hung Vuong, Loc Tho, Nha Trang (훙브엉 여행자 거리 꽌쩐 골목, 야시장 도보 3분)"
+stayModalMainImg
+    src="https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80"
+stayModalMapBtn
+    href="https://www.google.com/maps/search/?api=1&query=Kh%C3%A1ch%20S%E1%BA%A1n%20Seana%20Nha%20Trang%20Nha%20Trang"
+stayModalNameVi
+    text="Khách Sạn Seana Nha Trang (Seana Hotel Nha Trang)"
+stayModalNearbyList
+    html="<li><span class=\"bullet\">✔</span> 나트랑 야시장 (도보 3분 / 220m)</li><li><span class=\"bullet\">✔</span> 65번 과일가게 &amp; 약국 (도보 2분 / 120m)</li><li><span class=\"bullet\">✔</span> 갈랑가 로컬 식당 (도보 2분 / 150m)</li><li><span class=\"bullet\">✔</span> 나트랑 해변 (도보 4분 / 300m)</li>"
+stayModalPricePer
+    text="/ 1박 기준"
+stayModalPriceRange
+    text="420,000 VND / 1박"
+stayModalRating
+    text="★ 4.4 (850개 구글 리뷰)"
+stayModalThemeBadge
+    text="Day 6 0.5박 출국팩"
+stayModalThumbs
+    html="\n        <div class=\"gallery-thumb active\" data-index=\"0\">\n          <img src=\"https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80\" alt=\"숙소 사진 1\" loading=\"lazy\" />\n        </div>\n      "
+stayModalTip
+    text="체크인 시 고층이나 오션뷰 배정을 요청해보세요."
+stayModalTitle
+    text="세아나 호텔 나트랑"
+stayModalTripBtn
+    href="#"

@@ -1,0 +1,47 @@
+<!-- modal: stay | item: stay_01 -->
+stayModalAddress
+    text="39-41 Nguyễn Thị Minh Khai, Tân Lập, Nha Trang, Khánh Hòa 650000"
+stayModalAmenitiesList
+    html="<li><span class=\"bullet\">✔</span> 40층 루프탑 인피니티 풀</li><li><span class=\"bullet\">✔</span> 24시간 프런트 데스크</li><li><span class=\"bullet\">✔</span> 무료 초고속 Wi-Fi</li><li><span class=\"bullet\">✔</span> 피트니스 센터</li><li><span class=\"bullet\">✔</span> 무료 수하물 보관</li><li><span class=\"bullet\">✔</span> 조식 뷔페</li>"
+stayModalAvgKrw
+    text="(약 35,400원)"
+stayModalAvgPrice
+    text="650,000 VND"
+stayModalBadge
+    text="추천"
+stayModalCategory
+    text="호텔"
+stayModalCheckInOut
+    text="입실 14:00 / 퇴실 12:00"
+stayModalHeartBtn
+    text="♡ 찜하기"
+stayModalHighlight
+    text="새벽 비행기 도착 시에도 24시간 프런트 데스크에서 빠르고 친절한 웰컴 체크인 지원"
+stayModalHighlightsList
+    html="<li><span class=\"bullet\">✔</span> 새벽 비행기 도착 시에도 24시간 프런트 데스크에서 빠르고 친절한 웰컴 체크인 지원</li><li><span class=\"bullet\">✔</span> 나트랑 최고층(40층) 야외 인피니티 풀에서 시내와 에메랄드 바다를 한눈에 조망</li><li><span class=\"bullet\">✔</span> 야시장, 콩카페, 인기 반쎄오 맛집들이 도보 3~5분 거리에 밀집해 있어 익일 동선 최적</li>"
+stayModalLocation
+    text="시내 중심 / 탄랍 / 39-41 Nguyen Thi Minh Khai, Tan Lap, Nha Trang (야시장 도보 3분)"
+stayModalMainImg
+    src="https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80"
+stayModalMapBtn
+    href="https://www.google.com/maps/search/?api=1&query=Kh%C3%A1ch%20s%E1%BA%A1n%20Regalia%20Gold%20Nha%20Trang"
+stayModalNameVi
+    text="Khách sạn Regalia Gold (Regalia Gold Hotel)"
+stayModalNearbyList
+    html="<li><span class=\"bullet\">✔</span> 나트랑 야시장 (도보 3분 / 250m)</li><li><span class=\"bullet\">✔</span> 콩카페 2호점 (도보 4분 / 300m)</li><li><span class=\"bullet\">✔</span> 반쎄오 85 (도보 2분 / 150m)</li><li><span class=\"bullet\">✔</span> 나트랑 해변 (도보 5분 / 400m)</li>"
+stayModalPricePer
+    text="/ 1박 기준"
+stayModalPriceRange
+    text="650,000 VND / 1박"
+stayModalRating
+    text="★ 4.3 (3,200개 구글 리뷰)"
+stayModalThemeBadge
+    text="Day 1 웰컴 가성비"
+stayModalThumbs
+    html="\n        <div class=\"gallery-thumb active\" data-index=\"0\">\n          <img src=\"https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80\" alt=\"숙소 사진 1\" loading=\"lazy\" />\n        </div>\n      "
+stayModalTip
+    text="체크인 시 고층이나 오션뷰 배정을 요청해보세요."
+stayModalTitle
+    text="레갈리아 골드 호텔"
+stayModalTripBtn
+    href="#"

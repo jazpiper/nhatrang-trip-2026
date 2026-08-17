@@ -170,6 +170,46 @@ cases.push({
   }
 });
 
+// --- Modal snapshots --------------------------------------------------------
+// openXModal writes into ~30 individual elements each. Dumping every element the
+// call touched pins the whole modal population, which is what Phase 4 (declarative
+// field maps) has to preserve. Without this the modals would be unguarded.
+const MODAL_OPENERS = [
+  { key: 'activity', open: item => app.openActivityModal(item), data: () => NHA_TRANG_ACTIVITIES },
+  { key: 'gourmet', open: item => app.openGourmetModal(item), data: () => NHA_TRANG_GOURMETS },
+  { key: 'stay', open: item => app.openStayModal(item), data: () => NHA_TRANG_STAYS },
+  { key: 'shopping', open: item => app.openShoppingModal(item), data: () => NHA_TRANG_SHOPPING },
+  { key: 'currency', open: item => app.openCurrencyModal(item), data: () => NHA_TRANG_CURRENCY }
+];
+
+function captureModal(m, index) {
+  dom.reset();
+  const item = m.data()[index];
+  m.open(item);
+  const lines = [`<!-- modal: ${m.key} | item: ${item.id} -->`];
+  dom.touchedIds().forEach(id => {
+    const el = dom.doc.getElementById(id);
+    const parts = [];
+    if (el.textContent) parts.push(`text=${JSON.stringify(el.textContent)}`);
+    if (el.innerHTML) parts.push(`html=${JSON.stringify(el.innerHTML)}`);
+    if (el.src) parts.push(`src=${JSON.stringify(el.src)}`);
+    if (el.href) parts.push(`href=${JSON.stringify(el.href)}`);
+    if (el.value) parts.push(`value=${JSON.stringify(el.value)}`);
+    const style = Object.keys(el.style).filter(k => el.style[k] !== '');
+    if (style.length) parts.push(`style={${style.map(k => `${k}:${el.style[k]}`).join(';')}}`);
+    if (parts.length) lines.push(`${id}\n    ${parts.join('\n    ')}`);
+  });
+  dom.reset();
+  return lines.join('\n');
+}
+
+MODAL_OPENERS.forEach(m => {
+  // First and last entry: catches domain items with different optional-field shapes.
+  [0, m.data().length - 1].forEach((idx, n) => {
+    cases.push({ file: `${m.key}.modal-${n === 0 ? 'first' : 'last'}.txt`, produce: () => captureModal(m, idx) });
+  });
+});
+
 for (const c of cases) {
   const target = path.join(SNAPSHOT_DIR, c.file);
   let actual;
