@@ -739,7 +739,7 @@ const NHA_TRANG_GOURMETS = [
       "에어컨완비"
     ],
     "highlight": "1980년대 베트남 레트로 가정집 분위기 속에서 즐기는 아기자기하고 깔끔한 감성 백반!",
-    "description": "와이프와 함께 예쁜 사진을 남기며 조용하고 쾌적하게 식사하기 좋은 감성 가정식 레스토랑입니다.",
+    "description": "동행과 함께 예쁜 사진을 남기며 조용하고 쾌적하게 식사하기 좋은 감성 가정식 레스토랑입니다.",
     "localTip": "계란말이와 토마토 두부조림은 자극적이지 않아 여행 중 속을 편안하게 달래줍니다.",
     "suggestedMeal": "점심 식사 (12:00 - 13:30)",
     "googleMapUrl": "https://www.google.com/maps/search/?api=1&query=Ti%E1%BB%87m%20C%C6%A1m%20Vi%E1%BB%87t%20Nam%2023%20Ho%C3%A0ng%20V%C4%83n%20Th%E1%BB%A5%20X%C6%B0%C6%A1ng%20Hu%C3%A2n%20Nha%20Trang",
@@ -2176,11 +2176,11 @@ const NHA_TRANG_GOURMETS = [
     "tags": [
       "정글인테리어",
       "포토존천국",
-      "와이프취향저격",
+      "취향저격",
       "에어컨좌석"
     ],
     "highlight": "푸른 나무와 독특한 목조 건축, 초록 식물로 가득 채워진 도심 속 힐링 오아시스 테마 카페!",
-    "description": "와이프와 함께 편안한 라탄 소파에 앉아 인생샷을 남기며 더위를 식히기에 최고의 장소입니다.",
+    "description": "동행과 함께 편안한 라탄 소파에 앉아 인생샷을 남기며 더위를 식히기에 최고의 장소입니다.",
     "localTip": "2층 창가 쪽 자연광이 잘 들어오는 좌석이 사진 명당입니다.",
     "suggestedMeal": "가장 더운 오후 1~3시 힐링 타임",
     "googleMapUrl": "https://www.google.com/maps/search/?api=1&query=Jungle%20Coffee%20Nha%20Trang%2008%20L%C3%AA%20Qu%C3%BD%20%C4%90%C3%B4n%20Ph%C6%B0%E1%BB%9Bc%20Ti%E1%BA%BFn%20Nha%20Trang",
@@ -2213,11 +2213,11 @@ const NHA_TRANG_GOURMETS = [
     "tags": [
       "가우디감성",
       "인스타핫플",
-      "와이프추천",
+      "인기추천",
       "감각적인테리어"
     ],
     "highlight": "스페인 가우디의 건축 양식과 부드러운 곡선 아치 벽면이 돋보이는 감성 핫플레이스!",
-    "description": "따뜻한 조명과 동굴 같은 독특한 구조로 와이프와 함께 인생 사진을 남기기에 최적의 스팟입니다.",
+    "description": "따뜻한 조명과 동굴 같은 독특한 구조로 동행과 함께 인생 사진을 남기기에 최적의 스팟입니다.",
     "localTip": "낮 2~4시 햇살이 곡선 아치 벽 사이로 드라마틱하게 들어옵니다.",
     "suggestedMeal": "오후 감성 티타임 (13:30 - 16:00)",
     "googleMapUrl": "https://www.google.com/maps/search/?api=1&query=Ola%20Caf%C3%A9%2031%20Nguy%E1%BB%85n%20H%E1%BB%AFu%20Hu%C3%A2n%20Ph%C6%B0%E1%BB%9Bc%20Ti%E1%BA%BFn%20Nha%20Trang",
@@ -2639,7 +2639,7 @@ const NHA_TRANG_GOURMETS = [
       "자연친화"
     ],
     "highlight": "맑은 물속에 수십 마리의 비단잉어가 헤엄치는 연못과 고풍스러운 목조 정원이 어우러진 도심 속 최고의 힐링 공간!",
-    "description": "나무 그늘 아래 물소리를 들으며 여유롭게 커피를 마실 수 있어 부부나 커플 여행자에게 만족도가 매우 높습니다.",
+    "description": "나무 그늘 아래 물소리를 들으며 여유롭게 커피를 마실 수 있어 커플 및 여행자에게 만족도가 매우 높습니다.",
     "localTip": "1층 징검다리 연못 위 좌석이나 2층 테라스 난간 좌석에서 연못을 내려다보는 구도로 사진을 찍으면 최고의 인생샷이 완성됩니다.",
     "suggestedMeal": "아침 햇살이 부드러운 08:30 - 10:30",
     "googleMapUrl": "https://www.google.com/maps/search/?api=1&query=AN%20Caf%C3%A9%2024%20Nguy%E1%BB%85n%20Trung%20Tr%E1%BB%B1c%20T%C3%A2n%20L%E1%BA%ADp%20Nha%20Trang",
@@ -2945,7 +2945,7 @@ const NHA_TRANG_GOURMETS = [
       "기념일추천"
     ],
     "highlight": "화려한 샹들리에와 클래식 서재풍 인테리어 속에서 즐기는 품격 있는 애프터눈 티타임과 이탈리안 디저트!",
-    "description": "와이프와 함께 여행 중 우아하고 낭만적인 분위기에서 특별한 시간을 보내기에 최적의 럭셔리 공간입니다.",
+    "description": "동행과 함께 여행 중 우아하고 낭만적인 분위기에서 특별한 시간을 보내기에 최적의 럭셔리 공간입니다.",
     "localTip": "바다가 보이는 야외 테라스도 좋지만, 웅장한 서재와 샹들리에가 있는 실내 소파 좌석이 사진 배경으로 최고입니다.",
     "suggestedMeal": "오후 애프터눈 티 (14:00 - 16:30)",
     "googleMapUrl": "https://www.google.com/maps/search/?api=1&query=RuNam%20Bistro%2032-34%20Tr%E1%BA%A7n%20Ph%C3%BA%20L%E1%BB%99c%20Th%E1%BB%8D%20Nha%20Trang",

@@ -1,6 +1,10 @@
-# CLAUDE.md — Nha Trang Trip 2026 (나트랑 여행 가이드)
+# CLAUDE.md — Nha Trang Trip 2026
 
-2026.09.19 ~ 09.25 부부 나트랑 여행용 큐레이션 웹앱. **빌드 도구·프레임워크·패키지 매니저 없음** (Vanilla HTML/CSS/JS, `package.json` 없음). Node.js는 오직 테스트 스크립트 실행용.
+나트랑 2026 자유 여행용 큐레이션 웹앱. **빌드 도구·프레임워크·패키지 매니저 없음** (Vanilla HTML/CSS/JS, `package.json` 없음). Node.js는 오직 테스트 스크립트 실행용.
+- **액티비티 43선**: `data.js` (`NHA_TRANG_ACTIVITIES`)
+- **로컬 맛집 113선**: `gourmet-data.js` (`NHA_TRANG_GOURMETS`)
+- **숙소 24선 (4개 테마)**: `stays-data.js` (`NHA_TRANG_STAYS`)
+- **짝퉁/패션 쇼핑 18선**: `shopping-data.js` (`NHA_TRANG_SHOPPING`)
 
 ## 실행
 

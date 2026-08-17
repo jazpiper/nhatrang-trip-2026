@@ -1,87 +1,90 @@
-# Project: Nha Trang Trip 2026 - Shopping & Replica Guide Domain
+# Project: Nha Trang Trip 2026 - Currency, ATM & Travel Card Guide Domain
 
 ## Architecture
-Vanilla Single Page Application (SPA) architecture without external framework dependencies.
-- **Data Layer (`shopping-data.js`)**: Global constant `NHA_TRANG_SHOPPING` loaded before `app.js`, supporting dual Node.js `module.exports` for test runners. Contains 18 ground-truth verified shopping spots.
-- **State Layer (`js/store/state.js`)**: Centralized reactive state managing `currentTab`, `shoppingCategory`, `shoppingTag`, `shoppingWishlist`, `shoppingNotes`, and `activeModalShopping`.
-- **Component Layer (`js/components/shopping.js`)**: Pure functional module exporting `renderShopping()`, `openShoppingModal()`, `closeShoppingModal()`, `toggleShoppingWishlist()`, and `getFilteredShopping()`.
-- **App Controller (`js/app.js`)**: Main orchestrator handling tab switching (`switchMainTab`), event routing, search debouncing, and hero banner updates.
-- **Style Layer (`style.css`)**: Airbnb design tokens, scoped `.shopping-card`, `.bargaining-table`, `.pros-cons-grid`, and `.customs-warning-box` adhering to strict CSS class invariants.
-- **Verification Layer (`test-shopping.js`, `test-frontend.js`)**: Automated test runner executing 12 validation suites with 100% schema, DOM, URL encoding, and business logic coverage.
+Vanilla Single Page Application (SPA) architecture with strict separation of concerns, zero external framework runtime dependencies, and dual Node.js CommonJS test compatibility.
+
+- **Data Layer (`currency-data.js`)**: Global constant `NHA_TRANG_CURRENCY` loaded before `app.js`, supporting dual Node.js `module.exports` for test runners. Contains 17 ground-truth verified currency exchange spots and zero-fee ATMs with 28-field schema. Also exports `NHA_TRANG_TRAVEL_CARDS` and `NHA_TRANG_ATM_TIPS`.
+- **State Layer (`js/store/state.js` & `js/app.js`)**: Reactive state managing `currentTab: 'currency'`, `currencyCategory`, `currencyTag`, `currencyWishlist`, `currencyNotes`, and `activeModalCurrency`.
+- **Component Layer (`js/components/currency.js` & `js/app.js`)**: Pure modular functions exporting `renderCurrency()`, `openCurrencyModal()`, `closeCurrencyModal()`, `toggleCurrencyWishlist()`, `getFilteredCurrency()`, and `initCurrencyCalculator()`.
+- **App Controller (`js/app.js`)**: Main SPA orchestrator handling tab switching (`switchMainTab('currency')`), event routing, search filtering, and hero banner updates.
+- **Style Layer (`style.css`)**: Airbnb design tokens, scoped `.currency-card`, `.currency-badge-fee`, `.supported-cards-grid`, `.atm-step-guide`, `.dcc-warning-banner`, `.exchange-rate-table-wrap`, and interactive calculator styling.
+- **Verification Layer (`test-currency.js`, `test-frontend.js`)**: Automated test runner executing 12 validation suites with 100% schema, DOM, URL encoding, card matrix, and business logic coverage.
 
 ## Feature Inventory
 | # | Feature | Description | Milestone | Source |
 |---|---------|-------------|-----------|--------|
-| 1 | Shopping Data Dataset (`shopping-data.js`) | 18 ground-truth verified shopping venues with 28-field schema | M1 | Spec Miner 2 / Explorer 1 |
-| 2 | Bargaining Master Price Guide Tables | Item-by-item initial asking price vs target negotiated price | M1 | Spec Miner 2 |
-| 3 | Korean Community Sentiment Analysis | Curated pros/cons, bestsellers, scam warnings, fabric quality | M1 | Spec Miner 2 |
-| 4 | Customs Clearance & Safety Advice | Duty-free $800 limit, personal use rules, tag removal tips | M1 | Spec Miner 2 |
-| 5 | Header Navigation Tab & Badge | Tab button with synced venue count badge | M2 | Explorer 1 / 3 |
-| 6 | Category Filter Bar (`#shoppingCategoryNav`) | 5 category filters (전체, 명품/미러급, 담시장, 야시장, 크록스, 스포츠) | M2 | Explorer 1 / 3 |
-| 7 | Tag Chips Bar (`#shoppingTagChips`) | 7 quick filter chips (에어컨완비, 정찰제, 계좌이체, 흥정필수 등) | M2 | Explorer 1 / 3 |
-| 8 | Dynamic Shopping Grid Section | Responsive card grid container `#shoppingCardsGridContainer` | M2 | Explorer 1 / 3 |
-| 9 | Comprehensive Detail Modal | Modal with gallery, bargaining table, sentiment, couple notes | M2 | Explorer 1 / 3 |
-| 10 | CSS Styling & Design Tokens | Styles for cards, badges, bargaining tables, sentiment boxes | M2 | Explorer 1 |
-| 11 | State Store Extension | `shoppingCategory`, `shoppingTag`, `shoppingWishlist`, `shoppingNotes` | M3 | Explorer 1 / 3 |
-| 12 | Shopping Component Module | `js/components/shopping.js` with filtering, sorting, rendering | M3 | Explorer 1 / 3 |
-| 13 | App Tab Switching & Event Router | `js/app.js` `switchMainTab('shopping')`, search, hero stats | M3 | Explorer 1 |
-| 14 | LocalStorage Sync | Wishlist & couple notes persistent sync with storage helper | M3 | Explorer 1 / 3 |
-| 15 | SSOT Count Synchronization | Sync header badge, category buttons, hero stats with dataset length | M3 | GEMINI.md |
-| 16 | Automated Test Suite (`test-shopping.js`) | 12 test suites verifying schema, URLs, DOM sync, filter simulation | M4 | Explorer 3 / 1 |
-| 17 | Regression & Frontend Suite Update | Extend `test-frontend.js` for shopping tab DOM IDs and CSS classes | M4 | Explorer 1 |
+| 1 | Verified Currency & ATM Dataset (`currency-data.js`) | 17 ground-truth verified exchange spots & zero-fee ATMs (28-field schema) | M1 | Spec Miner 2 / Explorer 2 |
+| 2 | 5 Major Korean Travel Cards Specs Matrix | TraveLog, TravelWallet, SOL Travel, Toss Bank, Wibee Travel matching | M1 | Spec Miner 2 / Explorer 2 |
+| 3 | Cash & ATM Operational Guide Dataset | DCC avoidance, 6-digit PIN rules, card-dispense-first order, $100 crisp bill rules | M1 | Spec Miner 2 / Explorer 3 |
+| 4 | Header Navigation Tab & Badge | '💱 환전 & ATM' tab button with dynamic venue count badge (17곳) | M2 | Explorer 1 / 3 |
+| 5 | Category Filter Bar (`#currencyCategoryNav`) | 6 category filters (전체, 수수료 무료 ATM, 시내 금은방, 공항/은행, 트래블로그, 트래블월렛 등) | M2 | Explorer 1 / 3 |
+| 6 | Tag Chips Bar (`#currencyTagChips`) | 8 quick filter chips (수수료 0원, 24시간 LiveBank, 100달러 우대, 야시장 인근 등) | M2 | Explorer 1 / 3 |
+| 7 | Interactive VND ↔ KRW Currency Calculator | Dual bidirectional input, quick preset pills (+50k~+2M), mental math banner, custom rate | M2 | Explorer 3 |
+| 8 | Practical Guide & DCC Defense Infographics | POS terminal simulation, 7-step ATM flowchart, emergency hotlines | M2 | Explorer 3 |
+| 9 | Dynamic Currency Cards Grid Section | Responsive card grid container `#currencyCardsGridContainer` | M2 | Explorer 1 |
+| 10 | Comprehensive Detail Modal (`#currencyModal`) | Modal with photos, Google Maps link, address copy, supported card badges, limits, tips | M2 | Explorer 1 / 3 |
+| 11 | Airbnb CSS Styling & Class Invariants | Styles for currency cards, badges, calculator, tables, guide banners in `style.css` | M3 | Explorer 1 / 3 |
+| 12 | State Store & LocalStorage Extension | `currencyCategory`, `currencyTag`, `currencyWishlist`, `currencyNotes` (`nha_trang_currency_*`) | M3 | Explorer 1 |
+| 13 | Currency Component Module & Router | `js/components/currency.js` + `js/app.js` `switchMainTab('currency')`, search, hero | M3 | Explorer 1 / 3 |
+| 14 | Automated Test Suite (`test-currency.js`) | 12 test suites verifying schema, URLs, DOM sync, card matrices, filter simulation | Final | Explorer 1 / 2 / 3 |
+| 15 | Frontend Regression Suite Update | Extend `test-frontend.js` for currency tab DOM IDs and CSS classes | Final | Explorer 1 |
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M1 | Ground-Truth Dataset Creation | `shopping-data.js` (18 verified spots, 28 fields, bargaining tables, sentiment) | none | PLANNED |
-| M2 | Markup & CSS Layout | `index.html` (tab, nav, chips, grid, modal) & `style.css` (tables, cards, sentiment) | M1 | PLANNED |
-| M3 | State Store & App Component Integration | `js/store/state.js`, `js/components/shopping.js`, `js/app.js` | M1, M2 | PLANNED |
-| M4 | Automated Verification & Test Harness | `test-shopping.js` & `test-frontend.js` execution & 100% pass | M1, M2, M3 | PLANNED |
-| M5 | Final Gate & Dual-Track Acceptance | Reviewer, Challenger, Forensic Auditor Gate Verification | M4 | PLANNED |
+| M1 | Verified Real-World Dataset | `currency-data.js` (17 verified spots, 28 fields, 5 travel card matrices, tips) | none | DONE |
+| M2 | SPA Markup & Calculator UI | `index.html` (tab, nav, chips, calculator widget, guide cards, grid, modal) | M1 | DONE |
+| M3 | State Store, Logic & Styling | `js/store/state.js`, `js/components/currency.js`, `js/app.js`, `style.css` | M1, M2 | DONE |
+| Final | 100% Verification, Audit & Hardening | `test-currency.js` & `test-frontend.js` 100% pass + Forensic Audit | M1, M2, M3 | DONE |
 
 ## Interface Contracts
-### `shopping-data.js` ↔ `js/components/shopping.js`
-- `window.NHA_TRANG_SHOPPING`: Array of 18 `NhaTrangShoppingSpot` objects.
-- Each object contains: `id`, `name`, `nameVi`, `category`, `categoryLabel`, `badge`, `qualityTier`, `rating`, `reviewCount`, `openHours`, `location`, `addressVi`, `phone`, `googleMapQuery`, `googleMapUrl`, `googlePhotosUrl`, `priceRangeVnd`, `avgPriceVnd`, `pricePer`, `paymentMethods`, `facilities`, `bargainingGuide`, `koreanReviewsSummary` / `sentimentAnalysis`, `customsAdvice`, `tags`, `images`, `coverImage`, `highlight`, `description`, `localTip`.
+### `currency-data.js` ↔ `js/components/currency.js` & `js/app.js`
+- `window.NHA_TRANG_CURRENCY`: Array of 17 `NhaTrangCurrencySpot` objects.
+- `window.NHA_TRANG_TRAVEL_CARDS`: Array of 5 Korean travel card spec objects.
+- `window.NHA_TRANG_ATM_TIPS`: Array of practical guidelines (DCC, PIN, card ejection, 100 USD bill).
+- Each `NhaTrangCurrencySpot` object contains: `id`, `name`, `nameKo`, `nameVi`, `nameEn`, `category`, `categoryLabel`, `badge`, `rating`, `reviewCount`, `openHours`, `location`, `addressVi`, `phone`, `googleMapQuery`, `googleMapUrl`, `googlePhotosUrl`, `district`, `districtLabel`, `supportedCurrencies`, `supportedCards`, `feeFree`, `feePolicy`, `withdrawalLimit`, `exchangePerks`, `facilities`, `tags`, `highlight`, `description`, `localTip`, `coverImage`, `images`.
 
-### `js/store/state.js` ↔ `js/components/shopping.js` & `js/app.js`
-- `state.shoppingCategory`: string ('all' | category slug)
-- `state.shoppingTag`: string ('all' | tag key)
-- `state.shoppingWishlist`: string[] (array of IDs)
-- `state.shoppingNotes`: Record<string, string> (id -> note)
-- `state.activeModalShopping`: object | null
+### `js/store/state.js` ↔ `js/components/currency.js` & `js/app.js`
+- `state.currencyCategory`: string ('all' | category slug)
+- `state.currencyTag`: string ('all' | tag key)
+- `state.currencyWishlist`: string[] (array of IDs from `nha_trang_currency_wishlist`)
+- `state.currencyNotes`: Record<string, string> (id -> note from `nha_trang_currency_notes`)
+- `state.activeModalCurrency`: object | null
 
-### `js/components/shopping.js` Exports
-- `renderShopping()`: void (renders cards into `#shoppingCardsGridContainer`)
-- `openShoppingModal(shop)`: void (populates `#shoppingModal` and adds `.active`)
-- `closeShoppingModal()`: void (removes `.active` from `#shoppingModal`)
-- `toggleShoppingWishlist(id)`: void (toggles item in wishlist, updates badge & storage)
-- `getFilteredShopping()`: Array<NhaTrangShoppingSpot> (returns filtered & sorted list)
+### `js/components/currency.js` Exports
+- `renderCurrency()`: void (renders cards into `#currencyCardsGridContainer`)
+- `openCurrencyModal(spot)`: void (populates `#currencyModal` and adds `.active`)
+- `closeCurrencyModal()`: void (removes `.active` from `#currencyModal`)
+- `toggleCurrencyWishlist(id)`: void (toggles item in wishlist, updates badge & storage)
+- `getFilteredCurrency()`: Array<NhaTrangCurrencySpot> (returns filtered & sorted list)
+- `initCurrencyCalculator()`: void (binds bidirectional calculation and preset pills)
 
 ## Code Layout
 ```
-NhaTrang_Trip_2026/
-├── data.js                     # Activities & Schedule dataset
-├── gourmet-data.js             # Gourmet dataset (113 spots)
-├── stays-data.js               # Stays dataset (24 spots)
-├── shopping-data.js            # [NEW M1] Shopping dataset (18 spots)
-├── index.html                  # [UPDATED M2] Main SPA markup & shopping modal
-├── style.css                   # [UPDATED M2] Airbnb design styles & shopping components
+./
+├── data.js                     # Activities & Schedule dataset (43 places)
+├── gourmet-data.js             # Gourmet dataset (113 places)
+├── stays-data.js               # Stays dataset (24 places)
+├── shopping-data.js            # Shopping dataset (18 places)
+├── currency-data.js            # [M1] Currency & ATM dataset (17 places)
+├── index.html                  # [M2] Main SPA markup, calculator widget & currency modal
+├── style.css                   # [M3] Airbnb design styles & currency components
 ├── js/
-│   ├── app.js                  # [UPDATED M3] Main router & tab switcher
+│   ├── app.js                  # [M3] Main router & tab switcher
 │   ├── store/
-│   │   └── state.js            # [UPDATED M3] Reactive state store
+│   │   └── state.js            # [M3] Reactive state store
 │   ├── utils/
 │   │   └── dom.js              # DOM and storage helpers
 │   └── components/
 │       ├── activity.js         # Activities component
 │       ├── gourmet.js          # Gourmet component
 │       ├── stay.js             # Stays component
-│       └── shopping.js         # [NEW M3] Shopping component
+│       ├── shopping.js         # Shopping component
+│       └── currency.js         # [M3] Currency & ATM component + Calculator
 ├── test-activity.js            # Activity test suite
 ├── test-gourmet.js             # Gourmet test suite
 ├── test-stays.js               # Stays test suite
-├── test-seafood.js             # Seafood test suite
-├── test-frontend.js            # [UPDATED M4] Frontend integration test
-└── test-shopping.js            # [NEW M4] Dedicated 12-suite shopping test runner
+├── test-shopping.js            # Shopping test suite
+├── test-frontend.js            # [Final] Frontend integration test
+└── test-currency.js            # [Final] Dedicated 12-suite currency & ATM test runner
 ```

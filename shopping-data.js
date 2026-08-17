@@ -72,7 +72,7 @@ const NHA_TRANG_SHOPPING = [
     customsAdvice: "크록스는 일반 소비재 신발로 자가사용 목적 1인 2~3켤레까지 세관 문제 없이 안전하게 반입 가능합니다. 박스는 매장에서 폐기하고 지비츠를 결합해 수하물에 넣으세요.",
     highlight: "시원한 에어컨과 친절한 한국어 직원, 크록스 구매 시 지비츠 10개 무료 증정 정찰제 성지!",
     description: "나트랑 여행자 커뮤니티에서 가장 신뢰받는 크록스 전문점입니다. 깔끔한 매장에 에어컨이 빵빵하게 가동되며, 지비츠를 마음껏 골라 세팅할 수 있습니다.",
-    localTip: "부부가 함께 방문하여 커플 크록스 맞추기 좋습니다. 양발 모두 신어보고 10초간 걸어본 후 사이즈 결정하세요.",
+    localTip: "함께 방문하여 커플 크록스 맞추기 좋습니다. 양발 모두 신어보고 10초간 걸어본 후 사이즈 결정하세요.",
     coverImage: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80",
@@ -143,7 +143,7 @@ const NHA_TRANG_SHOPPING = [
     customsAdvice: "의류 및 수공예 기념품은 자가사용 목적으로 면세 한도 내에서 안전하게 반입 가능합니다.",
     highlight: "1층 라탄백·마그넷 잡화, 2층 크록스·스투시 의류! 에어컨 빵빵한 정찰제 토탈 쇼핑 샵",
     description: "깨끗하고 쾌적한 2층 단독 건물로 운영되는 대표 편집샵입니다. 바가지 없는 정찰제와 한국어 소통이 완벽합니다.",
-    localTip: "부부가 함께 1층에서 라탄백과 기념품을 고르고 2층에서 커플 티셔츠와 크록스를 쇼핑하세요.",
+    localTip: "함께 1층에서 라탄백과 기념품을 고르고 2층에서 커플 티셔츠와 크록스를 쇼핑하세요.",
     coverImage: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=1200&q=80",
@@ -432,7 +432,7 @@ const NHA_TRANG_SHOPPING = [
     customsAdvice: "완제품 라탄 공예품은 가공 목제품으로 분류되어 대한민국 세관 및 검역을 정상 통과합니다.",
     highlight: "동남아 휴양지 감성 폭발! 수제 라탄백과 밀짚모자가 모여있는 담시장 1층 명소",
     description: "담시장 1층 회랑을 따라 수십 개의 라탄 수공예 전문점이 늘어서 있습니다. 탬버린백부터 숄더백까지 다양한 라탄 제품을 도매가에 만날 수 있습니다.",
-    localTip: "부부가 함께 보며 와이프 착용 컷을 확인하고, 냄새가 덜 나고 짜임이 고른 것을 고르세요.",
+    localTip: "함께 보며 실제 착용 컷을 확인하고, 냄새가 덜 나고 짜임이 고른 것을 고르세요.",
     coverImage: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=1200&q=80",
@@ -853,7 +853,7 @@ const NHA_TRANG_SHOPPING = [
     customsAdvice: "상표법 및 관세법 준수를 위해 선물용 다량 반입을 금지하며, 본인 실착용 1개 한정으로 박스 및 택을 제거하여 반입하세요.",
     highlight: "최고급 원단과 정교한 각인! VIP 프라이빗 룸에서 만나는 하이엔드 미러급 가죽 부티크",
     description: "나트랑 시내 훙브엉 거리에 위치한 럭셔리 부티크입니다. 고급 가죽 가방, 지갑, 벨트를 등급별로 비교 확인하며 구매할 수 있습니다.",
-    localTip: "부부가 함께 프라이빗 룸에서 편안하게 음료를 마시며 천천히 가죽 질감을 비교해보세요.",
+    localTip: "함께 프라이빗 룸에서 편안하게 음료를 마시며 천천히 가죽 질감을 비교해보세요.",
     coverImage: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=1200&q=80",
@@ -924,7 +924,7 @@ const NHA_TRANG_SHOPPING = [
     customsAdvice: "자가사용 목적 1개 품목에 한해 박스 없이 반입하는 것이 세관 통관의 기본 수칙입니다.",
     highlight: "감각적인 인테리어와 정교한 디테일! 남성 벨트·지갑 및 여성 숄더백 SA급 전문 매장",
     description: "비엣투 거리에 위치한 고급 명품 레플리카 매장입니다. 최고 등급의 가죽 제품을 엄선하여 전시하며 한국어 상담을 제공합니다.",
-    localTip: "남편 벨트와 아내 지갑을 세트로 함께 볼 때 추가 네고가 수월합니다.",
+    localTip: "벨트와 지갑 등을 세트로 함께 볼 때 추가 네고가 수월합니다.",
     coverImage: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=1200&q=80",
@@ -1054,7 +1054,7 @@ const NHA_TRANG_SHOPPING = [
       }
     ],
     sentimentAnalysis: {
-      communityVerdict: "남편 운동복과 캐주얼 티셔츠를 고르기에 최적화된 깔끔하고 시원한 남성복 샵.",
+      communityVerdict: "운동복과 캐주얼 티셔츠를 고르기에 최적화된 깔끔하고 시원한 남성복 샵.",
       pros: [
         "원단 퀄리티가 시장 제품보다 확실히 두껍고 좋음",
         "정찰제 운영으로 편안한 쇼핑",
@@ -1068,7 +1068,7 @@ const NHA_TRANG_SHOPPING = [
       customsTip: "일반 의류로 면세 범위 내에서 자유롭게 통관 가능."
     },
     customsAdvice: "개인 의류 수량으로 안전하게 국내 반입 가능합니다.",
-    highlight: "남편 스트릿 & 짐웨어 쇼핑 1순위! 나이키·스투시 오버핏 티셔츠와 기능성 반바지 성지",
+    highlight: "스트릿 & 짐웨어 쇼핑 1순위! 나이키·스투시 오버핏 티셔츠와 기능성 반바지 성지",
     description: "남성 스트릿웨어 및 피트니스 짐웨어 전문 로드샵입니다. 에어컨이 완비된 매장에서 편안하게 피팅하고 정찰가에 구매할 수 있습니다.",
     localTip: "한국 사이즈 100(L) 기준 현지 L~XL 사이즈가 적당합니다. 피팅룸에서 직접 입어보세요.",
     coverImage: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=80",
@@ -1114,7 +1114,7 @@ const NHA_TRANG_SHOPPING = [
         askingPriceVnd: "320,000 ~ 420,000 VND (정찰)",
         targetPriceVnd: "300,000 ~ 380,000 VND",
         targetPriceKrw: "약 16,000 ~ 20,500원",
-        tip: "정찰제이나 부부 커플 세트(2벌 이상) 구매 시 5~10% 할인 요청 가능."
+        tip: "정찰제이나 커플 세트(2벌 이상) 구매 시 5~10% 할인 요청 가능."
       },
       {
         item: "린넨 밴딩 와이드 팬츠",
@@ -1128,7 +1128,7 @@ const NHA_TRANG_SHOPPING = [
       communityVerdict: "한국에서 사려면 7~8만원대인 고급 천연 린넨 옷을 1~2만원대에 맞출 수 있는 숨은 감성 보물 샵.",
       pros: [
         "100% 천연 린넨의 고급스러운 구김과 쾌적함",
-        "부부 커플 리조트룩 연출 최적",
+        "커플 리조트룩 연출 최적",
         "에어컨과 피팅룸 완비"
       ],
       cons: [
@@ -1139,9 +1139,9 @@ const NHA_TRANG_SHOPPING = [
       customsTip: "순수 일반 의류이므로 면세 한도 내 무관세 통관."
     },
     customsAdvice: "자체 브랜드 일반 의류로 관세청 규제 없이 안전하게 통관됩니다.",
-    highlight: "고급 휴양지 감성 완벽 구현! 100% 천연 린넨 셔츠와 와이드 팬츠로 맞추는 부부 커플룩",
+    highlight: "고급 휴양지 감성 완벽 구현! 100% 천연 린넨 셔츠와 와이드 팬츠로 맞추는 커플룩",
     description: "베트남 고품질 린넨 원단으로 제작된 리조트웨어 전문 매장입니다. 자연스러운 파스텔 톤과 베이지 톤의 린넨 의류가 가득합니다.",
-    localTip: "부부가 아이보리/베이지 계열 린넨 시밀러룩을 맞춰 입고 빈원더스나 리조트에서 인생샷을 남기세요.",
+    localTip: "동행과 함께 아이보리/베이지 계열 린넨 시밀러룩을 맞춰 입고 빈원더스나 리조트에서 인생샷을 남기세요.",
     coverImage: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=1200&q=80",
@@ -1196,7 +1196,7 @@ const NHA_TRANG_SHOPPING = [
       }
     ],
     sentimentAnalysis: {
-      communityVerdict: "와이프 휴양지 인생샷 원피스를 찾을 때 실패 없는 감성 부티크.",
+      communityVerdict: "휴양지 인생샷 원피스를 찾을 때 실패 없는 감성 부티크.",
       pros: [
         "원단 퀄리티와 안감 처리가 시장 원피스보다 월등함",
         "감각적인 컬러와 세련된 패턴",
@@ -1210,7 +1210,7 @@ const NHA_TRANG_SHOPPING = [
       customsTip: "일반 여성 의류로 면세 한도 내 무관세 통관."
     },
     customsAdvice: "일반 여성 의류로 안전하게 반입 가능합니다.",
-    highlight: "와이프 인생샷 보장! 감성적인 패턴과 고급 안감의 리조트 & 바캉스 드레스 셀렉트 샵",
+    highlight: "휴양지 인생샷 보장! 감성적인 패턴과 고급 안감의 리조트 & 바캉스 드레스 셀렉트 샵",
     description: "나트랑 시내의 트렌디한 여성 휴양지 룩 전문 부티크입니다. 고급스러운 소재와 디자인으로 인스타 인생샷에 최적화되어 있습니다.",
     localTip: "화이트/옐로우 계열 롱드레스를 골라 호핑투어나 리조트 비치에서 사진을 찍어보세요.",
     coverImage: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=1200&q=80",

@@ -97,12 +97,12 @@ if (missing > 0) {
 console.log('\n=== Suite 2: Script Inclusion Order in index.html ===');
 const staysScript = '<script src="./stays-data.js"></script>';
 const shoppingScript = '<script src="./shopping-data.js"></script>';
-const appScript = '<script type="module" src="./js/app.js"></script>';
+const hasAppScript = html.includes('<script src="./js/app.js"></script>') || html.includes('<script type="module" src="./js/app.js"></script>');
 
-if (html.includes(staysScript) && html.includes(shoppingScript) && html.includes(appScript)) {
+if (html.includes(staysScript) && html.includes(shoppingScript) && hasAppScript) {
   const staysIdx = html.indexOf(staysScript);
   const shoppingIdx = html.indexOf(shoppingScript);
-  const appIdx = html.indexOf(appScript);
+  const appIdx = html.indexOf('src="./js/app.js"');
   if (staysIdx < shoppingIdx && shoppingIdx < appIdx) {
     console.log('  ✔ stays-data.js and shopping-data.js are correctly positioned before app.js');
   } else {
@@ -116,10 +116,11 @@ if (html.includes(staysScript) && html.includes(shoppingScript) && html.includes
 
 console.log('\n=== Suite 3: JavaScript Syntax & Compilation in app.js ===');
 const appCode = fs.readFileSync('js/app.js', 'utf8');
-if (appCode.includes('export') || appCode.includes('import')) {
-  console.log('  ✔ js/app.js loaded successfully and uses ES Modules!');
-} else {
-  console.error('  ❌ js/app.js does not use ES modules');
+try {
+  new Function(appCode);
+  console.log('  ✔ js/app.js syntax & logic compilation valid!');
+} catch (e) {
+  console.error('  ❌ js/app.js syntax error:', e.message);
   process.exit(1);
 }
 

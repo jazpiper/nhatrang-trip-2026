@@ -23,7 +23,7 @@ const NHA_TRANG_ACTIVITIES = [
     googleMapQuery: "Hon Mun Island Nha Trang",
     priceVnd: 890000,
     pricePer: "1인 기준 (런치 & 픽업 포함)",
-    tags: ["와이프추천", "인생샷", "스노클링", "해산물바비큐"],
+    tags: ["인기추천", "인생샷", "스노클링", "해산물바비큐"],
     images: [
       "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
@@ -72,7 +72,7 @@ const NHA_TRANG_ACTIVITIES = [
     ],
     notIncluded: ["호핑투어 선박 이동 요금 (호핑 연계 필수)"],
     whatToBring: ["수영복 또는 래시가드", "수중용 헤어밴드 (머리 정리용)"],
-    coupleTip: "수영을 전혀 못하거나 렌즈/화장을 한 상태에서도 머리가 젖지 않아 와이프분들의 만족도가 매우 높습니다! 둘이 손잡고 수중에서 하트 포즈를 취해보세요.",
+    coupleTip: "수영을 전혀 못하거나 렌즈/화장을 한 상태에서도 머리가 젖지 않아 여행자분들의 만족도가 매우 높습니다! 둘이 손잡고 수중에서 하트 포즈를 취해보세요.",
     suggestedDay: "Day 3 (9/21 일)",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=nha%20trang%20sea%20walker"
   },
@@ -260,7 +260,7 @@ const NHA_TRANG_ACTIVITIES = [
     titleEn: "Sen Spa Signature 90min Hot Stone & Bamboo Body Massage",
     category: "spa",
     categoryLabel: "스파 & 웰니스",
-    badge: "부부 최애",
+    badge: "여행자 베스트",
     rating: 4.97,
     reviewCount: 480,
     duration: "90분 ~ 120분 (코스별 선택)",
@@ -269,7 +269,7 @@ const NHA_TRANG_ACTIVITIES = [
     googleMapQuery: "Sen Spa Nha Trang",
     priceVnd: 580000,
     pricePer: "90분 핫스톤 코스 1인 기준",
-    tags: ["호텔급시설", "부부커플룸", "웰컴티", "사전예약필수"],
+    tags: ["호텔급시설", "프라이빗 커플룸", "웰컴티", "사전예약필수"],
     images: [
       "https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80",
@@ -336,7 +336,7 @@ const NHA_TRANG_ACTIVITIES = [
     googleMapQuery: "Royal Salon Nha Trang",
     priceVnd: 420000,
     pricePer: "90분 풀코스 1인 기준 (약 2.3만원)",
-    tags: ["귀청소", "오이팩세안", "두피샴푸스파", "남편만족1위"],
+    tags: ["귀청소", "오이팩세안", "두피샴푸스파", "만족도1위"],
     images: [
       "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80",
@@ -352,7 +352,7 @@ const NHA_TRANG_ACTIVITIES = [
     ],
     notIncluded: ["개인 매너 팁 (보통 5만동 내외)"],
     whatToBring: ["가벼운 복장"],
-    coupleTip: "남편분들이 여행 중 가장 만족스러워하는 코스 중 하나입니다! 부부가 나란히 누워 케어 받으면 더위에 지친 몸과 두피가 완전히 리셋됩니다.",
+    coupleTip: "여행자분들이 여행 중 가장 만족스러워하는 코스 중 하나입니다! 동행과 함께 나란히 누워 케어 받으면 더위에 지친 몸과 두피가 완전히 리셋됩니다.",
     suggestedDay: "Day 2 (9/20 토) 또는 Day 4 (9/22 월)",
     bookingUrl: "https://www.google.com/maps/search/Royal+Salon+Nha+Trang"
   },
@@ -362,7 +362,7 @@ const NHA_TRANG_ACTIVITIES = [
     titleEn: "Mango Nail & Spa Premium Gel Nail Art & Foot Care",
     category: "spa",
     categoryLabel: "뷰티 & 네일아트",
-    badge: "와이프 힐링",
+    badge: "힐링 케어",
     rating: 4.96,
     reviewCount: 450,
     duration: "60분 ~ 90분",
@@ -377,12 +377,12 @@ const NHA_TRANG_ACTIVITIES = [
       "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80"
     ],
-    highlight: "한국 강남 퀄리티의 트렌디한 이달의 아트 젤네일과 패디를 한국의 1/3도 안 되는 착한 가격에 예쁘게 받는 와이프 힐링 필수 코스!",
+    highlight: "한국 강남 퀄리티의 트렌디한 이달의 아트 젤네일과 패디를 한국의 1/3도 안 되는 착한 가격에 예쁘게 받는 힐링 케어 필수 코스!",
     included: [
       "손톱/발톱 기본 케어 & 큐티클 정리",
       "프리미엄 젤 컬러 & 트로피컬 휴양지 아트 디자인",
       "시원한 생과일 망고 주스 서비스",
-      "동행 남편을 위한 발 마사지 또는 편안한 소파 대기 공간"
+      "동행인을 위한 발 마사지 또는 편안한 소파 대기 공간"
     ],
     notIncluded: ["파츠 추가 옵션 (소액)"],
     whatToBring: ["원하는 네일 디자인 사진 (캡처본)"],
@@ -702,7 +702,7 @@ const NHA_TRANG_ACTIVITIES = [
     ],
     notIncluded: ["고급 프리미엄 샴페인 별도 주문", "개인 팁"],
     whatToBring: ["스마트 캐주얼/원피스 (인생 사진용)", "가벼운 가디건 (밤바다 바람 대비)"],
-    coupleTip: "여행 6일 차 기념일 디너로 강력 추천합니다! 선셋 골든아워에 갑판에서 칵테일 잔을 들고 찍는 사진은 평생 남을 부부 사진이 됩니다.",
+    coupleTip: "여행 6일 차 기념일 디너로 강력 추천합니다! 선셋 골든아워에 갑판에서 칵테일 잔을 들고 찍는 사진은 평생 남을 인생 사진이 됩니다.",
     suggestedDay: "Day 6 (9/24 수)",
     bookingUrl: "https://emperorcruises.com"
   },
@@ -919,7 +919,7 @@ const NHA_TRANG_ACTIVITIES = [
     googleMapQuery: "Lanterns Cooking Class Nha Trang",
     priceVnd: 750000,
     pricePer: "1인 4코스 요리 & 마켓투어 포함",
-    tags: ["직접만드는반쎄오", "분짜", "마켓투어", "부부추억"],
+    tags: ["직접만드는반쎄오", "분짜", "마켓투어", "힐링추억"],
     images: [
       "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80",
@@ -1004,7 +1004,7 @@ const NHA_TRANG_ACTIVITIES = [
     ],
     notIncluded: ["왕복 그랩/차량 렌트비 (편도 약 25만 동)", "개인 락커 대여료 (소액)", "식음료"],
     whatToBring: ["아쿠아슈즈 또는 미끄럼 방지 샌들", "수영복 또는 래시가드", "비치타월 & 방수팩", "모기 기피제"],
-    coupleTip: "1호수는 수심이 적당하고 카약 타기 좋아 부부가 함께 놀기에 최고입니다. 바위에 걸터앉아 맑은 계곡물에 발을 담그고 사진을 찍으면 영화 속 한 장면 같은 분위기가 연출됩니다.",
+    coupleTip: "1호수는 수심이 적당하고 카약 타기 좋아 함께 놀기에 최고입니다. 바위에 걸터앉아 맑은 계곡물에 발을 담그고 사진을 찍으면 영화 속 한 장면 같은 분위기가 연출됩니다.",
     suggestedDay: "Day 5 (9/23 화) 낮",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Khu%20du%20l%E1%BB%8Bch%20Ba%20H%E1%BB%93%20Th%C3%B4n%20V%E1%BA%A1n%20Thu%E1%BA%ADn%20Ninh%20%C3%8Dch%20Ninh%20H%C3%B2a%20Kh%C3%A1nh%20H%C3%B2a"
   },
@@ -1037,7 +1037,7 @@ const NHA_TRANG_ACTIVITIES = [
     ],
     notIncluded: ["향 또는 소원 공양비 (자율 보시)", "주차비 (오토바이 이용 시 소액)"],
     whatToBring: ["무릎과 어깨를 가리는 복장 (사원 예절)", "편한 운동화/샌들", "부채 또는 손선풍기", "생수"],
-    coupleTip: "백불상 아래에 서서 올려다보며 사진을 찍으면 웅장한 사진을 얻을 수 있습니다. 정상 전망대에서는 나트랑 시내와 푸른 산세가 파노라마로 펼쳐져 부부 기념사진을 찍기에 훌륭합니다.",
+    coupleTip: "백불상 아래에 서서 올려다보며 사진을 찍으면 웅장한 사진을 얻을 수 있습니다. 정상 전망대에서는 나트랑 시내와 푸른 산세가 파노라마로 펼쳐져 여행 기념사진을 찍기에 훌륭합니다.",
     suggestedDay: "Day 2 (9/20 토) 또는 Day 5 (9/23 화) 오전",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a%20Long%20S%C6%A1n%2022%20%C4%90%C6%B0%E1%BB%9Dng%2023%20Th%C3%A1ng%2010%20Ph%C6%B0%C6%A1ng%20S%C6%A1n%20Nha%20Trang"
   },
@@ -1236,7 +1236,7 @@ const NHA_TRANG_ACTIVITIES = [
     ],
     notIncluded: ["개인 쇼핑 비용"],
     whatToBring: ["원하는 쇼핑 목록 메모", "트래블 카드 또는 스마트폰 뱅킹"],
-    coupleTip: "담시장 흥정에 피로감을 느끼시는 분들께 적극 추천합니다! 가격표가 투명하게 다 붙어 있어 와이프가 편안하게 라탄백과 예쁜 자수 파우치를 고를 수 있습니다.",
+    coupleTip: "담시장 흥정에 피로감을 느끼시는 분들께 적극 추천합니다! 가격표가 투명하게 다 붙어 있어 누구나 편안하게 라탄백과 예쁜 자수 파우치를 고를 수 있습니다.",
     suggestedDay: "Day 2 (9/20 토) 또는 Day 6 (9/24 수)",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=JW%20Gift%2092a%20H%E1%BB%93ng%20B%C3%A0ng%20T%C3%A2n%20L%E1%BA%ADp%20Nha%20Trang"
   },
@@ -1471,7 +1471,7 @@ const NHA_TRANG_ACTIVITIES = [
     ],
     notIncluded: ["테라피스트 팁"],
     whatToBring: ["편한 옷차림"],
-    coupleTip: "일반적인 부드러운 오일 마사지보다 목, 어깨, 허리의 뭉친 근육을 시원하게 풀고 싶어 하는 남편분들에게 압도적인 찬사를 받는 곳입니다. 부부가 함께 받으면 여행의 피로가 완벽히 풀립니다.",
+    coupleTip: "일반적인 부드러운 오일 마사지보다 목, 어깨, 허리의 뭉친 근육을 시원하게 풀고 싶어 하는 많은 여행자들에게 압도적인 찬사를 받는 곳입니다. 함께 받으면 여행의 피로가 완벽히 풀립니다.",
     suggestedDay: "Day 4 (9/22 월) 또는 Day 6 (9/24 수) 저녁",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Pure%20Vietnam%20Beauty%20%26%20Spa%2044%20Ng%C3%B4%20Quy%E1%BB%81n%20V%E1%BA%A1n%20Th%E1%BA%A1nh%20Nha%20Trang"
   }
