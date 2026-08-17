@@ -2128,6 +2128,82 @@
     }
   }
 
+  // --- 8.5 Domain Registry ---
+  // 5개 도메인의 배선 차이를 한 테이블로 모은다. 탭을 추가할 때 손댈 곳을
+  // 줄이는 것이 목적이며, 렌더/필터/모달 로직은 각 도메인 섹션에 그대로 있다.
+  // activities만 접두어 규칙이 다르다(actCategory / wishlist / detailModal 등) —
+  // 접두어로 유도하지 말고 이 표의 값을 그대로 쓸 것.
+  const DOMAINS = [
+    {
+      key: 'activities',
+      render: () => (state.currentView === 'timeline' ? renderTimeline() : renderCards()),
+      categoryNavId: 'activityCategoryNav', tagChipsId: 'activityTagChips',
+      catAttr: 'category', tagAttr: 'tag',
+      catField: 'actCategory', tagField: 'actTag',
+      notesField: 'notes', notesKey: 'nha_trang_notes',
+      activeModalField: 'activeModalActivity',
+      modalId: 'detailModal', modalCloseBtnId: 'modalCloseBtn', closeModal: () => closeActivityModal(),
+      noteInputIds: ['modalNoteInput', 'noteInput'], noteStatusIds: ['modalNoteStatus', 'noteStatus'],
+      copyAddressBtnId: null
+    },
+    {
+      key: 'gourmet',
+      render: () => renderGourmets(),
+      categoryNavId: 'gourmetCategoryNav', tagChipsId: 'gourmetTagChips',
+      catAttr: 'gcategory', tagAttr: 'gtag',
+      catField: 'gourmetCategory', tagField: 'gourmetTag',
+      notesField: 'gourmetNotes', notesKey: 'nha_trang_gourmet_notes',
+      activeModalField: 'activeModalGourmet',
+      modalId: 'gourmetModal', modalCloseBtnId: 'gourmetModalCloseBtn', closeModal: () => closeGourmetModal(),
+      noteInputIds: ['gourmetNoteInput'], noteStatusIds: ['gourmetNoteStatus'],
+      copyAddressBtnId: 'gourmetCopyAddressBtn'
+    },
+    {
+      key: 'stays',
+      render: () => renderStays(),
+      categoryNavId: 'stayCategoryNav', tagChipsId: 'stayTagChips',
+      catAttr: 'scategory', tagAttr: 'stag',
+      catField: 'stayCategory', tagField: 'stayTag',
+      notesField: 'stayNotes', notesKey: 'nha_trang_stay_notes',
+      activeModalField: 'activeModalStay',
+      modalId: 'stayModal', modalCloseBtnId: 'stayModalCloseBtn', closeModal: () => closeStayModal(),
+      noteInputIds: ['stayNoteInput'], noteStatusIds: ['stayNoteStatus'],
+      copyAddressBtnId: 'stayCopyAddressBtn'
+    },
+    {
+      key: 'shopping',
+      render: () => renderShopping(),
+      categoryNavId: 'shoppingCategoryNav', tagChipsId: 'shoppingTagChips',
+      catAttr: 'shopcategory', tagAttr: 'shoptag',
+      catField: 'shoppingCategory', tagField: 'shoppingTag',
+      notesField: 'shoppingNotes', notesKey: 'nha_trang_shopping_notes',
+      activeModalField: 'activeModalShopping',
+      modalId: 'shoppingModal', modalCloseBtnId: 'shoppingModalCloseBtn', closeModal: () => closeShoppingModal(),
+      noteInputIds: ['shoppingNoteInput'], noteStatusIds: ['shoppingNoteStatus'],
+      copyAddressBtnId: 'shoppingCopyAddressBtn'
+    },
+    {
+      key: 'currency',
+      render: () => renderCurrency(),
+      categoryNavId: 'currencyCategoryNav', tagChipsId: 'currencyTagChips',
+      catAttr: 'currcategory', tagAttr: 'currtag',
+      catField: 'currencyCategory', tagField: 'currencyTag',
+      notesField: 'currencyNotes', notesKey: 'nha_trang_currency_notes',
+      activeModalField: 'activeModalCurrency',
+      modalId: 'currencyModal', modalCloseBtnId: 'currencyModalCloseBtn', closeModal: () => closeCurrencyModal(),
+      noteInputIds: ['currencyNoteInput'], noteStatusIds: ['currencyNoteStatus'],
+      copyAddressBtnId: 'currencyCopyAddressBtn'
+    }
+  ];
+
+  function getDomain(key) {
+    return DOMAINS.find(d => d.key === key) || DOMAINS[0];
+  }
+
+  function renderCurrentTab() {
+    getDomain(state.currentTab).render();
+  }
+
   // --- 9. Tab Switching & UI Controller ---
   function switchMainTab(tab) {
     state.currentTab = tab;
@@ -2329,32 +2405,14 @@
     if (searchInput) searchInput.value = '';
     if (sortSelect) sortSelect.value = 'recommended';
 
-    document.querySelectorAll('#activityCategoryNav .category-item-btn').forEach(b => b.classList.toggle('active', b.dataset.category === 'all'));
-    document.querySelectorAll('#gourmetCategoryNav .category-item-btn').forEach(b => b.classList.toggle('active', b.dataset.gcategory === 'all'));
-    document.querySelectorAll('#stayCategoryNav .category-item-btn').forEach(b => b.classList.toggle('active', b.dataset.scategory === 'all'));
-    document.querySelectorAll('#shoppingCategoryNav .category-item-btn').forEach(b => b.classList.toggle('active', b.dataset.shopcategory === 'all'));
-    document.querySelectorAll('#currencyCategoryNav .category-item-btn').forEach(b => b.classList.toggle('active', b.dataset.currcategory === 'all'));
-
-    document.querySelectorAll('#activityTagChips .tag-chip-btn').forEach(b => b.classList.toggle('active', b.dataset.tag === 'all'));
-    document.querySelectorAll('#gourmetTagChips .tag-chip-btn').forEach(b => b.classList.toggle('active', b.dataset.gtag === 'all'));
-    document.querySelectorAll('#stayTagChips .tag-chip-btn').forEach(b => b.classList.toggle('active', b.dataset.stag === 'all'));
-    document.querySelectorAll('#shoppingTagChips .tag-chip-btn').forEach(b => b.classList.toggle('active', b.dataset.shoptag === 'all'));
-    document.querySelectorAll('#currencyTagChips .tag-chip-btn').forEach(b => b.classList.toggle('active', b.dataset.currtag === 'all'));
+    DOMAINS.forEach(d => {
+      document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => b.classList.toggle('active', b.dataset[d.catAttr] === 'all'));
+      document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => b.classList.toggle('active', b.dataset[d.tagAttr] === 'all'));
+    });
 
     updateWishlistBadge();
 
-    if (state.currentTab === 'activities') {
-      if (state.currentView === 'grid') renderCards();
-      else renderTimeline();
-    } else if (state.currentTab === 'gourmet') {
-      renderGourmets();
-    } else if (state.currentTab === 'stays') {
-      renderStays();
-    } else if (state.currentTab === 'shopping') {
-      renderShopping();
-    } else if (state.currentTab === 'currency') {
-      renderCurrency();
-    }
+    renderCurrentTab();
     showToast('필터가 모두 초기화되었습니다.');
   }
 
@@ -2371,103 +2429,31 @@
       wishlistBtn.addEventListener('click', () => {
         state.wishlistOnly = !state.wishlistOnly;
         updateWishlistBadge();
-        if (state.currentTab === 'activities') renderCards();
-        else if (state.currentTab === 'gourmet') renderGourmets();
-        else if (state.currentTab === 'stays') renderStays();
-        else if (state.currentTab === 'shopping') renderShopping();
-        else if (state.currentTab === 'currency') renderCurrency();
+        renderCurrentTab();
       });
     }
 
     // Category Buttons
-    document.querySelectorAll('#activityCategoryNav .category-item-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#activityCategoryNav .category-item-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.actCategory = btn.dataset.category;
-        renderCards();
-      });
-    });
-
-    document.querySelectorAll('#gourmetCategoryNav .category-item-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#gourmetCategoryNav .category-item-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.gourmetCategory = btn.dataset.gcategory;
-        renderGourmets();
-      });
-    });
-
-    document.querySelectorAll('#stayCategoryNav .category-item-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#stayCategoryNav .category-item-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.stayCategory = btn.dataset.scategory;
-        renderStays();
-      });
-    });
-
-    document.querySelectorAll('#shoppingCategoryNav .category-item-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#shoppingCategoryNav .category-item-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.shoppingCategory = btn.dataset.shopcategory;
-        renderShopping();
-      });
-    });
-
-    document.querySelectorAll('#currencyCategoryNav .category-item-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#currencyCategoryNav .category-item-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.currencyCategory = btn.dataset.currcategory;
-        renderCurrency();
+    DOMAINS.forEach(d => {
+      document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state[d.catField] = btn.dataset[d.catAttr];
+          d.render();
+        });
       });
     });
 
     // Tag Buttons
-    document.querySelectorAll('#activityTagChips .tag-chip-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#activityTagChips .tag-chip-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.actTag = btn.dataset.tag;
-        renderCards();
-      });
-    });
-
-    document.querySelectorAll('#gourmetTagChips .tag-chip-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#gourmetTagChips .tag-chip-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.gourmetTag = btn.dataset.gtag;
-        renderGourmets();
-      });
-    });
-
-    document.querySelectorAll('#stayTagChips .tag-chip-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#stayTagChips .tag-chip-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.stayTag = btn.dataset.stag;
-        renderStays();
-      });
-    });
-
-    document.querySelectorAll('#shoppingTagChips .tag-chip-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#shoppingTagChips .tag-chip-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.shoppingTag = btn.dataset.shoptag;
-        renderShopping();
-      });
-    });
-
-    document.querySelectorAll('#currencyTagChips .tag-chip-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#currencyTagChips .tag-chip-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.currencyTag = btn.dataset.currtag;
-        renderCurrency();
+    DOMAINS.forEach(d => {
+      document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state[d.tagField] = btn.dataset[d.tagAttr];
+          d.render();
+        });
       });
     });
 
@@ -2479,11 +2465,7 @@
         clearTimeout(searchDebounce);
         searchDebounce = setTimeout(() => {
           state.searchQuery = e.target.value.trim();
-          if (state.currentTab === 'activities') renderCards();
-          else if (state.currentTab === 'gourmet') renderGourmets();
-          else if (state.currentTab === 'stays') renderStays();
-          else if (state.currentTab === 'shopping') renderShopping();
-          else if (state.currentTab === 'currency') renderCurrency();
+          renderCurrentTab();
         }, 200);
       });
     }
@@ -2493,11 +2475,7 @@
       searchClearBtn.addEventListener('click', () => {
         if (searchInput) searchInput.value = '';
         state.searchQuery = '';
-        if (state.currentTab === 'activities') renderCards();
-        else if (state.currentTab === 'gourmet') renderGourmets();
-        else if (state.currentTab === 'stays') renderStays();
-        else if (state.currentTab === 'shopping') renderShopping();
-        else if (state.currentTab === 'currency') renderCurrency();
+        renderCurrentTab();
       });
     }
 
@@ -2506,11 +2484,7 @@
     if (sortSelect) {
       sortSelect.addEventListener('change', (e) => {
         state.sortBy = e.target.value;
-        if (state.currentTab === 'activities') renderCards();
-        else if (state.currentTab === 'gourmet') renderGourmets();
-        else if (state.currentTab === 'stays') renderStays();
-        else if (state.currentTab === 'shopping') renderShopping();
-        else if (state.currentTab === 'currency') renderCurrency();
+        renderCurrentTab();
       });
     }
 
@@ -2524,37 +2498,15 @@
     window.addEventListener('reset-filters', resetFilters);
 
     // Modals Close Events
-    const detailModal = document.getElementById('detailModal');
-    const gourmetModal = document.getElementById('gourmetModal');
-    const stayModal = document.getElementById('stayModal');
-    const shoppingModal = document.getElementById('shoppingModal');
-    const currencyModal = document.getElementById('currencyModal');
     const calcModal = document.getElementById('calcModal');
     const guideModal = document.getElementById('guideModal');
 
-    document.getElementById('modalCloseBtn')?.addEventListener('click', closeActivityModal);
-    detailModal?.addEventListener('click', (e) => {
-      if (e.target === detailModal) closeActivityModal();
-    });
-
-    document.getElementById('gourmetModalCloseBtn')?.addEventListener('click', closeGourmetModal);
-    gourmetModal?.addEventListener('click', (e) => {
-      if (e.target === gourmetModal) closeGourmetModal();
-    });
-
-    document.getElementById('stayModalCloseBtn')?.addEventListener('click', closeStayModal);
-    stayModal?.addEventListener('click', (e) => {
-      if (e.target === stayModal) closeStayModal();
-    });
-
-    document.getElementById('shoppingModalCloseBtn')?.addEventListener('click', closeShoppingModal);
-    shoppingModal?.addEventListener('click', (e) => {
-      if (e.target === shoppingModal) closeShoppingModal();
-    });
-
-    document.getElementById('currencyModalCloseBtn')?.addEventListener('click', closeCurrencyModal);
-    currencyModal?.addEventListener('click', (e) => {
-      if (e.target === currencyModal) closeCurrencyModal();
+    DOMAINS.forEach(d => {
+      const modalEl = document.getElementById(d.modalId);
+      document.getElementById(d.modalCloseBtnId)?.addEventListener('click', d.closeModal);
+      modalEl?.addEventListener('click', (e) => {
+        if (e.target === modalEl) d.closeModal();
+      });
     });
 
     function openModal(modalEl) {
@@ -2570,56 +2522,28 @@
 
     // Notes Auto-save Handlers
     document.addEventListener('input', (e) => {
-      if (e.target.matches('#modalNoteInput') || e.target.matches('#noteInput')) {
-        if (!state.activeModalActivity) return;
-        state.notes[state.activeModalActivity.id] = e.target.value;
-        saveToStorage('nha_trang_notes', state.notes);
-        const s = document.getElementById('modalNoteStatus') || document.getElementById('noteStatus');
+      DOMAINS.forEach(d => {
+        const matchesInput = d.noteInputIds.some(id => e.target.matches(`#${id}`));
+        if (!matchesInput) return;
+        if (!state[d.activeModalField]) return;
+        state[d.notesField][state[d.activeModalField].id] = e.target.value;
+        saveToStorage(d.notesKey, state[d.notesField]);
+        let s = null;
+        for (const statusId of d.noteStatusIds) {
+          s = document.getElementById(statusId);
+          if (s) break;
+        }
         if (s) s.textContent = '✓ 저장 완료';
-        renderCards();
-      } else if (e.target.matches('#gourmetNoteInput')) {
-        if (!state.activeModalGourmet) return;
-        state.gourmetNotes[state.activeModalGourmet.id] = e.target.value;
-        saveToStorage('nha_trang_gourmet_notes', state.gourmetNotes);
-        const s = document.getElementById('gourmetNoteStatus');
-        if (s) s.textContent = '✓ 저장 완료';
-        renderGourmets();
-      } else if (e.target.matches('#stayNoteInput')) {
-        if (!state.activeModalStay) return;
-        state.stayNotes[state.activeModalStay.id] = e.target.value;
-        saveToStorage('nha_trang_stay_notes', state.stayNotes);
-        const s = document.getElementById('stayNoteStatus');
-        if (s) s.textContent = '✓ 저장 완료';
-        renderStays();
-      } else if (e.target.matches('#shoppingNoteInput')) {
-        if (!state.activeModalShopping) return;
-        state.shoppingNotes[state.activeModalShopping.id] = e.target.value;
-        saveToStorage('nha_trang_shopping_notes', state.shoppingNotes);
-        const s = document.getElementById('shoppingNoteStatus');
-        if (s) s.textContent = '✓ 저장 완료';
-        renderShopping();
-      } else if (e.target.matches('#currencyNoteInput')) {
-        if (!state.activeModalCurrency) return;
-        state.currencyNotes[state.activeModalCurrency.id] = e.target.value;
-        saveToStorage('nha_trang_currency_notes', state.currencyNotes);
-        const s = document.getElementById('currencyNoteStatus');
-        if (s) s.textContent = '✓ 저장 완료';
-        renderCurrency();
-      }
+        d.render();
+      });
     });
 
     // Copy Address Handlers
-    document.getElementById('gourmetCopyAddressBtn')?.addEventListener('click', (e) => {
-      if (state.activeModalGourmet) copyAddress(state.activeModalGourmet.addressVi, e.currentTarget);
-    });
-    document.getElementById('stayCopyAddressBtn')?.addEventListener('click', (e) => {
-      if (state.activeModalStay) copyAddress(state.activeModalStay.addressVi, e.currentTarget);
-    });
-    document.getElementById('shoppingCopyAddressBtn')?.addEventListener('click', (e) => {
-      if (state.activeModalShopping) copyAddress(state.activeModalShopping.addressVi, e.currentTarget);
-    });
-    document.getElementById('currencyCopyAddressBtn')?.addEventListener('click', (e) => {
-      if (state.activeModalCurrency) copyAddress(state.activeModalCurrency.addressVi, e.currentTarget);
+    DOMAINS.forEach(d => {
+      if (!d.copyAddressBtnId) return;
+      document.getElementById(d.copyAddressBtnId)?.addEventListener('click', (e) => {
+        if (state[d.activeModalField]) copyAddress(state[d.activeModalField].addressVi, e.currentTarget);
+      });
     });
 
     // Calculator Modal
@@ -2667,11 +2591,7 @@
     // ESC Key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        closeActivityModal();
-        closeGourmetModal();
-        closeStayModal();
-        closeShoppingModal();
-        closeCurrencyModal();
+        DOMAINS.forEach(d => d.closeModal());
         closeModal(calcModal);
         closeModal(guideModal);
       }
