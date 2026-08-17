@@ -2365,7 +2365,38 @@
   }
 
   // --- 11. Initialization Entrypoint ---
+  // 5개 모달이 공유하는 껍데기를 여기서 한 번만 만든다. 도메인 마크업은
+  // index.html의 <template class="modal-tpl">에 그대로 있고, 이 함수는
+  // overlay/box/close 버튼으로 감싸 #modalHost에 넣기만 한다.
+  // initEvents()가 모달 id로 엘리먼트를 찾으므로 반드시 그보다 먼저 실행돼야 한다.
+  function buildModals() {
+    const host = document.getElementById('modalHost');
+    if (!host) return;
+    document.querySelectorAll('template.modal-tpl').forEach(tpl => {
+      const modalId = tpl.dataset.modal;
+      const closeId = tpl.dataset.close;
+      if (!modalId || !closeId) return;
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.id = modalId;
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      const box = document.createElement('div');
+      box.className = 'modal-box';
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'modal-close-btn';
+      closeBtn.id = closeId;
+      closeBtn.setAttribute('aria-label', '닫기');
+      closeBtn.textContent = '✕';
+      box.appendChild(closeBtn);
+      box.appendChild(tpl.content.cloneNode(true));
+      overlay.appendChild(box);
+      host.appendChild(overlay);
+    });
+  }
+
   function init() {
+    buildModals();
     updateWishlistBadge();
     initEvents();
     renderCards();

@@ -122,7 +122,10 @@ const requiredIds = [
 
 let missing = 0;
 for (const id of requiredIds) {
-  if (!html.includes(`id="${id}"`)) {
+  const hasId = html.includes(`id="${id}"`) ||
+                html.includes(`data-modal="${id}"`) ||
+                html.includes(`data-close="${id}"`);
+  if (!hasId) {
     console.error(`  ❌ MISSING ID in index.html: ${id}`);
     missing++;
   } else {

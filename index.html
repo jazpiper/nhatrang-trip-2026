@@ -564,10 +564,13 @@
     </div>
   </section>
 
+  <!-- Modal chrome(overlay/box/close button/body wrapper)은 app.js의
+       buildModals()가 한 번만 만든다. 도메인별 마크업은 아래 template에
+       그대로 남아 있어 grep과 정적 ID 검사가 계속 동작한다. -->
+  <div id="modalHost"></div>
+
   <!-- Activity Detail Modal -->
-  <div class="modal-overlay" id="detailModal" role="dialog" aria-modal="true">
-    <div class="modal-box">
-      <button class="modal-close-btn" id="modalCloseBtn" aria-label="닫기">✕</button>
+  <template class="modal-tpl" data-modal="detailModal" data-close="modalCloseBtn">
 
       <!-- Image Gallery -->
       <div class="modal-gallery-grid" id="modalGallery"></div>
@@ -651,13 +654,10 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
+  </template>
 
   <!-- Gourmet Detail Modal (Google Maps Focused) -->
-  <div class="modal-overlay" id="gourmetModal" role="dialog" aria-modal="true">
-    <div class="modal-box">
-      <button class="modal-close-btn" id="gourmetModalCloseBtn" aria-label="닫기">✕</button>
+  <template class="modal-tpl" data-modal="gourmetModal" data-close="gourmetModalCloseBtn">
 
       <!-- Google Photos Hero Action Banner -->
       <div id="gourmetModalPhotoBanner" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); color: white; padding: 28px 24px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
@@ -766,13 +766,10 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
+  </template>
 
   <!-- Stay Detail Modal -->
-  <div class="modal-overlay" id="stayModal" role="dialog" aria-modal="true">
-    <div class="modal-box">
-      <button class="modal-close-btn" id="stayModalCloseBtn" aria-label="닫기">✕</button>
+  <template class="modal-tpl" data-modal="stayModal" data-close="stayModalCloseBtn">
 
       <!-- Stay Image Gallery (Main Image + Interactive Thumbnails) -->
       <div class="stay-gallery-container" id="stayModalGallery">
@@ -893,13 +890,10 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
+  </template>
 
   <!-- Shopping Detail Modal -->
-  <div class="modal-overlay" id="shoppingModal" role="dialog" aria-modal="true">
-    <div class="modal-box">
-      <button class="modal-close-btn" id="shoppingModalCloseBtn" aria-label="닫기">✕</button>
+  <template class="modal-tpl" data-modal="shoppingModal" data-close="shoppingModalCloseBtn">
 
       <!-- Shopping Image Gallery -->
       <div class="stay-gallery-container" id="shoppingModalGallery">
@@ -1035,13 +1029,10 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
+  </template>
 
   <!-- Currency & ATM Detail Modal -->
-  <div class="modal-overlay" id="currencyModal" style="display: none;" role="dialog" aria-modal="true">
-    <div class="modal-box">
-      <button class="modal-close-btn" id="currencyModalCloseBtn" aria-label="닫기">✕</button>
+  <template class="modal-tpl" data-modal="currencyModal" data-close="currencyModalCloseBtn">
 
       <!-- Image Gallery -->
       <div class="stay-gallery-container" id="currencyModalGallery">
@@ -1181,8 +1172,7 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
+  </template>
 
   <!-- Currency Calculator Modal -->
   <div class="modal-overlay" id="calcModal" role="dialog" aria-modal="true">
