@@ -292,6 +292,21 @@
     });
   }
 
+  // --- 3.7 Declarative Modal Field Bindings ---
+  // 5개 모달이 공유하던 "getElementById -> null 가드 -> 대입" 반복만 걷어낸다.
+  // 도메인 고유 블록(ATM 단계, 흥정표, 갤러리 등)은 각 openXModal에 그대로 남는다.
+  function applyModalFields(item, fields) {
+    fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      if (!el) return;
+      const v = typeof f.value === 'function' ? f.value(item) : item[f.value];
+      if (f.as === 'html') el.innerHTML = v == null ? '' : v;
+      else if (f.as === 'src') el.src = v == null ? '' : v;
+      else if (f.as === 'href') el.href = v == null ? '' : v;
+      else el.textContent = v == null ? '' : v;
+    });
+  }
+
   // --- 4. Activities Domain Logic ---
   function activitiesTagMatch(item, tag) {
     const tagMap = {
@@ -486,6 +501,25 @@
     updateWishlistBadge();
   }
 
+  const ACTIVITY_MODAL_FIELDS = [
+    { id: 'modalBadge', value: item => item.badge || item.categoryLabel || '추천' },
+    { id: 'modalCategory', value: item => item.categoryLabel || item.category },
+    { id: 'modalDay', value: item => item.suggestedDay || '일정 추천' },
+    { id: 'modalTitle', value: 'title' },
+    { id: 'modalTitleEn', value: item => item.titleEn || '' },
+    { id: 'modalRating', value: item => `★ ${item.rating || 4.8} (구글/트립어드바이저)` },
+    { id: 'modalDuration', value: item => item.duration || '약 2~3시간' },
+    { id: 'modalBestTime', value: item => item.bestTime || '오전 중 추천' },
+    { id: 'modalLocation', value: item => item.location || '나트랑 시내' },
+    { id: 'modalHighlight', value: item => item.highlight || item.description || '' },
+    { id: 'modalCoupleTip', value: item => item.coupleTip || item.travelerTip || item.localTip || '즐겁고 안전한 여행 되세요!' },
+    { id: 'modalPriceVnd', value: item => formatVND(item.priceVnd) },
+    { id: 'modalPriceKrw', value: item => `(${formatKRW(item.priceVnd)})` },
+    { id: 'modalPricePer', value: item => `/ ${item.pricePer || '1인 기준'}` },
+    { id: 'modalMapLink', as: 'href', value: item => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.googleMapQuery || item.titleEn || item.title) + ' Nha Trang')}` },
+    { id: 'modalReserveLink', as: 'href', value: item => item.reserveUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.title + ' Nha Trang')}` },
+  ];
+
   function openActivityModal(item) {
     state.activeModalActivity = item;
     const modal = document.getElementById('detailModal');
@@ -510,42 +544,7 @@
       `;
     }
 
-    // Modal Header Fields
-    const modalBadge = document.getElementById('modalBadge');
-    if (modalBadge) modalBadge.textContent = item.badge || item.categoryLabel || '추천';
-
-    const modalCategory = document.getElementById('modalCategory');
-    if (modalCategory) modalCategory.textContent = item.categoryLabel || item.category;
-
-    const modalDay = document.getElementById('modalDay');
-    if (modalDay) modalDay.textContent = item.suggestedDay || '일정 추천';
-
-    const modalTitle = document.getElementById('modalTitle');
-    if (modalTitle) modalTitle.textContent = item.title;
-
-    const modalTitleEn = document.getElementById('modalTitleEn');
-    if (modalTitleEn) modalTitleEn.textContent = item.titleEn || '';
-
-    // Meta Grid
-    const modalRating = document.getElementById('modalRating');
-    if (modalRating) modalRating.textContent = `★ ${item.rating || 4.8} (구글/트립어드바이저)`;
-
-    const modalDuration = document.getElementById('modalDuration');
-    if (modalDuration) modalDuration.textContent = item.duration || '약 2~3시간';
-
-    const modalBestTime = document.getElementById('modalBestTime');
-    if (modalBestTime) modalBestTime.textContent = item.bestTime || '오전 중 추천';
-
-    const modalLocation = document.getElementById('modalLocation');
-    if (modalLocation) modalLocation.textContent = item.location || '나트랑 시내';
-
-    // Highlight
-    const modalHighlight = document.getElementById('modalHighlight');
-    if (modalHighlight) modalHighlight.textContent = item.highlight || item.description || '';
-
-    // Couple / Traveler Tip
-    const modalCoupleTip = document.getElementById('modalCoupleTip');
-    if (modalCoupleTip) modalCoupleTip.textContent = item.coupleTip || item.travelerTip || item.localTip || '즐겁고 안전한 여행 되세요!';
+    applyModalFields(item, ACTIVITY_MODAL_FIELDS);
 
     // Lists
     const setList = (id, list) => {
@@ -570,16 +569,6 @@
       if (noteStatus) noteStatus.textContent = '';
     }
 
-    // Price Sticky
-    const modalPriceVnd = document.getElementById('modalPriceVnd');
-    if (modalPriceVnd) modalPriceVnd.textContent = formatVND(item.priceVnd);
-
-    const modalPriceKrw = document.getElementById('modalPriceKrw');
-    if (modalPriceKrw) modalPriceKrw.textContent = `(${formatKRW(item.priceVnd)})`;
-
-    const modalPricePer = document.getElementById('modalPricePer');
-    if (modalPricePer) modalPricePer.textContent = `/ ${item.pricePer || '1인 기준'}`;
-
     // Action Buttons
     const heartBtn = document.getElementById('modalHeartBtn');
     if (heartBtn) {
@@ -591,17 +580,6 @@
         heartBtn.textContent = updatedWish ? '♥ 찜 취소' : '♡ 찜하기';
         renderCards();
       };
-    }
-
-    const mapLink = document.getElementById('modalMapLink');
-    if (mapLink) {
-      const query = item.googleMapQuery || item.titleEn || item.title;
-      mapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query + ' Nha Trang')}`;
-    }
-
-    const reserveLink = document.getElementById('modalReserveLink');
-    if (reserveLink) {
-      reserveLink.href = item.reserveUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.title + ' Nha Trang')}`;
     }
 
     modal.classList.add('active');
@@ -776,43 +754,32 @@
     updateWishlistBadge();
   }
 
+  const GOURMET_MODAL_FIELDS = [
+    { id: 'gourmetModalBadge', value: item => item.badge || item.categoryLabel || '인기맛집' },
+    { id: 'gourmetModalCategory', value: item => item.categoryLabel || item.category },
+    { id: 'gourmetModalTitle', value: 'name' },
+    { id: 'gourmetModalNameVi', value: item => item.nameVi || item.name },
+    { id: 'gourmetModalRating', value: item => `★ ${item.rating || 4.5} (${Number(item.reviewCount || 0).toLocaleString()}개 구글 리뷰)` },
+    { id: 'gourmetModalHours', value: item => item.openHours || '영업시간 확인 권장' },
+    { id: 'gourmetModalPriceRange', value: item => item.priceRange || `${formatVND(item.avgPriceVnd)} 내외` },
+    { id: 'gourmetModalMeal', value: item => item.recommendedMeal || '점심 / 저녁' },
+    { id: 'gourmetModalAddress', value: item => item.addressVi || item.location },
+    { id: 'gourmetModalHighlight', value: item => item.highlight || item.description },
+    { id: 'gourmetModalDesc', value: item => item.description || '' },
+    { id: 'gourmetModalTip', value: item => item.localTip || '웨이팅이 있을 수 있으니 여유 있게 방문하세요.' },
+    { id: 'gourmetModalAvgPrice', value: item => formatVND(item.avgPriceVnd) },
+    { id: 'gourmetModalAvgKrw', value: item => `(${formatKRW(item.avgPriceVnd)})` },
+    { id: 'gourmetModalPricePer', value: () => '/ 1인 예상' },
+    { id: 'gourmetModalPhotosBtn', as: 'href', value: item => item.photosUrl || item.mapUrl || '#' },
+    { id: 'gourmetModalMapBtn', as: 'href', value: item => item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.name) + ' Nha Trang')}` },
+  ];
+
   function openGourmetModal(item) {
     state.activeModalGourmet = item;
     const modal = document.getElementById('gourmetModal');
     if (!modal) return;
 
-    const modalBadge = document.getElementById('gourmetModalBadge');
-    if (modalBadge) modalBadge.textContent = item.badge || item.categoryLabel || '인기맛집';
-
-    const modalCategory = document.getElementById('gourmetModalCategory');
-    if (modalCategory) modalCategory.textContent = item.categoryLabel || item.category;
-
-    const modalTitle = document.getElementById('gourmetModalTitle');
-    if (modalTitle) modalTitle.textContent = item.name;
-
-    const modalNameVi = document.getElementById('gourmetModalNameVi');
-    if (modalNameVi) modalNameVi.textContent = item.nameVi || item.name;
-
-    const modalRating = document.getElementById('gourmetModalRating');
-    if (modalRating) modalRating.textContent = `★ ${item.rating || 4.5} (${Number(item.reviewCount || 0).toLocaleString()}개 구글 리뷰)`;
-
-    const modalHours = document.getElementById('gourmetModalHours');
-    if (modalHours) modalHours.textContent = item.openHours || '영업시간 확인 권장';
-
-    const modalPriceRange = document.getElementById('gourmetModalPriceRange');
-    if (modalPriceRange) modalPriceRange.textContent = item.priceRange || `${formatVND(item.avgPriceVnd)} 내외`;
-
-    const modalMeal = document.getElementById('gourmetModalMeal');
-    if (modalMeal) modalMeal.textContent = item.recommendedMeal || '점심 / 저녁';
-
-    const modalAddress = document.getElementById('gourmetModalAddress');
-    if (modalAddress) modalAddress.textContent = item.addressVi || item.location;
-
-    const modalHighlight = document.getElementById('gourmetModalHighlight');
-    if (modalHighlight) modalHighlight.textContent = item.highlight || item.description;
-
-    const modalDesc = document.getElementById('gourmetModalDesc');
-    if (modalDesc) modalDesc.textContent = item.description || '';
+    applyModalFields(item, GOURMET_MODAL_FIELDS);
 
     const menuList = document.getElementById('gourmetModalMenuList');
     if (menuList) {
@@ -833,24 +800,12 @@
       }
     }
 
-    const modalTip = document.getElementById('gourmetModalTip');
-    if (modalTip) modalTip.textContent = item.localTip || '웨이팅이 있을 수 있으니 여유 있게 방문하세요.';
-
     const noteInput = document.getElementById('gourmetNoteInput');
     const noteStatus = document.getElementById('gourmetNoteStatus');
     if (noteInput) {
       noteInput.value = (state.gourmetNotes || {})[item.id] || '';
       if (noteStatus) noteStatus.textContent = '';
     }
-
-    const avgPrice = document.getElementById('gourmetModalAvgPrice');
-    if (avgPrice) avgPrice.textContent = formatVND(item.avgPriceVnd);
-
-    const avgKrw = document.getElementById('gourmetModalAvgKrw');
-    if (avgKrw) avgKrw.textContent = `(${formatKRW(item.avgPriceVnd)})`;
-
-    const pricePer = document.getElementById('gourmetModalPricePer');
-    if (pricePer) pricePer.textContent = '/ 1인 예상';
 
     const heartBtn = document.getElementById('gourmetModalHeartBtn');
     if (heartBtn) {
@@ -864,14 +819,8 @@
       };
     }
 
-    const photosBtn = document.getElementById('gourmetModalPhotosBtn');
-    if (photosBtn) photosBtn.href = item.photosUrl || item.mapUrl || '#';
-
     const officialBtn = document.getElementById('gourmetModalOfficialBtn');
     if (officialBtn) officialBtn.href = item.photosUrl || item.mapUrl || '#';
-
-    const mapBtn = document.getElementById('gourmetModalMapBtn');
-    if (mapBtn) mapBtn.href = item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.name) + ' Nha Trang')}`;
 
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -1023,6 +972,24 @@
     updateWishlistBadge();
   }
 
+  const STAY_MODAL_FIELDS = [
+    { id: 'stayModalBadge', value: item => item.badge || '추천' },
+    { id: 'stayModalCategory', value: item => item.category || '호텔' },
+    { id: 'stayModalThemeBadge', value: item => item.themeName || '테마 숙소' },
+    { id: 'stayModalTitle', value: 'nameKo' },
+    { id: 'stayModalNameVi', value: item => `${item.nameVi || ''} (${item.nameEn || ''})` },
+    { id: 'stayModalRating', value: item => `★ ${item.rating || 4.5} (${Number(item.reviewCount || 0).toLocaleString()}개 구글 리뷰)` },
+    { id: 'stayModalPriceRange', value: item => item.priceRange || `${formatVND(item.pricePerNightVnd)} / 1박` },
+    { id: 'stayModalLocation', value: item => `${item.area || '시내'} / ${item.address || ''}` },
+    { id: 'stayModalAddress', value: item => item.addressVi || item.address },
+    { id: 'stayModalHighlight', value: item => (item.highlights && item.highlights[0]) || item.nameKo },
+    { id: 'stayModalTip', value: item => item.localTip || item.coupleTip || '체크인 시 고층이나 오션뷰 배정을 요청해보세요.' },
+    { id: 'stayModalAvgPrice', value: item => formatVND(item.pricePerNightVnd) },
+    { id: 'stayModalAvgKrw', value: item => `(${formatKRW(item.pricePerNightVnd)})` },
+    { id: 'stayModalPricePer', value: () => '/ 1박 기준' },
+    { id: 'stayModalMapBtn', as: 'href', value: item => item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.nameKo) + ' Nha Trang')}` },
+  ];
+
   function openStayModal(item) {
     state.activeModalStay = item;
     const modal = document.getElementById('stayModal');
@@ -1054,39 +1021,11 @@
       });
     }
 
-    // Modal Header Fields
-    const modalBadge = document.getElementById('stayModalBadge');
-    if (modalBadge) modalBadge.textContent = item.badge || '추천';
+    applyModalFields(item, STAY_MODAL_FIELDS);
 
-    const modalCategory = document.getElementById('stayModalCategory');
-    if (modalCategory) modalCategory.textContent = item.category || '호텔';
-
-    const modalThemeBadge = document.getElementById('stayModalThemeBadge');
-    if (modalThemeBadge) modalThemeBadge.textContent = item.themeName || '테마 숙소';
-
-    const modalTitle = document.getElementById('stayModalTitle');
-    if (modalTitle) modalTitle.textContent = item.nameKo;
-
-    const modalNameVi = document.getElementById('stayModalNameVi');
-    if (modalNameVi) modalNameVi.textContent = `${item.nameVi || ''} (${item.nameEn || ''})`;
-
-    const modalRating = document.getElementById('stayModalRating');
-    if (modalRating) modalRating.textContent = `★ ${item.rating || 4.5} (${Number(item.reviewCount || 0).toLocaleString()}개 구글 리뷰)`;
-
-    const modalPriceRange = document.getElementById('stayModalPriceRange');
-    if (modalPriceRange) modalPriceRange.textContent = item.priceRange || `${formatVND(item.pricePerNightVnd)} / 1박`;
-
+    // Modal Header Fields (unique combined string, not a plain field lookup)
     const modalCheckInOut = document.getElementById('stayModalCheckInOut');
     if (modalCheckInOut) modalCheckInOut.textContent = item.checkInOut || '입실 14:00 / 퇴실 12:00';
-
-    const modalLocation = document.getElementById('stayModalLocation');
-    if (modalLocation) modalLocation.textContent = `${item.area || '시내'} / ${item.address || ''}`;
-
-    const modalAddress = document.getElementById('stayModalAddress');
-    if (modalAddress) modalAddress.textContent = item.addressVi || item.address;
-
-    const modalHighlight = document.getElementById('stayModalHighlight');
-    if (modalHighlight) modalHighlight.textContent = (item.highlights && item.highlights[0]) || item.nameKo;
 
     // Lists
     const setList = (id, list) => {
@@ -1103,24 +1042,12 @@
     setList('stayModalHighlightsList', item.highlights);
     setList('stayModalNearbyList', item.nearbySpots);
 
-    const modalTip = document.getElementById('stayModalTip');
-    if (modalTip) modalTip.textContent = item.localTip || item.coupleTip || '체크인 시 고층이나 오션뷰 배정을 요청해보세요.';
-
     const noteInput = document.getElementById('stayNoteInput');
     const noteStatus = document.getElementById('stayNoteStatus');
     if (noteInput) {
       noteInput.value = (state.stayNotes || {})[item.id] || '';
       if (noteStatus) noteStatus.textContent = '';
     }
-
-    const avgPrice = document.getElementById('stayModalAvgPrice');
-    if (avgPrice) avgPrice.textContent = formatVND(item.pricePerNightVnd);
-
-    const avgKrw = document.getElementById('stayModalAvgKrw');
-    if (avgKrw) avgKrw.textContent = `(${formatKRW(item.pricePerNightVnd)})`;
-
-    const pricePer = document.getElementById('stayModalPricePer');
-    if (pricePer) pricePer.textContent = '/ 1박 기준';
 
     const heartBtn = document.getElementById('stayModalHeartBtn');
     if (heartBtn) {
@@ -1133,9 +1060,6 @@
         renderStays();
       };
     }
-
-    const mapBtn = document.getElementById('stayModalMapBtn');
-    if (mapBtn) mapBtn.href = item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.nameKo) + ' Nha Trang')}`;
 
     const tripBtn = document.getElementById('stayModalTripBtn');
     if (tripBtn) tripBtn.href = item.bookingUrl || item.mapUrl || '#';
@@ -1310,6 +1234,27 @@
     updateWishlistBadge();
   }
 
+  const SHOPPING_MODAL_FIELDS = [
+    { id: 'shoppingModalBadge', value: item => item.badge || item.categoryLabel || '쇼핑' },
+    { id: 'shoppingModalCategory', value: item => item.categoryLabel || item.category },
+    { id: 'shoppingModalQualityBadge', value: item => item.qualityTier || '품질 인증' },
+    { id: 'shoppingModalTitle', value: item => item.nameKo || item.name },
+    { id: 'shoppingModalNameVi', value: item => `${item.nameVi || ''} ${item.nameEn ? `(${item.nameEn})` : ''}` },
+    { id: 'shoppingModalRating', value: item => `★ ${item.rating || 4.7} (${Number(item.reviewCount || 0).toLocaleString()}개 구글 리뷰)` },
+    { id: 'shoppingModalHours', value: item => item.openHours || '09:00 - 21:00' },
+    { id: 'shoppingModalPriceRange', value: item => item.priceRange || `${formatVND(item.avgPriceVnd)} 내외` },
+    { id: 'shoppingModalLocation', value: item => item.location || '나트랑 시내' },
+    { id: 'shoppingModalAddress', value: item => item.addressVi || item.location },
+    { id: 'shoppingModalHighlight', value: item => item.highlight || item.description },
+    { id: 'shoppingModalDesc', value: item => item.description || '' },
+    { id: 'shoppingModalTip', value: item => item.localTip || '기분 좋은 쇼핑을 위해 가벼운 미소와 함께 흥정해보세요.' },
+    { id: 'shoppingModalAvgPrice', value: item => formatVND(item.avgPriceVnd) },
+    { id: 'shoppingModalAvgKrw', value: item => `(${formatKRW(item.avgPriceVnd)})` },
+    { id: 'shoppingModalPricePer', value: () => '/ 평균 기준' },
+    { id: 'shoppingModalPhotosBtn', as: 'href', value: item => item.photosUrl || item.mapUrl || '#' },
+    { id: 'shoppingModalMapBtn', as: 'href', value: item => item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.nameKo || item.name) + ' Nha Trang')}` },
+  ];
+
   function openShoppingModal(item) {
     state.activeModalShopping = item;
     const modal = document.getElementById('shoppingModal');
@@ -1342,44 +1287,13 @@
     }
 
     // Modal Header
-    const modalBadge = document.getElementById('shoppingModalBadge');
-    if (modalBadge) modalBadge.textContent = item.badge || item.categoryLabel || '쇼핑';
-
-    const modalCategory = document.getElementById('shoppingModalCategory');
-    if (modalCategory) modalCategory.textContent = item.categoryLabel || item.category;
-
-    const modalQualityBadge = document.getElementById('shoppingModalQualityBadge');
-    if (modalQualityBadge) modalQualityBadge.textContent = item.qualityTier || '품질 인증';
+    applyModalFields(item, SHOPPING_MODAL_FIELDS);
 
     const modalAcBadge = document.getElementById('shoppingModalAcBadge');
     if (modalAcBadge) {
       modalAcBadge.textContent = item.hasAirConditioning ? '❄️ 에어컨 완비' : '💨 선풍기 가동';
       modalAcBadge.style.display = item.hasAirConditioning ? 'inline-block' : 'none';
     }
-
-    const modalTitle = document.getElementById('shoppingModalTitle');
-    if (modalTitle) modalTitle.textContent = item.nameKo || item.name;
-
-    const modalNameVi = document.getElementById('shoppingModalNameVi');
-    if (modalNameVi) modalNameVi.textContent = `${item.nameVi || ''} ${item.nameEn ? `(${item.nameEn})` : ''}`;
-
-    const modalRating = document.getElementById('shoppingModalRating');
-    if (modalRating) modalRating.textContent = `★ ${item.rating || 4.7} (${Number(item.reviewCount || 0).toLocaleString()}개 구글 리뷰)`;
-
-    const modalHours = document.getElementById('shoppingModalHours');
-    if (modalHours) modalHours.textContent = item.openHours || '09:00 - 21:00';
-
-    const modalPriceRange = document.getElementById('shoppingModalPriceRange');
-    if (modalPriceRange) modalPriceRange.textContent = item.priceRange || `${formatVND(item.avgPriceVnd)} 내외`;
-
-    const modalLocation = document.getElementById('shoppingModalLocation');
-    if (modalLocation) modalLocation.textContent = item.location || '나트랑 시내';
-
-    const modalAddress = document.getElementById('shoppingModalAddress');
-    if (modalAddress) modalAddress.textContent = item.addressVi || item.location;
-
-    const modalHighlight = document.getElementById('shoppingModalHighlight');
-    if (modalHighlight) modalHighlight.textContent = item.highlight || item.description;
 
     // Facilities & Payment Badges
     const facilitiesEl = document.getElementById('shoppingModalFacilities');
@@ -1465,27 +1379,12 @@
       customsWarningText.textContent = item.customsCaution || '자가사용 목적 1인 소량 반입을 준수하고 영수증 및 포장 박스/택을 분리하세요.';
     }
 
-    const modalDesc = document.getElementById('shoppingModalDesc');
-    if (modalDesc) modalDesc.textContent = item.description || '';
-
-    const modalTip = document.getElementById('shoppingModalTip');
-    if (modalTip) modalTip.textContent = item.localTip || '기분 좋은 쇼핑을 위해 가벼운 미소와 함께 흥정해보세요.';
-
     const noteInput = document.getElementById('shoppingNoteInput');
     const noteStatus = document.getElementById('shoppingNoteStatus');
     if (noteInput) {
       noteInput.value = (state.shoppingNotes || {})[item.id] || '';
       if (noteStatus) noteStatus.textContent = '';
     }
-
-    const avgPrice = document.getElementById('shoppingModalAvgPrice');
-    if (avgPrice) avgPrice.textContent = formatVND(item.avgPriceVnd);
-
-    const avgKrw = document.getElementById('shoppingModalAvgKrw');
-    if (avgKrw) avgKrw.textContent = `(${formatKRW(item.avgPriceVnd)})`;
-
-    const pricePer = document.getElementById('shoppingModalPricePer');
-    if (pricePer) pricePer.textContent = '/ 평균 기준';
 
     const heartBtn = document.getElementById('shoppingModalHeartBtn');
     if (heartBtn) {
@@ -1498,12 +1397,6 @@
         renderShopping();
       };
     }
-
-    const photosBtn = document.getElementById('shoppingModalPhotosBtn');
-    if (photosBtn) photosBtn.href = item.photosUrl || item.mapUrl || '#';
-
-    const mapBtn = document.getElementById('shoppingModalMapBtn');
-    if (mapBtn) mapBtn.href = item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.nameKo || item.name) + ' Nha Trang')}`;
 
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -1784,6 +1677,23 @@
     updateWishlistBadge();
   }
 
+  const CURRENCY_MODAL_FIELDS = [
+    { id: 'currencyModalBadge', value: item => item.badge || item.categoryLabel },
+    { id: 'currencyModalCategory', value: 'categoryLabel' },
+    { id: 'currencyModalTitle', value: item => item.nameKo || item.name },
+    { id: 'currencyModalNameVi', value: item => `🇻🇳 ${item.nameVi}` },
+    { id: 'currencyModalRating', value: item => `★ ${item.rating || '-'} (${(item.reviewCount || 0).toLocaleString()}개 리뷰)` },
+    { id: 'currencyModalHours', value: item => item.openHours || '24시간 연중무휴' },
+    { id: 'currencyModalFeePolicy', value: item => item.feePolicy || '수수료 0원' },
+    { id: 'currencyModalLocation', value: item => item.location || '시내 중심' },
+    { id: 'currencyModalAddress', value: 'addressVi' },
+    { id: 'currencyModalHighlightText', value: item => item.highlight || '' },
+    { id: 'currencyModalDesc', value: item => item.description || '' },
+    { id: 'currencyModalTip', value: item => item.localTip || '' },
+    { id: 'currencyModalPhotosBtn', as: 'href', value: item => item.googlePhotosUrl || item.googleMapUrl },
+    { id: 'currencyModalMapBtn', as: 'href', value: 'googleMapUrl' },
+  ];
+
   function openCurrencyModal(item) {
     const modal = document.getElementById('currencyModal');
     if (!modal || !item) return;
@@ -1816,11 +1726,7 @@
       });
     }
 
-    const modalBadge = document.getElementById('currencyModalBadge');
-    if (modalBadge) modalBadge.textContent = item.badge || item.categoryLabel;
-
-    const modalCategory = document.getElementById('currencyModalCategory');
-    if (modalCategory) modalCategory.textContent = item.categoryLabel;
+    applyModalFields(item, CURRENCY_MODAL_FIELDS);
 
     const modalFeeBadge = document.getElementById('currencyModalFeeBadge');
     if (modalFeeBadge) {
@@ -1829,32 +1735,8 @@
       modalFeeBadge.style.color = item.feeFree ? '#059669' : '#D97706';
     }
 
-    const modalTitle = document.getElementById('currencyModalTitle');
-    if (modalTitle) modalTitle.textContent = item.nameKo || item.name;
-
-    const modalNameVi = document.getElementById('currencyModalNameVi');
-    if (modalNameVi) modalNameVi.textContent = `🇻🇳 ${item.nameVi}`;
-
-    const modalRating = document.getElementById('currencyModalRating');
-    if (modalRating) modalRating.textContent = `★ ${item.rating || '-'} (${(item.reviewCount || 0).toLocaleString()}개 리뷰)`;
-
-    const modalHours = document.getElementById('currencyModalHours');
-    if (modalHours) modalHours.textContent = item.openHours || '24시간 연중무휴';
-
-    const modalFeePolicy = document.getElementById('currencyModalFeePolicy');
-    if (modalFeePolicy) modalFeePolicy.textContent = item.feePolicy || '수수료 0원';
-
-    const modalLocation = document.getElementById('currencyModalLocation');
-    if (modalLocation) modalLocation.textContent = item.location || '시내 중심';
-
-    const modalAddress = document.getElementById('currencyModalAddress');
-    if (modalAddress) modalAddress.textContent = item.addressVi;
-
     // NOTE: copy handler is bound once in initEvents() via addEventListener.
     // Do NOT also assign .onclick here — both would fire on a single click.
-
-    const highlightEl = document.getElementById('currencyModalHighlightText');
-    if (highlightEl) highlightEl.textContent = item.highlight || '';
 
     const cardsListEl = document.getElementById('currencyModalCardsList');
     if (cardsListEl) {
@@ -1932,12 +1814,6 @@
       `).join('');
     }
 
-    const modalDesc = document.getElementById('currencyModalDesc');
-    if (modalDesc) modalDesc.textContent = item.description || '';
-
-    const modalTip = document.getElementById('currencyModalTip');
-    if (modalTip) modalTip.textContent = item.localTip || '';
-
     const noteInput = document.getElementById('currencyNoteInput');
     const noteStatus = document.getElementById('currencyNoteStatus');
     if (noteInput) {
@@ -1956,12 +1832,6 @@
         renderCurrency();
       };
     }
-
-    const photosBtn = document.getElementById('currencyModalPhotosBtn');
-    if (photosBtn) photosBtn.href = item.googlePhotosUrl || item.googleMapUrl;
-
-    const mapBtn = document.getElementById('currencyModalMapBtn');
-    if (mapBtn) mapBtn.href = item.googleMapUrl;
 
     modal.classList.add('active');
     modal.style.display = 'flex';
