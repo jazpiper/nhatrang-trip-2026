@@ -8,7 +8,18 @@
   'use strict';
 
   // --- 1. Storage Helpers ---
+  // Node test runners have no usable localStorage (and Node >= 22 exposes a stub that
+  // throws), so feature-detect once instead of warning on every single key.
+  function hasStorage() {
+    try {
+      return typeof localStorage !== 'undefined' && typeof localStorage.getItem === 'function';
+    } catch (e) {
+      return false;
+    }
+  }
+
   function loadFromStorage(key, fallback) {
+    if (!hasStorage()) return fallback;
     try {
       const data = localStorage.getItem(key);
       return data ? JSON.parse(data) : fallback;
@@ -19,6 +30,7 @@
   }
 
   function saveToStorage(key, val) {
+    if (!hasStorage()) return;
     try {
       localStorage.setItem(key, JSON.stringify(val));
     } catch (e) {
@@ -1524,7 +1536,10 @@
   }
 
   // --- 8. Currency & ATM Domain Logic ---
-  let currentBenchmarkRate = 5.45;
+  // KRW per 100 VND. Seeded from DEFAULT_EXCHANGE_RATE so the calculator, the header
+  // calculator modal and every card's KRW estimate start from the same number.
+  // The rate preset buttons reassign this at runtime.
+  let currentBenchmarkRate = (typeof DEFAULT_EXCHANGE_RATE !== 'undefined' ? DEFAULT_EXCHANGE_RATE : 0.0545) * 100;
 
   function formatVerbalVND(vnd) {
     if (!vnd || vnd <= 0) return '0 동 (0k VND)';
@@ -1691,6 +1706,9 @@
       if (state.sortBy === 'name') {
         return (a.nameKo || a.name).localeCompare(b.nameKo || b.name, 'ko');
       }
+      // price-asc / price-desc: switchMainTab hides these options on the currency tab
+      // because every spot's avgPriceVnd is 0. Kept only so a stale state.sortBy
+      // carried over from another tab degrades to "no reordering" instead of NaN.
       if (state.sortBy === 'price-asc') {
         return (a.avgPriceVnd || 0) - (b.avgPriceVnd || 0);
       }
@@ -1749,8 +1767,8 @@
       return `
         <div class="activity-card currency-card" data-id="${item.id}">
           <div class="card-media-wrapper">
-            <img class="card-img" src="${item.coverImage}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=800&q=80'" />
-            <span class="card-badge-top-left ${item.feeFree ? 'badge-fee-zero' : ''}">${escapeHtml(item.badge || item.categoryLabel)}</span>
+            <img class="card-img" src="${escapeHtml(item.coverImage || (item.images || [])[0] || '')}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=800&q=80'" />
+            <span class="card-badge-top-left ${item.feeFree ? 'badge-fee-zero' : ''}">${escapeHtml(item.badge || item.categoryLabel || '환전·ATM')}</span>
             <button type="button" class="card-heart-btn ${isWish ? 'active' : ''}" data-id="${item.id}" aria-label="찜하기">
               ${isWish ? '♥' : '♡'}
             </button>
@@ -1758,33 +1776,33 @@
           </div>
           <div class="card-content">
             <div class="card-category-row">
-              <span class="card-cat-pill">${escapeHtml(item.categoryLabel)}</span>
+              <span class="card-cat-pill">${escapeHtml(item.categoryLabel || '환전·ATM')}</span>
               <span class="currency-badge-fee ${feeBadgeClass}">${feeBadgeText}</span>
             </div>
             <h3 class="card-title">${escapeHtml(item.nameKo || item.name)}</h3>
-            <p class="card-name-vi">🇻🇳 ${escapeHtml(item.nameVi)}</p>
+            <p class="card-name-vi">🇻🇳 ${escapeHtml(item.nameVi || '')}</p>
             <div class="card-meta-line">
-              <span class="rating">★ ${item.rating}</span>
-              <span class="reviews">(${item.reviewCount.toLocaleString()})</span>
+              <span class="rating">★ ${item.rating || '-'}</span>
+              <span class="reviews">(${(item.reviewCount || 0).toLocaleString()})</span>
               <span class="dot">·</span>
-              <span class="hours">⏰ ${escapeHtml(item.openHours)}</span>
+              <span class="hours">⏰ ${escapeHtml(item.openHours || '영업시간 미확인')}</span>
             </div>
-            <p class="card-location-line">📍 ${escapeHtml(item.location)}</p>
+            <p class="card-location-line">📍 ${escapeHtml(item.location || '나트랑')}</p>
 
             <div class="supported-card-pills-row">
               ${cardPills}${morePill}
             </div>
 
-            <p class="card-highlight-text">✨ ${escapeHtml(item.highlight)}</p>
+            <p class="card-highlight-text">✨ ${escapeHtml(item.highlight || '')}</p>
 
             <div class="card-bottom-bar">
               <div class="card-fee-info">
                 <span class="fee-main">${item.feeFree ? '수수료 0 VND' : '최우대 스프레드'}</span>
-                <span class="fee-sub">${escapeHtml(item.feePolicy)}</span>
+                <span class="fee-sub">${escapeHtml(item.feePolicy || '')}</span>
               </div>
               <div class="currency-card-actions">
-                <a href="${item.googleMapUrl}" target="_blank" rel="noopener noreferrer" class="btn-currency-map" onclick="event.stopPropagation();" title="구글 지도로 보기">📍 지도</a>
-                <a href="${item.googlePhotosUrl}" target="_blank" rel="noopener noreferrer" class="btn-currency-photos" onclick="event.stopPropagation();" title="실시간 사진 보기">📸 사진</a>
+                <a href="${escapeHtml(item.googleMapUrl || '')}" target="_blank" rel="noopener noreferrer" class="btn-currency-map" onclick="event.stopPropagation();" title="구글 지도로 보기">📍 지도</a>
+                <a href="${escapeHtml(item.googlePhotosUrl || item.googleMapUrl || '')}" target="_blank" rel="noopener noreferrer" class="btn-currency-photos" onclick="event.stopPropagation();" title="실시간 사진 보기">📸 사진</a>
               </div>
             </div>
           </div>
@@ -1833,7 +1851,7 @@
 
     const mainImgEl = document.getElementById('currencyModalMainImg');
     const thumbsRow = document.getElementById('currencyModalThumbs');
-    const images = (item.images && item.images.length > 0) ? item.images : [item.coverImage];
+    const images = (item.images && item.images.length > 0) ? item.images : [item.coverImage].filter(Boolean);
 
     if (mainImgEl) {
       mainImgEl.src = images[0] || item.coverImage;
@@ -1843,7 +1861,7 @@
     if (thumbsRow) {
       thumbsRow.innerHTML = images.map((img, idx) => `
         <div class="gallery-thumb ${idx === 0 ? 'active' : ''}" data-idx="${idx}">
-          <img src="${img}" alt="${escapeHtml(item.nameKo || item.name)} 사진 ${idx + 1}" loading="lazy" />
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(item.nameKo || item.name)} 사진 ${idx + 1}" loading="lazy" />
         </div>
       `).join('');
 
@@ -1877,7 +1895,7 @@
     if (modalNameVi) modalNameVi.textContent = `🇻🇳 ${item.nameVi}`;
 
     const modalRating = document.getElementById('currencyModalRating');
-    if (modalRating) modalRating.textContent = `★ ${item.rating} (${item.reviewCount.toLocaleString()}개 리뷰)`;
+    if (modalRating) modalRating.textContent = `★ ${item.rating || '-'} (${(item.reviewCount || 0).toLocaleString()}개 리뷰)`;
 
     const modalHours = document.getElementById('currencyModalHours');
     if (modalHours) modalHours.textContent = item.openHours || '24시간 연중무휴';
@@ -1891,10 +1909,8 @@
     const modalAddress = document.getElementById('currencyModalAddress');
     if (modalAddress) modalAddress.textContent = item.addressVi;
 
-    const copyBtn = document.getElementById('currencyCopyAddressBtn');
-    if (copyBtn) {
-      copyBtn.onclick = () => copyAddress(item.addressVi, copyBtn);
-    }
+    // NOTE: copy handler is bound once in initEvents() via addEventListener.
+    // Do NOT also assign .onclick here — both would fire on a single click.
 
     const highlightEl = document.getElementById('currencyModalHighlightText');
     if (highlightEl) highlightEl.textContent = item.highlight || '';
@@ -2158,6 +2174,20 @@
     
     const viewToggleButtons = document.getElementById('viewToggleButtons');
     if (viewToggleButtons) viewToggleButtons.style.display = isActivities ? 'flex' : 'none';
+
+    // 환전소/ATM에는 '가격'이 없어 avgPriceVnd가 전부 0이다. 가격 정렬을 그대로 두면
+    // 선택해도 순서가 안 바뀌어 고장으로 보이므로 이 탭에서는 옵션 자체를 숨긴다.
+    const sortSelectEl = document.getElementById('sortSelect');
+    if (sortSelectEl) {
+      sortSelectEl.querySelectorAll('option[value="price-asc"], option[value="price-desc"]').forEach(opt => {
+        opt.hidden = isCurrency;
+        opt.disabled = isCurrency;
+      });
+      if (isCurrency && (state.sortBy === 'price-asc' || state.sortBy === 'price-desc')) {
+        state.sortBy = 'recommended';
+        sortSelectEl.value = 'recommended';
+      }
+    }
 
     const searchInput = document.getElementById('searchInput');
     const heroTitle = document.getElementById('heroTitle');
@@ -2599,7 +2629,9 @@
       if (e.target === calcModal) closeModal(calcModal);
     });
 
-    const rate = typeof DEFAULT_EXCHANGE_RATE !== 'undefined' ? DEFAULT_EXCHANGE_RATE : 0.0545;
+    // Read the rate live so this modal always agrees with the currency tab calculator,
+    // including after the user picks a different rate preset there.
+    const getRate = () => currentBenchmarkRate / 100;
     const calcVndInput = document.getElementById('calcVndInput');
     const calcKrwInput = document.getElementById('calcKrwInput');
 
@@ -2607,21 +2639,21 @@
       const raw = e.target.value.replace(/[^0-9]/g, '');
       const vnd = parseInt(raw, 10) || 0;
       e.target.value = vnd ? vnd.toLocaleString() : '';
-      if (calcKrwInput) calcKrwInput.value = vnd ? Math.round(vnd * rate).toLocaleString() : '';
+      if (calcKrwInput) calcKrwInput.value = vnd ? Math.round(vnd * getRate()).toLocaleString() : '';
     });
 
     calcKrwInput?.addEventListener('input', (e) => {
       const raw = e.target.value.replace(/[^0-9]/g, '');
       const krw = parseInt(raw, 10) || 0;
       e.target.value = krw ? krw.toLocaleString() : '';
-      if (calcVndInput) calcVndInput.value = krw ? Math.round(krw / rate).toLocaleString() : '';
+      if (calcVndInput) calcVndInput.value = krw ? Math.round(krw / getRate()).toLocaleString() : '';
     });
 
     document.querySelectorAll('.calc-preset-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const vnd = parseInt(btn.dataset.vnd, 10);
-        if (calcVndInput) calcVndInput.value = vnd.toLocaleString();
-        if (calcKrwInput) calcKrwInput.value = Math.round(vnd * rate).toLocaleString();
+        const vnd = parseInt(btn.dataset.vnd, 10) || 0;
+        if (calcVndInput) calcVndInput.value = vnd ? vnd.toLocaleString() : '';
+        if (calcKrwInput) calcKrwInput.value = vnd ? Math.round(vnd * getRate()).toLocaleString() : '';
       });
     });
 
@@ -2656,9 +2688,47 @@
     renderCards();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
+  // Browser: boot as usual. Node (test runners): there is no document, so skip booting.
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  }
+
+  // Node-only export shim so test suites can exercise the REAL filter/sort logic
+  // instead of reimplementing it. `module` is undefined in the browser, so this
+  // block is inert there and the IIFE keeps leaking nothing into window.
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+      state,
+      resetStateFilters,
+      escapeHtml,
+      formatVND,
+      formatKRW,
+      formatVerbalVND,
+      formatVerbalKRW,
+      getFilteredActivities,
+      getFilteredGourmets,
+      getFilteredStays,
+      getFilteredShopping,
+      getFilteredCurrency,
+      // Renderers — exported for the snapshot harness (test-render-snapshot.js).
+      // They resolve `document` at call time, so the harness can install a stub
+      // AFTER requiring this file, which keeps the bootstrap above from running.
+      renderCards,
+      renderTimeline,
+      renderGourmets,
+      renderStays,
+      renderShopping,
+      renderCurrency,
+      // Modal openers — Phase 4 refactor target, snapshotted the same way.
+      openActivityModal,
+      openGourmetModal,
+      openStayModal,
+      openShoppingModal,
+      openCurrencyModal
+    };
   }
 })();

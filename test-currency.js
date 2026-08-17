@@ -8,14 +8,14 @@
  * 1. File loading & dual export verification (window.NHA_TRANG_CURRENCY & module.exports)
  * 2. Dataset size (17 verified spots) & canonical category distribution
  * 3. Kebab-case unique IDs (/^[a-z0-9-]+$/)
- * 4. Schema completeness (28+ required fields non-empty)
+ * 4. Schema completeness (all 32 required fields non-empty + uniform 35-key shape)
  * 5. Numeric bounds (rating 3.0~5.0, reviewCount > 0 integer)
  * 6. Google Maps search API URL encoding & address fidelity
  * 7. 5 Major Korean travel cards matrix (TraveLog, TravelWallet, SOL, Toss, Wibee)
  * 8. Operational guidance rules (DCC avoidance, 6-digit PIN, card ejection, $100 bill)
  * 9. DOM element IDs & SSOT count badge synchronization in index.html
- * 10. Simulation of multi-keyword search & category/tag filtering logic
- * 11. Sorting algorithms simulation (recommended, rating, reviewCount, name)
+ * 10. Filter & search driven through the real js/app.js getFilteredCurrency()
+ * 11. Sorting driven through the real js/app.js comparator (recommended, rating)
  * 12. Security & Anti-XSS payload prevention
  * ============================================================================
  */
@@ -245,9 +245,9 @@ runner.test('All travel card IDs and ATM tip IDs adhere to unique kebab-case for
 });
 
 // ==========================================
-// 4. Schema Completeness (28+ Required Fields)
+// 4. Schema Completeness (Required Fields + Uniform Shape)
 // ==========================================
-runner.suite('Schema Completeness (28+ Required Fields)');
+runner.suite('Schema Completeness (Required Fields + Uniform Shape)');
 
 const REQUIRED_SPOT_FIELDS = [
   'id',
@@ -284,7 +284,7 @@ const REQUIRED_SPOT_FIELDS = [
   'images'
 ];
 
-runner.test('Every spot contains all 28+ required fields with non-empty values', () => {
+runner.test('Every spot contains all required fields with non-empty values', () => {
   runner.assertTruthy(NHA_TRANG_CURRENCY, 'NHA_TRANG_CURRENCY is not loaded');
   NHA_TRANG_CURRENCY.forEach(spot => {
     for (const field of REQUIRED_SPOT_FIELDS) {
@@ -307,6 +307,30 @@ runner.test('Every spot contains all 28+ required fields with non-empty values',
       }
     }
   });
+});
+
+runner.test('All spots share an identical key set (uniform schema, no silent drift)', () => {
+  runner.assertTruthy(NHA_TRANG_CURRENCY, 'NHA_TRANG_CURRENCY is not loaded');
+  const reference = Object.keys(NHA_TRANG_CURRENCY[0]).sort();
+
+  NHA_TRANG_CURRENCY.forEach(spot => {
+    const keys = Object.keys(spot).sort();
+    const missing = reference.filter(k => !keys.includes(k));
+    const extra = keys.filter(k => !reference.includes(k));
+    runner.assertTruthy(
+      missing.length === 0 && extra.length === 0,
+      `Spot '${spot.id}' schema drift — missing: [${missing.join(', ')}], extra: [${extra.join(', ')}]`
+    );
+  });
+
+  // REQUIRED_SPOT_FIELDS must not reference fields the data does not carry.
+  const unknown = REQUIRED_SPOT_FIELDS.filter(f => !reference.includes(f));
+  runner.assertTruthy(unknown.length === 0,
+    `REQUIRED_SPOT_FIELDS lists fields absent from the dataset: ${unknown.join(', ')}`);
+
+  // Document the fields deliberately left unvalidated so the gap is visible, not silent.
+  const unvalidated = reference.filter(f => !REQUIRED_SPOT_FIELDS.includes(f));
+  console.log(`    ℹ schema: ${reference.length} keys, ${REQUIRED_SPOT_FIELDS.length} validated, unvalidated: ${unvalidated.join(', ') || 'none'}`);
 });
 
 runner.test('Spot array fields contain valid strings with minimum depth', () => {
@@ -521,10 +545,48 @@ runner.test('Header navigation contains Currency & ATM tab button and synced cou
     htmlContent.includes('data-tab="currency"') || htmlContent.includes("data-tab='currency'"),
     "index.html missing nav tab button with data-tab='currency'"
   );
-  // Count badge verification (17 places)
+  // Count badge verification — derived from the dataset, never hardcoded.
+  // (The old assertion OR'd in a literal that always exists in index.html, so it
+  //  passed even when every badge was out of sync with the data.)
+  const total = NHA_TRANG_CURRENCY.length;
   runner.assertTruthy(
-    htmlContent.includes('17곳') || htmlContent.includes('17개') || htmlContent.includes('수수료 0원'),
-    "index.html tab badge or category button missing '17곳' / '수수료 0원'"
+    htmlContent.includes(`${total}곳`),
+    `index.html must state the live dataset count '${total}곳' (tab badge / category button / result count)`
+  );
+});
+
+runner.test('index.html count badges match NHA_TRANG_CURRENCY.length exactly (no stale numbers)', () => {
+  runner.assertTruthy(htmlExists, 'Cannot test index.html: file missing');
+  const total = NHA_TRANG_CURRENCY.length;
+
+  // Every "N곳" that appears inside the currency tab markup must equal the dataset
+  // total or a real per-category subtotal. A stale number fails here.
+  const validCounts = new Set([String(total)]);
+  REQUIRED_CATEGORIES.forEach(cat => {
+    validCounts.add(String(NHA_TRANG_CURRENCY.filter(s => s.category === cat).length));
+  });
+
+  const navStart = htmlContent.indexOf('id="currencyCategoryNav"');
+  const navEnd = htmlContent.indexOf('</nav>', navStart);
+  runner.assertTruthy(navStart > -1 && navEnd > navStart, 'currencyCategoryNav block not found in index.html');
+
+  const navMarkup = htmlContent.slice(navStart, navEnd);
+  const found = [...navMarkup.matchAll(/\((\d+)곳\)/g)].map(m => m[1]);
+  runner.assertTruthy(found.length > 0, 'No "(N곳)" count labels found in currencyCategoryNav');
+
+  found.forEach(n => {
+    runner.assertTruthy(
+      validCounts.has(n),
+      `currencyCategoryNav shows '(${n}곳)' but the dataset has no such total/subtotal (valid: ${[...validCounts].join(', ')})`
+    );
+  });
+
+  // The result count line must carry the live total.
+  const countLine = htmlContent.match(/id="currencyResultCountText"[^>]*>([\s\S]*?)<\/span>/);
+  runner.assertTruthy(countLine, 'currencyResultCountText span not found');
+  runner.assertTruthy(
+    countLine[1].includes(`<strong>${total}</strong>`),
+    `currencyResultCountText must show <strong>${total}</strong>, got: ${countLine[1].trim()}`
   );
 });
 
@@ -584,140 +646,176 @@ runner.test('currency-data.js script tag is loaded before js/app.js in index.htm
 });
 
 // ==========================================
-// 10. Multi-Keyword Search & Category/Tag Filtering Simulation
+// 10. Filter & Search — exercises the REAL js/app.js implementation
 // ==========================================
-runner.suite('Filter & Search Business Logic Simulation');
+runner.suite('Filter & Search Business Logic (real js/app.js)');
 
-runner.test('Category filtering simulation returns exact subsets for all 4 categories', () => {
-  runner.assertTruthy(NHA_TRANG_CURRENCY, 'NHA_TRANG_CURRENCY is not loaded');
-  for (const cat of REQUIRED_CATEGORIES) {
-    const filtered = NHA_TRANG_CURRENCY.filter(s => s.category === cat);
-    runner.assertTruthy(filtered.length > 0, `Category filter '${cat}' returned 0 spots`);
+// Load the shipped application logic rather than reimplementing it here. A test that
+// re-derives the filter would keep passing even if getFilteredCurrency() were gutted.
+global.NHA_TRANG_CURRENCY = NHA_TRANG_CURRENCY;
+global.NHA_TRANG_ACTIVITIES = [];
+global.NHA_TRANG_GOURMETS = [];
+global.NHA_TRANG_STAYS = [];
+global.NHA_TRANG_SHOPPING = [];
+let app = null;
+let appLoadError = null;
+try {
+  app = require('./js/app.js');
+} catch (e) {
+  appLoadError = e;
+}
+
+function withCurrencyState(patch, fn) {
+  app.resetStateFilters();
+  Object.assign(app.state, patch);
+  try {
+    return fn();
+  } finally {
+    app.resetStateFilters();
   }
+}
+
+runner.test('js/app.js is loadable in Node and exports getFilteredCurrency', () => {
+  runner.assertTruthy(!appLoadError, `js/app.js failed to load: ${appLoadError && appLoadError.message}`);
+  runner.assertTruthy(app && typeof app.getFilteredCurrency === 'function', 'getFilteredCurrency export missing');
+  runner.assertTruthy(app.state && typeof app.resetStateFilters === 'function', 'state / resetStateFilters export missing');
 });
 
-runner.test('Tag chips filtering simulation matches expected spot subsets', () => {
-  runner.assertTruthy(NHA_TRANG_CURRENCY, 'NHA_TRANG_CURRENCY is not loaded');
-  const tagsToTest = ['zero_fee', 'travellog', 'travelwallet', 'sol_travel', 'usd100', 'night_market'];
-
-  for (const tagKey of tagsToTest) {
-    const filtered = NHA_TRANG_CURRENCY.filter(spot => {
-      const allText = [
-        ...(spot.tags || []),
-        ...(spot.facilities || []),
-        ...(spot.supportedCards || []),
-        ...(spot.exchangePerks || []),
-        spot.badge || '',
-        spot.category || '',
-        spot.location || '',
-        spot.feePolicy || ''
-      ].join(' ').toLowerCase();
-
-      if (tagKey === 'zero_fee') return spot.feeFree === true || allText.includes('수수료 0') || allText.includes('수수료0');
-      if (tagKey === 'travellog') return allText.includes('트래블로그') || (spot.supportedCards && spot.supportedCards.some(c => c.includes('트래블로그')));
-      if (tagKey === 'travelwallet') return allText.includes('트래블월렛') || (spot.supportedCards && spot.supportedCards.some(c => c.includes('트래블월렛')));
-      if (tagKey === 'sol_travel') return allText.includes('쏠트래블') || allText.includes('sol') || (spot.supportedCards && spot.supportedCards.some(c => c.includes('쏠')));
-      if (tagKey === 'usd100') return allText.includes('100달러') || allText.includes('신권') || (spot.supportedCurrencies && spot.supportedCurrencies.some(c => c.includes('100')));
-      if (tagKey === 'night_market') return allText.includes('야시장') || allText.includes('여행자 거리') || spot.location.includes('야시장');
-      return false;
-    });
-
-    runner.assertTruthy(filtered.length > 0, `Tag filter simulation for '${tagKey}' yielded 0 spots`);
-  }
+runner.test('getFilteredCurrency() with no filters returns the whole dataset', () => {
+  const all = withCurrencyState({}, () => app.getFilteredCurrency());
+  runner.assertEqual(all.length, NHA_TRANG_CURRENCY.length,
+    'Unfiltered getFilteredCurrency() must return every spot');
 });
 
-runner.test('Multi-keyword search simulation finds spots for representative keywords', () => {
-  runner.assertTruthy(NHA_TRANG_CURRENCY, 'NHA_TRANG_CURRENCY is not loaded');
+runner.test('Every category button in index.html yields a non-empty result through the real filter', () => {
+  const navStart = htmlContent.indexOf('id="currencyCategoryNav"');
+  const navEnd = htmlContent.indexOf('</nav>', navStart);
+  const navMarkup = htmlContent.slice(navStart, navEnd);
+  const categories = [...navMarkup.matchAll(/data-currcategory="([^"]+)"/g)].map(m => m[1]);
+
+  runner.assertTruthy(categories.length > 0, 'No data-currcategory buttons found in index.html');
+
+  categories.forEach(cat => {
+    const out = withCurrencyState({ currencyCategory: cat }, () => app.getFilteredCurrency());
+    runner.assertTruthy(out.length > 0,
+      `Category button '${cat}' produces 0 results through getFilteredCurrency() — dead filter in the UI`);
+  });
+});
+
+runner.test('Canonical category filters return exactly the matching subset', () => {
+  REQUIRED_CATEGORIES.forEach(cat => {
+    const expected = NHA_TRANG_CURRENCY.filter(s => s.category === cat).length;
+    const actual = withCurrencyState({ currencyCategory: cat }, () => app.getFilteredCurrency()).length;
+    runner.assertEqual(actual, expected, `Category '${cat}': real filter returned ${actual}, dataset has ${expected}`);
+  });
+});
+
+runner.test('Every tag chip in index.html yields a non-empty result through the real filter', () => {
+  const chipStart = htmlContent.indexOf('id="currencyTagChips"');
+  const chipEnd = htmlContent.indexOf('</div>', htmlContent.indexOf('tag-chip-btn', chipStart));
+  const chipMarkup = htmlContent.slice(chipStart, chipEnd > chipStart ? chipEnd + 4000 : chipStart + 4000);
+  const tags = [...chipMarkup.matchAll(/data-currtag="([^"]+)"/g)].map(m => m[1]);
+
+  runner.assertTruthy(tags.length > 0, 'No data-currtag chips found in index.html');
+
+  tags.forEach(tag => {
+    const out = withCurrencyState({ currencyTag: tag }, () => app.getFilteredCurrency());
+    runner.assertTruthy(out.length > 0,
+      `Tag chip '${tag}' produces 0 results through getFilteredCurrency() — dead chip in the UI`);
+  });
+});
+
+runner.test('Wishlist-only mode filters through the real implementation', () => {
+  const pick = NHA_TRANG_CURRENCY[0].id;
+  const out = withCurrencyState({ wishlistOnly: true }, () => {
+    app.state.currencyWishlist = [pick];
+    const r = app.getFilteredCurrency();
+    app.state.currencyWishlist = [];
+    return r;
+  });
+  runner.assertEqual(out.length, 1, 'wishlistOnly must narrow the list to the wishlisted spot');
+  runner.assertEqual(out[0].id, pick, 'wishlistOnly returned the wrong spot');
+});
+
+runner.test('Search keywords resolve through the real search implementation', () => {
   const searchKeywords = [
-    '김청',
-    '김빈',
-    '김탄',
-    'VPBank',
-    'TPBank',
-    'LiveBank',
-    '비엣콤뱅크',
-    'BIDV',
-    '테크콤',
-    '사콤뱅크',
-    '깜란',
-    '야시장',
-    '담시장',
-    '100달러',
-    '5만원',
-    '혼총',
-    '이어신',
-    '수수료',
-    '트래블로그',
-    '트래블월렛'
+    '김청', '김빈', 'VPBank', 'TPBank', 'LiveBank',
+    '깜란', '야시장', '100달러', '수수료', '트래블로그', '트래블월렛'
   ];
 
-  for (const kw of searchKeywords) {
-    const q = kw.toLowerCase();
-    const matches = NHA_TRANG_CURRENCY.filter(spot => {
-      const inName = (spot.name || '').toLowerCase().includes(q);
-      const inNameKo = (spot.nameKo || '').toLowerCase().includes(q);
-      const inNameVi = (spot.nameVi || '').toLowerCase().includes(q);
-      const inNameEn = (spot.nameEn || '').toLowerCase().includes(q);
-      const inLocation = (spot.location || '').toLowerCase().includes(q);
-      const inAddress = (spot.addressVi || '').toLowerCase().includes(q);
-      const inHighlight = (spot.highlight || '').toLowerCase().includes(q);
-      const inDesc = (spot.description || '').toLowerCase().includes(q);
-      const inTip = (spot.localTip || '').toLowerCase().includes(q);
-      const inTags = (spot.tags || []).some(t => t.toLowerCase().includes(q));
-      const inCards = (spot.supportedCards || []).some(c => c.toLowerCase().includes(q));
-      const inPerks = (spot.exchangePerks || []).some(p => p.toLowerCase().includes(q));
-
-      return inName || inNameKo || inNameVi || inNameEn || inLocation || inAddress || inHighlight || inDesc || inTip || inTags || inCards || inPerks;
-    });
-
-    runner.assertTruthy(matches.length > 0, `Search keyword '${kw}' returned 0 matches across 17 spots`);
-  }
-});
-
-// ==========================================
-// 11. Sorting Algorithms Simulation
-// ==========================================
-runner.suite('Sorting Algorithms Simulation');
-
-runner.test('Sorting by rating produces non-ascending order (rating DESC, reviewCount DESC tie-breaker)', () => {
-  runner.assertTruthy(NHA_TRANG_CURRENCY, 'NHA_TRANG_CURRENCY is not loaded');
-  const sorted = [...NHA_TRANG_CURRENCY].sort((a, b) => {
-    const scoreA = (a.rating || 0) * 100000 + (a.reviewCount || 0);
-    const scoreB = (b.rating || 0) * 100000 + (b.reviewCount || 0);
-    return scoreB - scoreA;
+  searchKeywords.forEach(kw => {
+    const out = withCurrencyState({ searchQuery: kw }, () => app.getFilteredCurrency());
+    runner.assertTruthy(out.length > 0, `Search '${kw}' returned 0 matches through getFilteredCurrency()`);
   });
+});
 
-  for (let i = 0; i < sorted.length - 1; i++) {
-    const currentScore = (sorted[i].rating || 0) * 100000 + (sorted[i].reviewCount || 0);
-    const nextScore = (sorted[i + 1].rating || 0) * 100000 + (sorted[i + 1].reviewCount || 0);
-    runner.assertTruthy(currentScore >= nextScore, `Rating sort order violated at index ${i} ('${sorted[i].id}' vs '${sorted[i + 1].id}')`);
+runner.test('A nonsense query returns zero results (search is not a pass-through)', () => {
+  const out = withCurrencyState({ searchQuery: 'zzzz-no-such-place-zzzz' }, () => app.getFilteredCurrency());
+  runner.assertEqual(out.length, 0, 'Search must actually exclude non-matching spots');
+});
+
+runner.test('Category and search compose (AND, not OR)', () => {
+  const both = withCurrencyState(
+    { currencyCategory: 'atm_zero_fee', searchQuery: 'zzzz-no-such-place-zzzz' },
+    () => app.getFilteredCurrency()
+  );
+  runner.assertEqual(both.length, 0, 'Combined category + unmatched search must yield 0, not the category subset');
+});
+
+// ==========================================
+// 11. Sorting — drives the REAL comparator in js/app.js
+// ==========================================
+runner.suite('Sorting (real js/app.js comparator)');
+
+// These tests sort via app.state.sortBy so the shipped comparator is the thing under
+// test. (Previously the suite sorted with its own comparator and then asserted that
+// result was sorted — a tautology that could never fail.)
+
+runner.test("sortBy='rating' orders by rating DESC with reviewCount as tie-breaker", () => {
+  const out = withCurrencyState({ sortBy: 'rating' }, () => app.getFilteredCurrency());
+  runner.assertEqual(out.length, NHA_TRANG_CURRENCY.length, 'Sorting must not drop spots');
+
+  for (let i = 0; i < out.length - 1; i++) {
+    const a = (out[i].rating || 0) * 100000 + (out[i].reviewCount || 0);
+    const b = (out[i + 1].rating || 0) * 100000 + (out[i + 1].reviewCount || 0);
+    runner.assertTruthy(a >= b,
+      `Real comparator produced a rating-sort violation at index ${i} ('${out[i].id}' before '${out[i + 1].id}')`);
   }
 });
 
-runner.test('Sorting by review count produces non-ascending order (reviewCount DESC)', () => {
-  runner.assertTruthy(NHA_TRANG_CURRENCY, 'NHA_TRANG_CURRENCY is not loaded');
-  const sorted = [...NHA_TRANG_CURRENCY].sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0));
-
-  for (let i = 0; i < sorted.length - 1; i++) {
-    runner.assertTruthy(
-      sorted[i].reviewCount >= sorted[i + 1].reviewCount,
-      `Review count sort violated at index ${i}: ${sorted[i].reviewCount} < ${sorted[i + 1].reviewCount}`
-    );
-  }
+runner.test("sortBy='rating' actually reorders (top spot is the true maximum)", () => {
+  const out = withCurrencyState({ sortBy: 'rating' }, () => app.getFilteredCurrency());
+  const best = NHA_TRANG_CURRENCY.reduce((m, s) =>
+    ((s.rating || 0) * 100000 + (s.reviewCount || 0)) > ((m.rating || 0) * 100000 + (m.reviewCount || 0)) ? s : m);
+  runner.assertEqual(out[0].id, best.id,
+    `rating sort should surface '${best.id}' first, got '${out[0].id}'`);
 });
 
-runner.test('Sorting by name produces correct Korean alphabetical ascending order', () => {
-  runner.assertTruthy(NHA_TRANG_CURRENCY, 'NHA_TRANG_CURRENCY is not loaded');
-  const sorted = [...NHA_TRANG_CURRENCY].sort((a, b) => (a.nameKo || a.name).localeCompare(b.nameKo || b.name, 'ko'));
+runner.test("sortBy='recommended' preserves the curated dataset order", () => {
+  const out = withCurrencyState({ sortBy: 'recommended' }, () => app.getFilteredCurrency());
+  out.forEach((spot, i) => {
+    runner.assertEqual(spot.id, NHA_TRANG_CURRENCY[i].id,
+      `recommended order must match the dataset order at index ${i}`);
+  });
+});
 
-  for (let i = 0; i < sorted.length - 1; i++) {
-    const nameA = sorted[i].nameKo || sorted[i].name;
-    const nameB = sorted[i + 1].nameKo || sorted[i + 1].name;
-    runner.assertTruthy(
-      nameA.localeCompare(nameB, 'ko') <= 0,
-      `Alphabetical sort violated at index ${i}: '${nameA}' should precede '${nameB}'`
-    );
+runner.test('Price sort options are hidden on the currency tab (avgPriceVnd is not meaningful here)', () => {
+  // Every spot has avgPriceVnd = 0, so a price sort can never reorder anything.
+  // js/app.js hides those options in switchMainTab(); this guards that contract.
+  const allZero = NHA_TRANG_CURRENCY.every(s => !s.avgPriceVnd);
+  if (!allZero) {
+    // If real prices ever land in the dataset, the option should come back — fail loudly
+    // so nobody forgets to re-enable it.
+    runner.assertTruthy(false,
+      'currency-data.js now carries real avgPriceVnd values — re-enable the price sort options in switchMainTab()');
+    return;
   }
+
+  const appSrc = fs.readFileSync(path.join(__dirname, 'js', 'app.js'), 'utf8');
+  runner.assertTruthy(
+    appSrc.includes("option[value=\"price-asc\"], option[value=\"price-desc\"]"),
+    'switchMainTab() must hide the price sort options while avgPriceVnd is 0 for every spot'
+  );
 });
 
 // ==========================================

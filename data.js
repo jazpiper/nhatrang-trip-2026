@@ -1538,5 +1538,9 @@ const NHA_TRANG_SCHEDULE = [
 ];
 
 // Current standard conversion rate (approximate for quick budget calculation)
-// 100,000 VND ≈ 5,400 KRW (1 VND ≈ 0.054 KRW)
-const DEFAULT_EXCHANGE_RATE = 0.054;
+// 100,000 VND ≈ 5,450 KRW (1 VND ≈ 0.0545 KRW)
+// SINGLE SOURCE OF TRUTH: every KRW figure in the app derives from this constant —
+// card price estimates (formatKRW), the header calculator modal, and the currency
+// tab calculator's default benchmark (currentBenchmarkRate = this * 100).
+// The currency tab's rate preset buttons (5.40 / 5.45 / 5.50) override it at runtime.
+const DEFAULT_EXCHANGE_RATE = 0.0545;

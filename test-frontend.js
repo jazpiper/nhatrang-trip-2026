@@ -76,7 +76,48 @@ const requiredIds = [
   'shoppingModalPricePer',
   'shoppingModalHeartBtn',
   'shoppingModalPhotosBtn',
-  'shoppingModalMapBtn'
+  'shoppingModalMapBtn',
+  // Currency & ATM tab
+  'currencyCategoryNav',
+  'currencyTagChips',
+  'currencyGridSection',
+  'currencyResultCountText',
+  'currencyCardsGridContainer',
+  'currencyModal',
+  'currencyModalCloseBtn',
+  'currencyModalMainImg',
+  'currencyModalThumbs',
+  'currencyModalBadge',
+  'currencyModalCategory',
+  'currencyModalFeeBadge',
+  'currencyModalTitle',
+  'currencyModalNameVi',
+  'currencyModalRating',
+  'currencyModalHours',
+  'currencyModalFeePolicy',
+  'currencyModalLocation',
+  'currencyModalAddress',
+  'currencyCopyAddressBtn',
+  'currencyModalHighlightText',
+  'currencyModalCardsList',
+  'currencyModalAtmSteps',
+  'currencyModalDccGuide',
+  'currencyModalRatesBox',
+  'currencyModalLimitsBox',
+  'currencyModalFacilities',
+  'currencyModalDesc',
+  'currencyModalTip',
+  'currencyNoteInput',
+  'currencyNoteStatus',
+  'currencyModalHeartBtn',
+  'currencyModalPhotosBtn',
+  'currencyModalMapBtn',
+  // Currency calculator widget
+  'calcVndInputMain',
+  'calcKrwInputMain',
+  'calcVndHelperMain',
+  'calcKrwHelperMain',
+  'calcResetBtnMain'
 ];
 
 let missing = 0;
@@ -95,24 +136,38 @@ if (missing > 0) {
 }
 
 console.log('\n=== Suite 2: Script Inclusion Order in index.html ===');
-const staysScript = '<script src="./stays-data.js"></script>';
-const shoppingScript = '<script src="./shopping-data.js"></script>';
+// Every dataset must be a classic script loaded BEFORE js/app.js, which reads them
+// as plain globals. One tag out of order silently breaks the whole tab.
+const dataScripts = [
+  './data.js',
+  './gourmet-data.js',
+  './stays-data.js',
+  './shopping-data.js',
+  './currency-data.js'
+];
 const hasAppScript = html.includes('<script src="./js/app.js"></script>') || html.includes('<script type="module" src="./js/app.js"></script>');
+const appIdx = html.indexOf('src="./js/app.js"');
 
-if (html.includes(staysScript) && html.includes(shoppingScript) && hasAppScript) {
-  const staysIdx = html.indexOf(staysScript);
-  const shoppingIdx = html.indexOf(shoppingScript);
-  const appIdx = html.indexOf('src="./js/app.js"');
-  if (staysIdx < shoppingIdx && shoppingIdx < appIdx) {
-    console.log('  ✔ stays-data.js and shopping-data.js are correctly positioned before app.js');
-  } else {
-    console.error('  ❌ script order violation');
-    process.exit(1);
-  }
-} else {
-  console.error('  ❌ Script tag missing');
+if (!hasAppScript) {
+  console.error('  ❌ js/app.js script tag missing');
   process.exit(1);
 }
+
+let orderOk = true;
+for (const src of dataScripts) {
+  const tag = `<script src="${src}"></script>`;
+  const idx = html.indexOf(tag);
+  if (idx === -1) {
+    console.error(`  ❌ Missing dataset script tag: ${src}`);
+    orderOk = false;
+  } else if (idx > appIdx) {
+    console.error(`  ❌ ${src} is loaded AFTER js/app.js — globals would be undefined`);
+    orderOk = false;
+  } else {
+    console.log(`  ✔ ${src} loaded before js/app.js`);
+  }
+}
+if (!orderOk) process.exit(1);
 
 console.log('\n=== Suite 3: JavaScript Syntax & Compilation in app.js ===');
 const appCode = fs.readFileSync('js/app.js', 'utf8');
@@ -153,7 +208,18 @@ const requiredSelectors = [
   '.pros-cons-grid',
   '.pros-box',
   '.cons-box',
-  '.customs-warning-box'
+  '.customs-warning-box',
+  // Currency & ATM Selectors
+  '.currency-card',
+  '.currency-badge-fee',
+  '.supported-card-pill',
+  '.supported-card-pills-row',
+  '.currency-card-actions',
+  '.btn-currency-map',
+  '.btn-currency-photos',
+  '.card-fee-info',
+  '.supported-cards-grid',
+  '.badge-fee-zero'
 ];
 
 for (const sel of requiredSelectors) {
@@ -163,6 +229,53 @@ for (const sel of requiredSelectors) {
     console.error(`  ❌ Missing CSS Selector: ${sel}`);
     process.exit(1);
   }
+}
+
+console.log('\n=== Suite 4b: CSS Class Invariant (renderer output vs style.css) ===');
+// The project rule is that template-literal markup may only use classes that already
+// exist in style.css. Violations are invisible at runtime — the element just renders
+// unstyled — so no other suite catches them.
+const appSrcForClasses = fs.readFileSync('js/app.js', 'utf8');
+const usedClasses = new Set();
+for (const m of appSrcForClasses.matchAll(/class="([^"`]*)"/g)) {
+  m[1].split(/\s+/).forEach(c => {
+    if (c && !c.includes('${') && /^[a-z][a-z0-9-]*$/.test(c)) usedClasses.add(c);
+  });
+}
+
+// Pre-existing debt from before the class-invariant check existed. Shrink this list;
+// never grow it. New renderer code must not add entries here.
+const KNOWN_UNSTYLED = new Set([
+  'card-icon', 'day-header', 'day-number', 'hours', 'item-content', 'item-icon',
+  'item-meta', 'item-price', 'item-title', 'reviews', 'sub-imgs-grid',
+  'timeline-activities-list', 'timeline-activity-item'
+]);
+
+const undefinedClasses = [...usedClasses]
+  .filter(c => !css.includes('.' + c) && !html.includes(`class="${c}`))
+  .sort();
+
+const newViolations = undefinedClasses.filter(c => !KNOWN_UNSTYLED.has(c));
+const stillOutstanding = undefinedClasses.filter(c => KNOWN_UNSTYLED.has(c));
+
+if (stillOutstanding.length > 0) {
+  console.log(`  ⚠ ${stillOutstanding.length} known-unstyled classes (pre-existing debt): ${stillOutstanding.join(', ')}`);
+}
+
+if (newViolations.length > 0) {
+  console.error(`  ❌ ${newViolations.length} class(es) emitted by js/app.js are not declared in style.css:`);
+  newViolations.forEach(c => console.error(`     .${c}`));
+  console.error('     Add them to style.css, or reuse an existing class.');
+  process.exit(1);
+}
+console.log(`  ✔ All ${usedClasses.size - stillOutstanding.length} renderer classes are declared in style.css`);
+
+// Classes the KNOWN_UNSTYLED list claims are missing but that now exist should be
+// removed from the list, otherwise the debt ledger rots.
+const staleAllowlist = [...KNOWN_UNSTYLED].filter(c => css.includes('.' + c));
+if (staleAllowlist.length > 0) {
+  console.error(`  ❌ KNOWN_UNSTYLED is stale — these are now styled, remove them: ${staleAllowlist.join(', ')}`);
+  process.exit(1);
 }
 
 console.log('\n=== Suite 5: Simulation of Stays Filtering & Business Logic ===');
@@ -287,5 +400,84 @@ for (const q of shopSearchQueries) {
     process.exit(1);
   }
 }
+
+console.log('\n=== Suite 7: Currency & ATM Tab wired through the real js/app.js ===');
+const { NHA_TRANG_CURRENCY } = require('./currency-data.js');
+console.log(`  ✔ Loaded ${NHA_TRANG_CURRENCY.length} currency spots from currency-data.js`);
+
+// Seed the globals the app reads, then load the real application logic.
+global.NHA_TRANG_CURRENCY = NHA_TRANG_CURRENCY;
+global.NHA_TRANG_ACTIVITIES = global.NHA_TRANG_ACTIVITIES || [];
+global.NHA_TRANG_GOURMETS = global.NHA_TRANG_GOURMETS || [];
+global.NHA_TRANG_STAYS = NHA_TRANG_STAYS;
+global.NHA_TRANG_SHOPPING = NHA_TRANG_SHOPPING;
+
+let currencyApp;
+try {
+  currencyApp = require('./js/app.js');
+} catch (e) {
+  console.error('  ❌ js/app.js could not be loaded in Node:', e.message);
+  process.exit(1);
+}
+
+if (typeof currencyApp.getFilteredCurrency !== 'function') {
+  console.error('  ❌ js/app.js does not export getFilteredCurrency');
+  process.exit(1);
+}
+console.log('  ✔ js/app.js exports the currency filter for testing');
+
+// Every category button and tag chip declared in the markup must return results
+// through the shipped filter. A renamed data attribute or category slug dies here.
+const navBlock = html.slice(html.indexOf('id="currencyCategoryNav"'), html.indexOf('id="currencyTagChips"'));
+const chipBlock = html.slice(html.indexOf('id="currencyTagChips"'), html.indexOf('id="currencyTagChips"') + 6000);
+const navCats = [...navBlock.matchAll(/data-currcategory="([^"]+)"/g)].map(m => m[1]);
+const navTags = [...chipBlock.matchAll(/data-currtag="([^"]+)"/g)].map(m => m[1]);
+
+if (navCats.length === 0 || navTags.length === 0) {
+  console.error('  ❌ No currency category buttons / tag chips found in index.html');
+  process.exit(1);
+}
+
+for (const cat of navCats) {
+  currencyApp.resetStateFilters();
+  currencyApp.state.currencyCategory = cat;
+  const n = currencyApp.getFilteredCurrency().length;
+  if (n === 0) {
+    console.error(`  ❌ Currency category '${cat}' returns 0 results through the real filter`);
+    process.exit(1);
+  }
+  console.log(`  ✔ Currency category '${cat}': ${n} spots matched`);
+}
+
+for (const tag of navTags) {
+  currencyApp.resetStateFilters();
+  currencyApp.state.currencyTag = tag;
+  const n = currencyApp.getFilteredCurrency().length;
+  if (n === 0) {
+    console.error(`  ❌ Currency tag chip '${tag}' returns 0 results through the real filter`);
+    process.exit(1);
+  }
+  console.log(`  ✔ Currency tag '${tag}': ${n} spots matched`);
+}
+currencyApp.resetStateFilters();
+
+// Exchange rate must come from one constant, or the calculator and the card prices disagree.
+const dataSrc = fs.readFileSync('data.js', 'utf8');
+const rateMatch = dataSrc.match(/const DEFAULT_EXCHANGE_RATE\s*=\s*([\d.]+)/);
+if (!rateMatch) {
+  console.error('  ❌ DEFAULT_EXCHANGE_RATE not found in data.js');
+  process.exit(1);
+}
+if (!appCode.includes('DEFAULT_EXCHANGE_RATE') || !appCode.includes('currentBenchmarkRate =')) {
+  console.error('  ❌ js/app.js must seed currentBenchmarkRate from DEFAULT_EXCHANGE_RATE');
+  process.exit(1);
+}
+// The header calculator modal must read the rate live so it agrees with the currency
+// tab calculator even after the user picks a different rate preset.
+if (!/const getRate = \(\) => currentBenchmarkRate \/ 100/.test(appCode)) {
+  console.error('  ❌ The header calculator must derive its rate from currentBenchmarkRate (live), not a snapshot');
+  process.exit(1);
+}
+console.log(`  ✔ Single exchange-rate source: DEFAULT_EXCHANGE_RATE = ${rateMatch[1]}`);
 
 console.log('\n✨ All Frontend Integration Suites Passed Perfectly! ✨');

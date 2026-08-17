@@ -1,0 +1,231 @@
+/**
+ * ============================================================================
+ * Nha Trang Trip 2026 - Render Output Snapshot Suite (Characterization Tests)
+ * File: test-render-snapshot.js
+ * ============================================================================
+ *
+ * WHAT THIS GUARDS
+ * The other suites verify data and filter logic. Nothing verified the HTML the
+ * renderers actually emit — so a refactor could silently change every card on
+ * the page and stay green. This suite pins the exact markup for all 5 domains
+ * across representative filter states.
+ *
+ * It is a CHARACTERIZATION test: the goldens record what the code does today,
+ * not what it ideally should do. During a behaviour-preserving refactor the
+ * correct outcome is "no diff". If a diff appears, either the refactor changed
+ * behaviour (fix the code) or the change was intended (review the diff line by
+ * line, then re-record).
+ *
+ *   node test-render-snapshot.js            # verify against goldens
+ *   node test-render-snapshot.js --update   # re-record goldens (review the diff!)
+ * ============================================================================
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const SNAPSHOT_DIR = path.join(__dirname, 'test-snapshots');
+const UPDATE = process.argv.includes('--update');
+
+const colors = {
+  reset: '\x1b[0m', bright: '\x1b[1m', dim: '\x1b[2m',
+  green: '\x1b[32m', red: '\x1b[31m', yellow: '\x1b[33m', cyan: '\x1b[36m'
+};
+
+// --- 1. Seed data globals BEFORE requiring the app -------------------------
+// data.js has no module.exports, so it is evaluated the same way test-activity.js
+// does it: read the source and run it, then lift the consts onto globalThis.
+const dataSrc = fs.readFileSync(path.join(__dirname, 'data.js'), 'utf8');
+(0, eval)(
+  dataSrc +
+  '\n;globalThis.NHA_TRANG_ACTIVITIES = NHA_TRANG_ACTIVITIES;' +
+  '\n;globalThis.NHA_TRANG_SCHEDULE = NHA_TRANG_SCHEDULE;' +
+  '\n;globalThis.DEFAULT_EXCHANGE_RATE = DEFAULT_EXCHANGE_RATE;'
+);
+
+globalThis.NHA_TRANG_GOURMETS = require('./gourmet-data.js').NHA_TRANG_GOURMETS;
+globalThis.NHA_TRANG_STAYS = require('./stays-data.js').NHA_TRANG_STAYS;
+globalThis.NHA_TRANG_SHOPPING = require('./shopping-data.js').NHA_TRANG_SHOPPING;
+globalThis.NHA_TRANG_CURRENCY = require('./currency-data.js').NHA_TRANG_CURRENCY;
+
+// --- 2. Require the app while `document` is still absent -------------------
+// (that is what keeps init() from firing — see test-dom-stub.js header)
+const app = require('./js/app.js');
+
+// --- 3. Install the DOM stub ------------------------------------------------
+const { installDom } = require('./test-dom-stub.js');
+const dom = installDom();
+
+// --- 4. Case matrix ---------------------------------------------------------
+// Values below are the real data-* attribute values used in index.html, so the
+// cases stay meaningful rather than synthetic.
+const DOMAINS = [
+  {
+    key: 'activity',
+    render: () => app.renderCards(),
+    container: 'cardsGridContainer',
+    count: 'resultCountText',
+    catField: 'actCategory', tagField: 'actTag',
+    sampleCat: 'hopping', sampleTag: 'wife', sampleQuery: '스노클링'
+  },
+  {
+    key: 'gourmet',
+    render: () => app.renderGourmets(),
+    container: 'gourmetCardsGridContainer',
+    count: 'gourmetResultCountText',
+    catField: 'gourmetCategory', tagField: 'gourmetTag',
+    sampleCat: 'banhxeo', sampleTag: 'line', sampleQuery: '반쎄오'
+  },
+  {
+    key: 'stay',
+    render: () => app.renderStays(),
+    container: 'staysCardsGridContainer',
+    count: 'stayResultCountText',
+    catField: 'stayCategory', tagField: 'stayTag',
+    sampleCat: 'welcome', sampleTag: 'pool', sampleQuery: '인터컨티넨탈'
+  },
+  {
+    key: 'shopping',
+    render: () => app.renderShopping(),
+    container: 'shoppingCardsGridContainer',
+    count: 'shoppingResultCountText',
+    catField: 'shoppingCategory', tagField: 'shoppingTag',
+    sampleCat: 'boutique_mirror', sampleTag: 'ac', sampleQuery: '크록스'
+  },
+  {
+    key: 'currency',
+    render: () => app.renderCurrency(),
+    container: 'currencyCardsGridContainer',
+    count: 'currencyResultCountText',
+    catField: 'currencyCategory', tagField: 'currencyTag',
+    sampleCat: 'atm_zero_fee', sampleTag: 'fee_free', sampleQuery: '김청'
+  }
+];
+
+const NO_MATCH = 'zzzz-no-such-place-zzzz';
+
+function statesFor(d) {
+  return [
+    { name: 'default', patch: {} },
+    { name: 'category', patch: { [d.catField]: d.sampleCat } },
+    { name: 'tag', patch: { [d.tagField]: d.sampleTag } },
+    { name: 'search', patch: { searchQuery: d.sampleQuery } },
+    { name: 'sort-rating', patch: { sortBy: 'rating' } },
+    { name: 'empty', patch: { searchQuery: NO_MATCH } }
+  ];
+}
+
+function capture(d, state) {
+  app.resetStateFilters();
+  Object.assign(app.state, state.patch);
+  d.render();
+  const out = [
+    `<!-- domain: ${d.key} | state: ${state.name} -->`,
+    `<!-- count: ${dom.html(d.count) || dom.text(d.count)} -->`,
+    dom.html(d.container)
+  ].join('\n');
+  app.resetStateFilters();
+  return out;
+}
+
+// --- 5. Run -----------------------------------------------------------------
+if (!fs.existsSync(SNAPSHOT_DIR)) fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
+
+let checked = 0, passed = 0, failed = 0, written = 0;
+const failures = [];
+
+console.log(`\n${colors.bright}${colors.cyan}=== Render Output Snapshots (${UPDATE ? 'RECORDING' : 'verifying'}) ===${colors.reset}`);
+
+const cases = [];
+for (const d of DOMAINS) {
+  for (const state of statesFor(d)) {
+    cases.push({ file: `${d.key}.${state.name}.html`, produce: () => capture(d, state) });
+  }
+}
+// Timeline is a second view of the activities tab, not a domain of its own.
+cases.push({
+  file: 'activity.timeline.html',
+  produce: () => {
+    app.resetStateFilters();
+    app.renderTimeline();
+    const out = `<!-- domain: activity | state: timeline -->\n${dom.html('timelineContainer')}`;
+    app.resetStateFilters();
+    return out;
+  }
+});
+
+for (const c of cases) {
+  const target = path.join(SNAPSHOT_DIR, c.file);
+  let actual;
+  try {
+    actual = c.produce();
+  } catch (err) {
+    failed++;
+    failures.push({ file: c.file, message: `renderer threw: ${err.message}` });
+    console.log(`  ${colors.red}✖ THREW:${colors.reset} ${c.file} — ${err.message}`);
+    continue;
+  }
+
+  if (actual.trim() === '' || actual.split('\n').slice(2).join('').trim() === '') {
+    // A completely empty container almost always means the harness is miswired
+    // (wrong container id), which would make every later comparison vacuous.
+    failed++;
+    failures.push({ file: c.file, message: 'renderer produced no markup — harness likely misconfigured' });
+    console.log(`  ${colors.red}✖ EMPTY:${colors.reset} ${c.file}`);
+    continue;
+  }
+
+  if (UPDATE || !fs.existsSync(target)) {
+    fs.writeFileSync(target, actual);
+    written++;
+    console.log(`  ${colors.yellow}✎ recorded:${colors.reset} ${c.file} (${actual.length.toLocaleString()} chars)`);
+    continue;
+  }
+
+  checked++;
+  const expected = fs.readFileSync(target, 'utf8');
+  if (expected === actual) {
+    passed++;
+    console.log(`  ${colors.green}✔ match:${colors.reset} ${c.file}`);
+  } else {
+    failed++;
+    const expLines = expected.split('\n');
+    const actLines = actual.split('\n');
+    let firstDiff = 0;
+    while (firstDiff < Math.max(expLines.length, actLines.length) &&
+           expLines[firstDiff] === actLines[firstDiff]) firstDiff++;
+    failures.push({
+      file: c.file,
+      message: `first difference at line ${firstDiff + 1}`,
+      expected: (expLines[firstDiff] || '(missing)').trim().slice(0, 200),
+      actual: (actLines[firstDiff] || '(missing)').trim().slice(0, 200)
+    });
+    console.log(`  ${colors.red}✖ DIFF:${colors.reset} ${c.file} (line ${firstDiff + 1})`);
+  }
+}
+
+// --- 6. Summary -------------------------------------------------------------
+console.log(`\n${colors.bright}====================================================${colors.reset}`);
+if (UPDATE || written > 0) {
+  console.log(`${colors.yellow}Recorded ${written} snapshot(s) into test-snapshots/.${colors.reset}`);
+  console.log(`${colors.dim}Review the git diff before committing — these are the refactor baseline.${colors.reset}`);
+}
+if (checked > 0) {
+  console.log(`Compared: ${checked}   ${colors.green}Match: ${passed}${colors.reset}   ${failed > 0 ? colors.red : colors.green}Diff: ${failed}${colors.reset}`);
+}
+
+if (failed > 0) {
+  console.log(`\n${colors.red}${colors.bright}Render output changed in ${failed} case(s):${colors.reset}`);
+  failures.forEach((f, i) => {
+    console.log(`\n  ${i + 1}) ${colors.red}${f.file}${colors.reset} — ${f.message}`);
+    if (f.expected !== undefined) {
+      console.log(`     ${colors.dim}expected:${colors.reset} ${f.expected}`);
+      console.log(`     ${colors.dim}actual  :${colors.reset} ${f.actual}`);
+    }
+  });
+  console.log(`\n${colors.red}❌ Snapshot suite failed. If the change was intended, re-run with --update and review the diff.${colors.reset}\n`);
+  process.exit(1);
+}
+
+console.log(`\n${colors.green}${colors.bright}✨ Render output is unchanged across all ${checked || written} snapshot cases.${colors.reset}\n`);
+process.exit(0);
