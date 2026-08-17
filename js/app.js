@@ -207,45 +207,88 @@
     state.wishlistOnly = false;
   }
 
+  // --- 3.5 Generic Filter Pipeline ---
+  // 5개 도메인의 getFilteredX가 공유하던 "찜 -> 카테고리 -> 태그 -> 검색 -> 정렬"
+  // 골격만 여기 하나로 모은다. 도메인별 매처/정렬 comparator는 각 섹션에 그대로
+  // 남겨 다른 도메인과 절대 공유하지 않는다 (통일 시 카테고리/태그 판정이 깨짐).
+
+  // 검색어 포함 여부. q는 호출부에서 이미 소문자로 정규화되어 들어온다.
+  function textIncludes(value, q) {
+    return (value || '').toString().toLowerCase().includes(q);
+  }
+
+  /**
+   * 도메인별 검색을 선언적으로 처리한다.
+   *   strings: 스칼라 문자열 필드명 목록
+   *   arrays : 문자열 배열 필드명 목록
+   *   extra  : 위 두 형태로 표현 못 하는 케이스(중첩 객체, fallback 체인 등)
+   * 필드를 늘리거나 줄이면 검색 결과가 바뀌므로 목록은 데이터 스키마와 함께 관리할 것.
+   */
+  function matchTextFields(item, q, spec) {
+    if ((spec.strings || []).some(f => textIncludes(item[f], q))) return true;
+    if ((spec.arrays || []).some(f => (item[f] || []).some(v => textIncludes(v, q)))) return true;
+    return spec.extra ? !!spec.extra(item, q) : false;
+  }
+  function applyDomainFilter(cfg) {
+    if (typeof cfg.source === 'undefined' || !cfg.source) return [];
+    const cat = state[cfg.catField];
+    const tag = state[cfg.tagField];
+    const q = state.searchQuery ? state.searchQuery.toLowerCase() : '';
+    const wish = state[cfg.wishField] || [];
+
+    return cfg.source.filter(item => {
+      if (state.wishlistOnly && !wish.includes(item.id)) return false;
+      if (cat && cat !== 'all' && !cfg.categoryMatch(item, cat)) return false;
+      if (tag && tag !== 'all' && !cfg.tagMatch(item, tag)) return false;
+      if (q && !cfg.searchMatch(item, q)) return false;
+      return true;
+    }).sort(cfg.compare);
+  }
+
   // --- 4. Activities Domain Logic ---
+  function activitiesTagMatch(item, tag) {
+    const tagMap = {
+      'wife': ['wife', '인기', '추천', '커플', '인기추천'],
+      'photo': ['photo', '인생샷', '사진', '스팟', '성지', '인스타'],
+      'spa': ['spa', '스파', '힐링', '마사지', '온천', '머드'],
+      'rain': ['rain', '비오는날', '비올때', '실내', '워터파크', '테마파크']
+    };
+    const keywords = tagMap[tag] || [tag];
+    const itemTags = (item.tags || []).concat([item.category, item.categoryLabel || '', item.badge || '']);
+    return itemTags.some(t => {
+      const tLower = (t || '').toLowerCase();
+      return keywords.some(k => tLower.includes(k.toLowerCase()));
+    });
+  }
+
+  const ACTIVITY_SEARCH = {
+    strings: ['title', 'titleEn', 'location', 'highlight', 'googleMapQuery'],
+    arrays: ['tags'],
+    // These two read a fallback chain rather than a single field, so they stay explicit.
+    extra: (item, q) => textIncludes(item.description || item.highlight, q) ||
+                        textIncludes(item.categoryLabel || item.category, q)
+  };
+
+  function activitiesSearchMatch(item, q) {
+    return matchTextFields(item, q, ACTIVITY_SEARCH);
+  }
+
+  function activitiesCompare(a, b) {
+    if (state.sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+    if (state.sortBy === 'price-asc') return (a.priceVnd || 0) - (b.priceVnd || 0);
+    if (state.sortBy === 'price-desc') return (b.priceVnd || 0) - (a.priceVnd || 0);
+    return 0; // recommended
+  }
+
   function getFilteredActivities() {
     if (typeof NHA_TRANG_ACTIVITIES === 'undefined') return [];
-    return NHA_TRANG_ACTIVITIES.filter(item => {
-      if (state.wishlistOnly && !state.wishlist.includes(item.id)) return false;
-      if (state.actCategory !== 'all' && item.category !== state.actCategory) return false;
-      if (state.actTag !== 'all') {
-        const tagMap = {
-          'wife': ['wife', '인기', '추천', '커플', '인기추천'],
-          'photo': ['photo', '인생샷', '사진', '스팟', '성지', '인스타'],
-          'spa': ['spa', '스파', '힐링', '마사지', '온천', '머드'],
-          'rain': ['rain', '비오는날', '비올때', '실내', '워터파크', '테마파크']
-        };
-        const keywords = tagMap[state.actTag] || [state.actTag];
-        const itemTags = (item.tags || []).concat([item.category, item.categoryLabel || '', item.badge || '']);
-        const hasTag = itemTags.some(t => {
-          const tLower = (t || '').toLowerCase();
-          return keywords.some(k => tLower.includes(k.toLowerCase()));
-        });
-        if (!hasTag) return false;
-      }
-      if (state.searchQuery) {
-        const q = state.searchQuery.toLowerCase();
-        const matchTitle = (item.title || '').toLowerCase().includes(q);
-        const matchTitleEn = (item.titleEn || '').toLowerCase().includes(q);
-        const matchDesc = (item.description || item.highlight || '').toLowerCase().includes(q);
-        const matchLoc = (item.location || '').toLowerCase().includes(q);
-        const matchHighlight = (item.highlight || '').toLowerCase().includes(q);
-        const matchCat = (item.categoryLabel || item.category || '').toLowerCase().includes(q);
-        const matchTags = (item.tags || []).some(t => (t || '').toLowerCase().includes(q));
-        const matchMapQuery = (item.googleMapQuery || '').toLowerCase().includes(q);
-        if (!matchTitle && !matchTitleEn && !matchDesc && !matchLoc && !matchHighlight && !matchCat && !matchTags && !matchMapQuery) return false;
-      }
-      return true;
-    }).sort((a, b) => {
-      if (state.sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
-      if (state.sortBy === 'price-asc') return (a.priceVnd || 0) - (b.priceVnd || 0);
-      if (state.sortBy === 'price-desc') return (b.priceVnd || 0) - (a.priceVnd || 0);
-      return 0; // recommended
+    return applyDomainFilter({
+      source: NHA_TRANG_ACTIVITIES,
+      catField: 'actCategory', tagField: 'actTag', wishField: 'wishlist',
+      categoryMatch: (item, cat) => item.category === cat,
+      tagMatch: activitiesTagMatch,
+      searchMatch: activitiesSearchMatch,
+      compare: activitiesCompare
     });
   }
 
@@ -547,70 +590,66 @@
   }
 
   // --- 5. Gourmet Domain Logic ---
+  function gourmetCategoryMatch(item, cat) {
+    const tagStr = (item.tags || []).join(' ');
+    if (cat === 'fruit') {
+      return (item.category === 'fruit' || item.category === 'cafe' || item.category === 'dessert' || (item.categoryLabel && (item.categoryLabel.includes('카페') || item.categoryLabel.includes('디저트') || item.categoryLabel.includes('생과일'))));
+    } else if (cat === 'rice') {
+      return (item.category === 'rice' || (item.category === 'vietnamese' && (tagStr.includes('가정식') || tagStr.includes('솥밥') || tagStr.includes('치킨라이스') || tagStr.includes('닭고기밥') || tagStr.includes('전통') || tagStr.includes('식당'))) || tagStr.includes('가정식') || tagStr.includes('솥밥') || tagStr.includes('치킨라이스') || tagStr.includes('닭고기밥') || tagStr.includes('껌땀') || tagStr.includes('누룽지'));
+    } else if (cat === 'pho') {
+      return (item.category === 'pho' || item.category === 'bunca' || tagStr.includes('쌀국수') || tagStr.includes('분짜') || tagStr.includes('분까') || tagStr.includes('분보') || (item.category === 'vietnamese' && tagStr.includes('쌀국수')) || (item.categoryLabel && (item.categoryLabel.includes('쌀국수') || item.categoryLabel.includes('분짜'))));
+    } else if (cat === 'banhxeo') {
+      return (item.category === 'banhxeo' || tagStr.includes('반쎄오') || tagStr.includes('넴느엉') || tagStr.includes('반깐') || (item.categoryLabel && item.categoryLabel.includes('반쎄오')));
+    } else if (cat === 'seafood') {
+      return (item.category === 'seafood' || (item.categoryLabel && item.categoryLabel.includes('해산물')) || tagStr.includes('해산물') || tagStr.includes('조개'));
+    } else if (cat === 'banhmi') {
+      return (item.category === 'banhmi' || tagStr.includes('반미'));
+    } else {
+      return (item.category === cat);
+    }
+  }
+
+  function gourmetTagMatch(item, gt) {
+    const tagStr = (item.tags || []).join(' ');
+    if (gt === 'line' && (tagStr.includes('줄서는') || tagStr.includes('1위') || tagStr.includes('인기') || tagStr.includes('성지') || tagStr.includes('명가') || tagStr.includes('단골'))) return true;
+    if (gt === 'ac' && (tagStr.includes('에어컨') || tagStr.includes('냉방') || tagStr.includes('쾌적') || tagStr.includes('위생'))) return true;
+    if (gt === 'breakfast' && (tagStr.includes('아침') || tagStr.includes('모닝') || tagStr.includes('해장') || (item.openHours && (item.openHours.startsWith('05:') || item.openHours.startsWith('06:') || item.openHours.startsWith('07:'))))) return true;
+    if (gt === 'seafood' && (tagStr.includes('정찰제') || tagStr.includes('해산물') || tagStr.includes('조개') || item.category === 'seafood')) return true;
+    if (gt === 'night' && (tagStr.includes('야간') || tagStr.includes('야식') || tagStr.includes('맥주') || tagStr.includes('심야') || (item.openHours && (item.openHours.includes('23:') || item.openHours.includes('24:') || item.openHours.includes('02:'))))) return true;
+    if (item.tags && item.tags.includes(gt)) return true;
+    return false;
+  }
+
+  const GOURMET_SEARCH = {
+    strings: ['name', 'nameVi', 'description', 'location', 'highlight', 'badge', 'categoryLabel'],
+    arrays: ['tags'],
+    // signatureMenu entries are either a plain string or {name, desc}.
+    extra: (item, q) => (item.signatureMenu || []).some(m => {
+      const mStr = typeof m === 'string' ? m : (m.name + ' ' + m.desc);
+      return mStr.toLowerCase().includes(q);
+    })
+  };
+
+  function gourmetSearchMatch(item, q) {
+    return matchTextFields(item, q, GOURMET_SEARCH);
+  }
+
+  function gourmetCompare(a, b) {
+    if (state.sortBy === 'rating') return ((b.rating || 0) * 10000 + (b.reviewCount || 0)) - ((a.rating || 0) * 10000 + (a.reviewCount || 0));
+    if (state.sortBy === 'price-asc') return (a.avgPriceVnd || 0) - (b.avgPriceVnd || 0);
+    if (state.sortBy === 'price-desc') return (b.avgPriceVnd || 0) - (a.avgPriceVnd || 0);
+    return 0;
+  }
+
   function getFilteredGourmets() {
     if (typeof NHA_TRANG_GOURMETS === 'undefined') return [];
-    return NHA_TRANG_GOURMETS.filter(item => {
-      if (state.wishlistOnly && !state.gourmetWishlist.includes(item.id)) return false;
-      
-      // Category Filter
-      if (state.gourmetCategory !== 'all') {
-        const cat = state.gourmetCategory;
-        const tagStr = (item.tags || []).join(' ');
-        let matchCat = false;
-        if (cat === 'fruit') {
-          matchCat = (item.category === 'fruit' || item.category === 'cafe' || item.category === 'dessert' || (item.categoryLabel && (item.categoryLabel.includes('카페') || item.categoryLabel.includes('디저트') || item.categoryLabel.includes('생과일'))));
-        } else if (cat === 'rice') {
-          matchCat = (item.category === 'rice' || (item.category === 'vietnamese' && (tagStr.includes('가정식') || tagStr.includes('솥밥') || tagStr.includes('치킨라이스') || tagStr.includes('닭고기밥') || tagStr.includes('전통') || tagStr.includes('식당'))) || tagStr.includes('가정식') || tagStr.includes('솥밥') || tagStr.includes('치킨라이스') || tagStr.includes('닭고기밥') || tagStr.includes('껌땀') || tagStr.includes('누룽지'));
-        } else if (cat === 'pho') {
-          matchCat = (item.category === 'pho' || item.category === 'bunca' || tagStr.includes('쌀국수') || tagStr.includes('분짜') || tagStr.includes('분까') || tagStr.includes('분보') || (item.category === 'vietnamese' && tagStr.includes('쌀국수')) || (item.categoryLabel && (item.categoryLabel.includes('쌀국수') || item.categoryLabel.includes('분짜'))));
-        } else if (cat === 'banhxeo') {
-          matchCat = (item.category === 'banhxeo' || tagStr.includes('반쎄오') || tagStr.includes('넴느엉') || tagStr.includes('반깐') || (item.categoryLabel && item.categoryLabel.includes('반쎄오')));
-        } else if (cat === 'seafood') {
-          matchCat = (item.category === 'seafood' || (item.categoryLabel && item.categoryLabel.includes('해산물')) || tagStr.includes('해산물') || tagStr.includes('조개'));
-        } else if (cat === 'banhmi') {
-          matchCat = (item.category === 'banhmi' || tagStr.includes('반미'));
-        } else {
-          matchCat = (item.category === cat);
-        }
-        if (!matchCat) return false;
-      }
-
-      // Tag Filter
-      if (state.gourmetTag !== 'all') {
-        const gt = state.gourmetTag;
-        const tagStr = (item.tags || []).join(' ');
-        let matchTag = false;
-        if (gt === 'line' && (tagStr.includes('줄서는') || tagStr.includes('1위') || tagStr.includes('인기') || tagStr.includes('성지') || tagStr.includes('명가') || tagStr.includes('단골'))) matchTag = true;
-        else if (gt === 'ac' && (tagStr.includes('에어컨') || tagStr.includes('냉방') || tagStr.includes('쾌적') || tagStr.includes('위생'))) matchTag = true;
-        else if (gt === 'breakfast' && (tagStr.includes('아침') || tagStr.includes('모닝') || tagStr.includes('해장') || (item.openHours && (item.openHours.startsWith('05:') || item.openHours.startsWith('06:') || item.openHours.startsWith('07:'))))) matchTag = true;
-        else if (gt === 'seafood' && (tagStr.includes('정찰제') || tagStr.includes('해산물') || tagStr.includes('조개') || item.category === 'seafood')) matchTag = true;
-        else if (gt === 'night' && (tagStr.includes('야간') || tagStr.includes('야식') || tagStr.includes('맥주') || tagStr.includes('심야') || (item.openHours && (item.openHours.includes('23:') || item.openHours.includes('24:') || item.openHours.includes('02:'))))) matchTag = true;
-        else if (item.tags && item.tags.includes(gt)) matchTag = true;
-        if (!matchTag) return false;
-      }
-      
-      if (state.searchQuery) {
-        const q = state.searchQuery.toLowerCase();
-        const matchName = (item.name || '').toLowerCase().includes(q);
-        const matchNameVi = (item.nameVi || '').toLowerCase().includes(q);
-        const matchDesc = (item.description || '').toLowerCase().includes(q);
-        const matchLoc = (item.location || '').toLowerCase().includes(q);
-        const matchHighlight = (item.highlight || '').toLowerCase().includes(q);
-        const matchBadge = (item.badge || '').toLowerCase().includes(q);
-        const matchCatLabel = (item.categoryLabel || '').toLowerCase().includes(q);
-        const matchTags = (item.tags || []).some(t => (t || '').toLowerCase().includes(q));
-        const matchMenu = (item.signatureMenu || []).some(m => {
-          const mStr = typeof m === 'string' ? m : (m.name + ' ' + m.desc);
-          return mStr.toLowerCase().includes(q);
-        });
-        if (!matchName && !matchNameVi && !matchDesc && !matchLoc && !matchHighlight && !matchBadge && !matchCatLabel && !matchTags && !matchMenu) return false;
-      }
-      return true;
-    }).sort((a, b) => {
-      if (state.sortBy === 'rating') return ((b.rating || 0) * 10000 + (b.reviewCount || 0)) - ((a.rating || 0) * 10000 + (a.reviewCount || 0));
-      if (state.sortBy === 'price-asc') return (a.avgPriceVnd || 0) - (b.avgPriceVnd || 0);
-      if (state.sortBy === 'price-desc') return (b.avgPriceVnd || 0) - (a.avgPriceVnd || 0);
-      return 0;
+    return applyDomainFilter({
+      source: NHA_TRANG_GOURMETS,
+      catField: 'gourmetCategory', tagField: 'gourmetTag', wishField: 'gourmetWishlist',
+      categoryMatch: gourmetCategoryMatch,
+      tagMatch: gourmetTagMatch,
+      searchMatch: gourmetSearchMatch,
+      compare: gourmetCompare
     });
   }
 
@@ -841,64 +880,53 @@
   }
 
   // --- 6. Stays Domain Logic ---
+  function staysCategoryMatch(item, cat) {
+    return (
+      item.theme === cat ||
+      (cat === 'welcome' && item.theme === 'theme1') ||
+      (cat === 'luxury' && item.theme === 'theme2') ||
+      (cat === 'poolvilla' && item.theme === 'theme3') ||
+      (cat === 'goodbye' && item.theme === 'theme4') ||
+      (item.themeName && item.themeName.toLowerCase().includes(cat))
+    );
+  }
+
+  function staysTagMatch(item, t) {
+    const allTags = (item.tags || []).concat(item.amenities || []).join(' ').toLowerCase();
+    if (t === 'pool' && (allTags.includes('수영장') || allTags.includes('인피니티풀') || allTags.includes('루프탑풀') || allTags.includes('풀') || item.category === '풀빌라')) return true;
+    if (t === 'beach' && (allTags.includes('오션') || allTags.includes('비치') || allTags.includes('해변') || allTags.includes('바다'))) return true;
+    if (t === 'private_pool' && (allTags.includes('단독') || allTags.includes('프라이빗') || allTags.includes('개별') || item.category === '풀빌라')) return true;
+    if (t === 'budget' && ((item.pricePerNightVnd || 0) <= 1000000 || allTags.includes('가성비') || allTags.includes('5만') || item.theme === 'theme1' || item.theme === 'theme4')) return true;
+    if (t === 'shopping' && (allTags.includes('야시장') || allTags.includes('쇼핑') || allTags.includes('시내') || allTags.includes('마트') || (item.nearbySpots || []).some(s => (s || '').includes('야시장') || (s || '').includes('마트')))) return true;
+    if ((item.tags || []).includes(t)) return true;
+    return false;
+  }
+
+  const STAY_SEARCH = {
+    strings: ['nameKo', 'nameEn', 'nameVi', 'area', 'address', 'addressVi', 'category', 'themeName'],
+    arrays: ['tags', 'amenities', 'highlights', 'nearbySpots']
+  };
+
+  function staysSearchMatch(item, q) {
+    return matchTextFields(item, q, STAY_SEARCH);
+  }
+
+  function staysCompare(a, b) {
+    if (state.sortBy === 'rating') return ((b.rating || 0) * 10000 + (b.reviewCount || 0)) - ((a.rating || 0) * 10000 + (a.reviewCount || 0));
+    if (state.sortBy === 'price-asc') return (a.pricePerNightVnd || 0) - (b.pricePerNightVnd || 0);
+    if (state.sortBy === 'price-desc') return (b.pricePerNightVnd || 0) - (a.pricePerNightVnd || 0);
+    return 0;
+  }
+
   function getFilteredStays() {
     if (typeof NHA_TRANG_STAYS === 'undefined') return [];
-    return NHA_TRANG_STAYS.filter(item => {
-      if (state.wishlistOnly && !state.stayWishlist.includes(item.id)) return false;
-
-      if (state.stayCategory !== 'all') {
-        const cat = state.stayCategory;
-        const matchesTheme = (
-          item.theme === cat ||
-          (cat === 'welcome' && item.theme === 'theme1') ||
-          (cat === 'luxury' && item.theme === 'theme2') ||
-          (cat === 'poolvilla' && item.theme === 'theme3') ||
-          (cat === 'goodbye' && item.theme === 'theme4') ||
-          (item.themeName && item.themeName.toLowerCase().includes(cat))
-        );
-        if (!matchesTheme) return false;
-      }
-
-      if (state.stayTag !== 'all') {
-        const t = state.stayTag;
-        const allTags = (item.tags || []).concat(item.amenities || []).join(' ').toLowerCase();
-        let match = false;
-        if (t === 'pool' && (allTags.includes('수영장') || allTags.includes('인피니티풀') || allTags.includes('루프탑풀') || allTags.includes('풀') || item.category === '풀빌라')) match = true;
-        else if (t === 'beach' && (allTags.includes('오션') || allTags.includes('비치') || allTags.includes('해변') || allTags.includes('바다'))) match = true;
-        else if (t === 'private_pool' && (allTags.includes('단독') || allTags.includes('프라이빗') || allTags.includes('개별') || item.category === '풀빌라')) match = true;
-        else if (t === 'budget' && ((item.pricePerNightVnd || 0) <= 1000000 || allTags.includes('가성비') || allTags.includes('5만') || item.theme === 'theme1' || item.theme === 'theme4')) match = true;
-        else if (t === 'shopping' && (allTags.includes('야시장') || allTags.includes('쇼핑') || allTags.includes('시내') || allTags.includes('마트') || (item.nearbySpots || []).some(s => (s || '').includes('야시장') || (s || '').includes('마트')))) match = true;
-        else if ((item.tags || []).includes(t)) match = true;
-
-        if (!match) return false;
-      }
-
-      if (state.searchQuery) {
-        const q = state.searchQuery.toLowerCase();
-        const inNameKo = (item.nameKo || '').toLowerCase().includes(q);
-        const inNameEn = (item.nameEn || '').toLowerCase().includes(q);
-        const inNameVi = (item.nameVi || '').toLowerCase().includes(q);
-        const inArea = (item.area || '').toLowerCase().includes(q);
-        const inAddress = (item.address || '').toLowerCase().includes(q);
-        const inAddressVi = (item.addressVi || '').toLowerCase().includes(q);
-        const inCategory = (item.category || '').toLowerCase().includes(q);
-        const inTheme = (item.themeName || '').toLowerCase().includes(q);
-        const inTags = (item.tags || []).some(tag => (tag || '').toLowerCase().includes(q));
-        const inAmenities = (item.amenities || []).some(amenity => (amenity || '').toLowerCase().includes(q));
-        const inHighlights = (item.highlights || []).some(hl => (hl || '').toLowerCase().includes(q));
-        const inNearby = (item.nearbySpots || []).some(spot => (spot || '').toLowerCase().includes(q));
-
-        if (!inNameKo && !inNameEn && !inNameVi && !inArea && !inAddress && !inAddressVi && !inCategory && !inTheme && !inTags && !inAmenities && !inHighlights && !inNearby) {
-          return false;
-        }
-      }
-
-      return true;
-    }).sort((a, b) => {
-      if (state.sortBy === 'rating') return ((b.rating || 0) * 10000 + (b.reviewCount || 0)) - ((a.rating || 0) * 10000 + (a.reviewCount || 0));
-      if (state.sortBy === 'price-asc') return (a.pricePerNightVnd || 0) - (b.pricePerNightVnd || 0);
-      if (state.sortBy === 'price-desc') return (b.pricePerNightVnd || 0) - (a.pricePerNightVnd || 0);
-      return 0;
+    return applyDomainFilter({
+      source: NHA_TRANG_STAYS,
+      catField: 'stayCategory', tagField: 'stayTag', wishField: 'stayWishlist',
+      categoryMatch: staysCategoryMatch,
+      tagMatch: staysTagMatch,
+      searchMatch: staysSearchMatch,
+      compare: staysCompare
     });
   }
 
@@ -1140,81 +1168,71 @@
   }
 
   // --- 7. Shopping Domain Logic ---
+  function shoppingTagMatch(item, t) {
+    const allText = [
+      ...(item.tags || []),
+      ...(item.facilities || []),
+      ...(item.paymentMethods || []),
+      item.qualityTier || '',
+      item.category || ''
+    ].join(' ').toLowerCase();
+
+    if (t === 'ac') {
+      if (item.hasAirConditioning || allText.includes('에어컨')) return true;
+    } else if (t === 'fixed') {
+      if (item.bargainingRequired === false || allText.includes('정찰')) return true;
+    } else if (t === 'transfer') {
+      if (allText.includes('계좌이체') || allText.includes('원화') || allText.includes('gln') || allText.includes('카카오페이')) return true;
+    } else if (t === 'bargain') {
+      if (item.bargainingRequired === true || allText.includes('흥정')) return true;
+    } else if (t === 'mirror_tier') {
+      if (item.category === 'boutique_mirror' || allText.includes('미러') || allText.includes('sa급')) return true;
+    } else if (t === 'value') {
+      if (allText.includes('가성비') || (item.avgPriceVnd || 0) <= 250000 || item.category === 'dam_market') return true;
+    } else if ((item.tags || []).includes(t)) {
+      return true;
+    }
+    return false;
+  }
+
+  const SHOPPING_SEARCH = {
+    strings: ['name', 'nameKo', 'nameVi', 'nameEn', 'categoryLabel', 'location',
+              'addressVi', 'qualityTier', 'highlight', 'description', 'localTip'],
+    arrays: ['tags', 'facilities', 'signatureItems'],
+    // bargainingGuide holds objects; sentimentAnalysis is a nested object.
+    extra: (item, q) => {
+      const inBargain = (item.bargainingGuide || []).some(bg => textIncludes(bg.item, q) || textIncludes(bg.tip, q));
+      const s = item.sentimentAnalysis;
+      const inSentiment = !!s && (
+        textIncludes(s.communityVerdict, q) ||
+        (s.pros || []).some(p => textIncludes(p, q)) ||
+        (s.cons || []).some(c => textIncludes(c, q)) ||
+        textIncludes(s.scamWarning, q)
+      );
+      return inBargain || inSentiment;
+    }
+  };
+
+  function shoppingSearchMatch(item, q) {
+    return matchTextFields(item, q, SHOPPING_SEARCH);
+  }
+
+  function shoppingCompare(a, b) {
+    if (state.sortBy === 'rating') return ((b.rating || 0) * 10000 + (b.reviewCount || 0)) - ((a.rating || 0) * 10000 + (a.reviewCount || 0));
+    if (state.sortBy === 'price-asc') return (a.avgPriceVnd || 0) - (b.avgPriceVnd || 0);
+    if (state.sortBy === 'price-desc') return (b.avgPriceVnd || 0) - (a.avgPriceVnd || 0);
+    return 0;
+  }
+
   function getFilteredShopping() {
     if (typeof NHA_TRANG_SHOPPING === 'undefined') return [];
-
-    return NHA_TRANG_SHOPPING.filter(item => {
-      if (state.wishlistOnly && !state.shoppingWishlist.includes(item.id)) return false;
-
-      if (state.shoppingCategory !== 'all') {
-        if (item.category !== state.shoppingCategory) return false;
-      }
-
-      if (state.shoppingTag !== 'all') {
-        const t = state.shoppingTag;
-        let match = false;
-        const allText = [
-          ...(item.tags || []),
-          ...(item.facilities || []),
-          ...(item.paymentMethods || []),
-          item.qualityTier || '',
-          item.category || ''
-        ].join(' ').toLowerCase();
-
-        if (t === 'ac') {
-          if (item.hasAirConditioning || allText.includes('에어컨')) match = true;
-        } else if (t === 'fixed') {
-          if (item.bargainingRequired === false || allText.includes('정찰')) match = true;
-        } else if (t === 'transfer') {
-          if (allText.includes('계좌이체') || allText.includes('원화') || allText.includes('gln') || allText.includes('카카오페이')) match = true;
-        } else if (t === 'bargain') {
-          if (item.bargainingRequired === true || allText.includes('흥정')) match = true;
-        } else if (t === 'mirror_tier') {
-          if (item.category === 'boutique_mirror' || allText.includes('미러') || allText.includes('sa급')) match = true;
-        } else if (t === 'value') {
-          if (allText.includes('가성비') || (item.avgPriceVnd || 0) <= 250000 || item.category === 'dam_market') match = true;
-        } else if ((item.tags || []).includes(t)) {
-          match = true;
-        }
-
-        if (!match) return false;
-      }
-
-      if (state.searchQuery) {
-        const q = state.searchQuery.toLowerCase();
-        const inName = (item.name || '').toLowerCase().includes(q);
-        const inNameKo = (item.nameKo || '').toLowerCase().includes(q);
-        const inNameVi = (item.nameVi || '').toLowerCase().includes(q);
-        const inNameEn = (item.nameEn || '').toLowerCase().includes(q);
-        const inCategory = (item.categoryLabel || '').toLowerCase().includes(q);
-        const inLocation = (item.location || '').toLowerCase().includes(q);
-        const inAddress = (item.addressVi || '').toLowerCase().includes(q);
-        const inQuality = (item.qualityTier || '').toLowerCase().includes(q);
-        const inHighlight = (item.highlight || '').toLowerCase().includes(q);
-        const inDesc = (item.description || '').toLowerCase().includes(q);
-        const inTip = (item.localTip || '').toLowerCase().includes(q);
-        const inTags = (item.tags || []).some(tag => (tag || '').toLowerCase().includes(q));
-        const inFacilities = (item.facilities || []).some(fac => (fac || '').toLowerCase().includes(q));
-        const inSignature = (item.signatureItems || []).some(sig => (sig || '').toLowerCase().includes(q));
-        const inBargain = (item.bargainingGuide || []).some(bg => (bg.item || '').toLowerCase().includes(q) || (bg.tip || '').toLowerCase().includes(q));
-        const inSentiment = item.sentimentAnalysis ? (
-          (item.sentimentAnalysis.communityVerdict || '').toLowerCase().includes(q) ||
-          (item.sentimentAnalysis.pros || []).some(p => (p || '').toLowerCase().includes(q)) ||
-          (item.sentimentAnalysis.cons || []).some(c => (c || '').toLowerCase().includes(q)) ||
-          (item.sentimentAnalysis.scamWarning || '').toLowerCase().includes(q)
-        ) : false;
-
-        if (!inName && !inNameKo && !inNameVi && !inNameEn && !inCategory && !inLocation && !inAddress && !inQuality && !inHighlight && !inDesc && !inTip && !inTags && !inFacilities && !inSignature && !inBargain && !inSentiment) {
-          return false;
-        }
-      }
-
-      return true;
-    }).sort((a, b) => {
-      if (state.sortBy === 'rating') return ((b.rating || 0) * 10000 + (b.reviewCount || 0)) - ((a.rating || 0) * 10000 + (a.reviewCount || 0));
-      if (state.sortBy === 'price-asc') return (a.avgPriceVnd || 0) - (b.avgPriceVnd || 0);
-      if (state.sortBy === 'price-desc') return (b.avgPriceVnd || 0) - (a.avgPriceVnd || 0);
-      return 0;
+    return applyDomainFilter({
+      source: NHA_TRANG_SHOPPING,
+      catField: 'shoppingCategory', tagField: 'shoppingTag', wishField: 'shoppingWishlist',
+      categoryMatch: (item, cat) => item.category === cat,
+      tagMatch: shoppingTagMatch,
+      searchMatch: shoppingSearchMatch,
+      compare: shoppingCompare
     });
   }
 
@@ -1588,134 +1606,116 @@
     }
   }
 
+  function currencyCategoryMatch(item, cat) {
+    if (cat === 'atm_zero_fee') {
+      return item.category === 'atm_zero_fee';
+    } else if (cat === 'exchange_gold') {
+      return item.category === 'exchange_gold';
+    } else if (cat === 'exchange_bank') {
+      return item.category === 'exchange_bank';
+    } else if (cat === 'exchange_airport') {
+      return item.category === 'exchange_airport';
+    } else if (cat === 'card_travellog') {
+      const cards = (item.supportedCards || []).join(' ');
+      const tags = (item.tags || []).join(' ');
+      return cards.includes('트래블로그') || tags.includes('트래블로그') || item.category === 'exchange_gold';
+    } else if (cat === 'card_travelwallet') {
+      const cards = (item.supportedCards || []).join(' ');
+      const tags = (item.tags || []).join(' ');
+      return cards.includes('트래블월렛') || tags.includes('트래블월렛') || item.category === 'exchange_gold';
+    } else if (cat === 'card_sol_toss_wibee') {
+      const cards = (item.supportedCards || []).join(' ');
+      const tags = (item.tags || []).join(' ');
+      return cards.includes('쏠트래블') || cards.includes('토스') || cards.includes('위비') ||
+          tags.includes('신한쏠트래블') || tags.includes('토스뱅크') || tags.includes('위비트래블') ||
+          item.category === 'exchange_gold';
+    } else {
+      return item.category === cat;
+    }
+  }
+
+  function currencyTagMatch(item, t) {
+    const allText = [
+      ...(item.tags || []),
+      ...(item.facilities || []),
+      ...(item.supportedCards || []),
+      ...(item.supportedCurrencies || []),
+      ...(item.exchangePerks || []),
+      item.badge || '',
+      item.category || '',
+      item.location || '',
+      item.feePolicy || ''
+    ].join(' ').toLowerCase();
+
+    if (t === 'fee_free' || t === 'zero_fee') {
+      if (item.feeFree === true || allText.includes('수수료 0') || allText.includes('수수료0')) return true;
+    } else if (t === 'travellog') {
+      if (allText.includes('트래블로그') || (item.supportedCards && item.supportedCards.some(c => c.includes('트래블로그')))) return true;
+    } else if (t === 'travelwallet') {
+      if (allText.includes('트래블월렛') || (item.supportedCards && item.supportedCards.some(c => c.includes('트래블월렛')))) return true;
+    } else if (t === 'sol_travel') {
+      if (allText.includes('쏠트래블') || allText.includes('sol') || (item.supportedCards && item.supportedCards.some(c => c.includes('쏠')))) return true;
+    } else if (t === 'toss_bank') {
+      if (allText.includes('토스') || (item.supportedCards && item.supportedCards.some(c => c.includes('토스')))) return true;
+    } else if (t === 'wibee') {
+      if (allText.includes('위비') || (item.supportedCards && item.supportedCards.some(c => c.includes('위비')))) return true;
+    } else if (t === 'usd100') {
+      if (allText.includes('100달러') || allText.includes('신권') || (item.supportedCurrencies && item.supportedCurrencies.some(c => c.includes('100')))) return true;
+    } else if (t === 'livebank_24h') {
+      if (allText.includes('livebank') || allText.includes('24시간') || (item.facilities && item.facilities.some(f => f.includes('24시간')))) return true;
+    } else if (t === 'night_market') {
+      if (allText.includes('야시장') || allText.includes('여행자거리') || (item.location || '').includes('야시장')) return true;
+    } else if (t === 'korean_atm') {
+      if (allText.includes('한국어') || (item.facilities && item.facilities.some(f => f.includes('한국어')))) return true;
+    } else if ((item.tags || []).includes(t)) {
+      return true;
+    }
+    return false;
+  }
+
+  const CURRENCY_SEARCH = {
+    strings: ['name', 'nameKo', 'nameVi', 'nameEn', 'categoryLabel', 'location', 'addressVi',
+              'districtLabel', 'highlight', 'description', 'localTip', 'feePolicy', 'withdrawalLimit'],
+    arrays: ['tags', 'facilities', 'supportedCards', 'supportedCurrencies', 'exchangePerks']
+  };
+
+  function currencySearchMatch(item, q) {
+    return matchTextFields(item, q, CURRENCY_SEARCH);
+  }
+
+  function currencyCompare(a, b) {
+    if (state.sortBy === 'rating') {
+      const scoreA = (a.rating || 0) * 100000 + (a.reviewCount || 0);
+      const scoreB = (b.rating || 0) * 100000 + (b.reviewCount || 0);
+      return scoreB - scoreA;
+    }
+    if (state.sortBy === 'reviews' || state.sortBy === 'reviewCount') {
+      return (b.reviewCount || 0) - (a.reviewCount || 0);
+    }
+    if (state.sortBy === 'name') {
+      return (a.nameKo || a.name).localeCompare(b.nameKo || b.name, 'ko');
+    }
+    // price-asc / price-desc: switchMainTab hides these options on the currency tab
+    // because every spot's avgPriceVnd is 0. Kept only so a stale state.sortBy
+    // carried over from another tab degrades to "no reordering" instead of NaN.
+    if (state.sortBy === 'price-asc') {
+      return (a.avgPriceVnd || 0) - (b.avgPriceVnd || 0);
+    }
+    if (state.sortBy === 'price-desc') {
+      return (b.avgPriceVnd || 0) - (a.avgPriceVnd || 0);
+    }
+    return 0;
+  }
+
   function getFilteredCurrency() {
     if (typeof NHA_TRANG_CURRENCY === 'undefined') return [];
-
-    return NHA_TRANG_CURRENCY.filter(item => {
-      if (state.wishlistOnly && !(state.currencyWishlist || []).includes(item.id)) return false;
-
-      if (state.currencyCategory && state.currencyCategory !== 'all') {
-        const cat = state.currencyCategory;
-        if (cat === 'atm_zero_fee') {
-          if (item.category !== 'atm_zero_fee') return false;
-        } else if (cat === 'exchange_gold') {
-          if (item.category !== 'exchange_gold') return false;
-        } else if (cat === 'exchange_bank') {
-          if (item.category !== 'exchange_bank') return false;
-        } else if (cat === 'exchange_airport') {
-          if (item.category !== 'exchange_airport') return false;
-        } else if (cat === 'card_travellog') {
-          const cards = (item.supportedCards || []).join(' ');
-          const tags = (item.tags || []).join(' ');
-          if (!cards.includes('트래블로그') && !tags.includes('트래블로그') && item.category !== 'exchange_gold') return false;
-        } else if (cat === 'card_travelwallet') {
-          const cards = (item.supportedCards || []).join(' ');
-          const tags = (item.tags || []).join(' ');
-          if (!cards.includes('트래블월렛') && !tags.includes('트래블월렛') && item.category !== 'exchange_gold') return false;
-        } else if (cat === 'card_sol_toss_wibee') {
-          const cards = (item.supportedCards || []).join(' ');
-          const tags = (item.tags || []).join(' ');
-          if (!cards.includes('쏠트래블') && !cards.includes('토스') && !cards.includes('위비') &&
-              !tags.includes('신한쏠트래블') && !tags.includes('토스뱅크') && !tags.includes('위비트래블') &&
-              item.category !== 'exchange_gold') return false;
-        } else if (item.category !== cat) {
-          return false;
-        }
-      }
-
-      if (state.currencyTag && state.currencyTag !== 'all') {
-        const t = state.currencyTag;
-        let match = false;
-        const allText = [
-          ...(item.tags || []),
-          ...(item.facilities || []),
-          ...(item.supportedCards || []),
-          ...(item.supportedCurrencies || []),
-          ...(item.exchangePerks || []),
-          item.badge || '',
-          item.category || '',
-          item.location || '',
-          item.feePolicy || ''
-        ].join(' ').toLowerCase();
-
-        if (t === 'fee_free' || t === 'zero_fee') {
-          if (item.feeFree === true || allText.includes('수수료 0') || allText.includes('수수료0')) match = true;
-        } else if (t === 'travellog') {
-          if (allText.includes('트래블로그') || (item.supportedCards && item.supportedCards.some(c => c.includes('트래블로그')))) match = true;
-        } else if (t === 'travelwallet') {
-          if (allText.includes('트래블월렛') || (item.supportedCards && item.supportedCards.some(c => c.includes('트래블월렛')))) match = true;
-        } else if (t === 'sol_travel') {
-          if (allText.includes('쏠트래블') || allText.includes('sol') || (item.supportedCards && item.supportedCards.some(c => c.includes('쏠')))) match = true;
-        } else if (t === 'toss_bank') {
-          if (allText.includes('토스') || (item.supportedCards && item.supportedCards.some(c => c.includes('토스')))) match = true;
-        } else if (t === 'wibee') {
-          if (allText.includes('위비') || (item.supportedCards && item.supportedCards.some(c => c.includes('위비')))) match = true;
-        } else if (t === 'usd100') {
-          if (allText.includes('100달러') || allText.includes('신권') || (item.supportedCurrencies && item.supportedCurrencies.some(c => c.includes('100')))) match = true;
-        } else if (t === 'livebank_24h') {
-          if (allText.includes('livebank') || allText.includes('24시간') || (item.facilities && item.facilities.some(f => f.includes('24시간')))) match = true;
-        } else if (t === 'night_market') {
-          if (allText.includes('야시장') || allText.includes('여행자거리') || (item.location || '').includes('야시장')) match = true;
-        } else if (t === 'korean_atm') {
-          if (allText.includes('한국어') || (item.facilities && item.facilities.some(f => f.includes('한국어')))) match = true;
-        } else if ((item.tags || []).includes(t)) {
-          match = true;
-        }
-
-        if (!match) return false;
-      }
-
-      if (state.searchQuery) {
-        const q = state.searchQuery.toLowerCase();
-        const inName = (item.name || '').toLowerCase().includes(q);
-        const inNameKo = (item.nameKo || '').toLowerCase().includes(q);
-        const inNameVi = (item.nameVi || '').toLowerCase().includes(q);
-        const inNameEn = (item.nameEn || '').toLowerCase().includes(q);
-        const inCategory = (item.categoryLabel || '').toLowerCase().includes(q);
-        const inLocation = (item.location || '').toLowerCase().includes(q);
-        const inAddress = (item.addressVi || '').toLowerCase().includes(q);
-        const inDistrict = (item.districtLabel || '').toLowerCase().includes(q);
-        const inHighlight = (item.highlight || '').toLowerCase().includes(q);
-        const inDesc = (item.description || '').toLowerCase().includes(q);
-        const inTip = (item.localTip || '').toLowerCase().includes(q);
-        const inFee = (item.feePolicy || '').toLowerCase().includes(q);
-        const inLimit = (item.withdrawalLimit || '').toLowerCase().includes(q);
-        const inTags = (item.tags || []).some(t => (t || '').toLowerCase().includes(q));
-        const inFacilities = (item.facilities || []).some(f => (f || '').toLowerCase().includes(q));
-        const inCards = (item.supportedCards || []).some(c => (c || '').toLowerCase().includes(q));
-        const inCurrencies = (item.supportedCurrencies || []).some(c => (c || '').toLowerCase().includes(q));
-        const inPerks = (item.exchangePerks || []).some(p => (p || '').toLowerCase().includes(q));
-
-        if (!inName && !inNameKo && !inNameVi && !inNameEn && !inCategory && !inLocation && !inAddress &&
-            !inDistrict && !inHighlight && !inDesc && !inTip && !inFee && !inLimit && !inTags &&
-            !inFacilities && !inCards && !inCurrencies && !inPerks) {
-          return false;
-        }
-      }
-
-      return true;
-    }).sort((a, b) => {
-      if (state.sortBy === 'rating') {
-        const scoreA = (a.rating || 0) * 100000 + (a.reviewCount || 0);
-        const scoreB = (b.rating || 0) * 100000 + (b.reviewCount || 0);
-        return scoreB - scoreA;
-      }
-      if (state.sortBy === 'reviews' || state.sortBy === 'reviewCount') {
-        return (b.reviewCount || 0) - (a.reviewCount || 0);
-      }
-      if (state.sortBy === 'name') {
-        return (a.nameKo || a.name).localeCompare(b.nameKo || b.name, 'ko');
-      }
-      // price-asc / price-desc: switchMainTab hides these options on the currency tab
-      // because every spot's avgPriceVnd is 0. Kept only so a stale state.sortBy
-      // carried over from another tab degrades to "no reordering" instead of NaN.
-      if (state.sortBy === 'price-asc') {
-        return (a.avgPriceVnd || 0) - (b.avgPriceVnd || 0);
-      }
-      if (state.sortBy === 'price-desc') {
-        return (b.avgPriceVnd || 0) - (a.avgPriceVnd || 0);
-      }
-      return 0;
+    return applyDomainFilter({
+      source: NHA_TRANG_CURRENCY,
+      catField: 'currencyCategory', tagField: 'currencyTag', wishField: 'currencyWishlist',
+      categoryMatch: currencyCategoryMatch,
+      tagMatch: currencyTagMatch,
+      searchMatch: currencySearchMatch,
+      compare: currencyCompare
     });
   }
 
