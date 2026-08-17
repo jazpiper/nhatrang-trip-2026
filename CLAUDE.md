@@ -34,17 +34,34 @@ gourmet-data.js    NHA_TRANG_GOURMETS(113)   — module.exports 있음
 stays-data.js      NHA_TRANG_STAYS(24)       — module.exports 있음
 shopping-data.js   NHA_TRANG_SHOPPING(18)    — module.exports 있음
 currency-data.js   NHA_TRANG_CURRENCY(17)    — module.exports 있음
-js/app.js          전체 앱 로직 단일 파일 (IIFE). 도메인별 섹션 주석으로 구분:
+js/app.js          전체 앱 로직 단일 파일 (IIFE). 섹션 주석으로 구분:
                      1 스토리지 / 2 포맷·UI 헬퍼 / 3 state
+                     3.5 applyDomainFilter + matchTextFields (공통 필터 파이프라인)
+                     3.6 renderDomainGrid (공통 렌더 셸)
+                     3.7 applyModalFields (모달 필드 선언 바인딩)
                      4 액티비티 / 5 맛집 / 6 숙소 / 7 쇼핑 / 8 환전·ATM
+                     8.5 DOMAINS 레지스트리
                      9 탭 전환 / 10 이벤트 바인딩 / 11 부트스트랩 + Node export shim
 test-*.js          Node 검증 스위트 (루트)
+test-snapshots/    렌더 출력 골든 파일 (자동 생성, 직접 편집 금지)
 scratch/, .agents/ 과거 에이전트 작업 산출물. 프로덕션 코드 아님 — 수정/참조 불필요
 ```
 
-과거의 `js/store/`, `js/utils/`, `js/components/` 모듈 분리는 되돌려져 지금은 `js/app.js` 하나뿐이다. `PROJECT.md`나 옛 문서가 그 경로를 언급하면 무시할 것.
+과거의 `js/store/`, `js/utils/`, `js/components/` 모듈 분리는 되돌려져 지금은 `js/app.js` 하나뿐이다. **`file://`로 열려면 클래식 스크립트여야 하므로 다시 ES 모듈로 쪼개지 말 것.** `PROJECT.md`나 옛 문서가 그 경로를 언급하면 무시하라.
 
-5개 도메인은 동일한 패턴을 따른다: `typeof NHA_TRANG_X === 'undefined'` 가드 → 필터 → 정렬 → 템플릿 리터럴로 카드 HTML 생성 → 이미지 에러 핸들러/찜 버튼/모달 오픈 바인딩. 신규 도메인 추가 시 섹션 8(환전)을 그대로 본떠 쓸 것.
+### 도메인 레지스트리 (`DOMAINS`, 섹션 8.5)
+
+5개 도메인의 배선 차이가 이 테이블 하나에 모여 있다: 카테고리/태그 nav id와 `data-*` 속성명, state 필드명, 노트 스토리지 키, 모달 id, 히어로 문구, 섹션 id, 렌더 함수. 탭 전환·이벤트 바인딩·필터 초기화가 전부 이 테이블을 순회한다.
+
+**`activities`만 접두어 규칙이 다르다** — `actCategory` / `wishlist` / `notes` / `cardsGridContainer` / `detailModal` / `modalNoteInput` / `renderCards`처럼 "activity" 접두어가 없다. 접두어로 유도하지 말고 테이블 값을 읽어라.
+
+도메인 로직은 4개 축으로 분리돼 있다:
+- `getFilteredX()` → `applyDomainFilter(cfg)` + 도메인별 `categoryMatch`/`tagMatch`/`searchMatch`/`compare`
+- `renderX()` → `renderDomainGrid(cfg)` + 도메인별 `xCardTemplate(item)`
+- `openXModal()` → `applyModalFields(item, X_MODAL_FIELDS)` + 도메인 고유 훅
+- 배선 → `DOMAINS` 테이블
+
+**정렬 comparator와 카테고리/태그 매처는 도메인마다 의도적으로 다르다.** 통일하면 판정이 깨진다: activities는 rating에 리뷰수 타이브레이크가 없고, currency만 배수가 100000이며, 가격 필드가 `priceVnd`/`avgPriceVnd`/`pricePerNightVnd`로 갈린다.
 
 ### Node 테스트용 export shim
 
@@ -55,7 +72,9 @@ scratch/, .agents/ 과거 에이전트 작업 산출물. 프로덕션 코드 아
 ## 테스트
 
 ```bash
-node test-activity.js && node test-gourmet.js && node test-stays.js && node test-seafood.js && node test-shopping.js && node test-currency.js && node test-frontend.js
+node test-activity.js && node test-gourmet.js && node test-stays.js && node test-seafood.js && \
+node test-shopping.js && node test-currency.js && node test-challenger-2.js && \
+node test-frontend.js && node test-render-snapshot.js
 ```
 
 | 파일 | 대상 | 현재 상태 |
@@ -66,10 +85,20 @@ node test-activity.js && node test-gourmet.js && node test-stays.js && node test
 | `test-seafood.js` | 해산물 카테고리 17곳 도메인 검증 | PASS |
 | `test-shopping.js` | `shopping-data.js` 18개 | 25/25 PASS |
 | `test-currency.js` | `currency-data.js` 17개, 스키마 균일성, **실제 `getFilteredCurrency()` 구동** | 43/43 PASS |
+| `test-challenger-2.js` | 링크/보안 어드버세리얼, 결과 카운트 XSS 불변식 | 18/18 PASS |
 | `test-frontend.js` | DOM ID, 스크립트 순서, CSS 클래스 불변식, 환전 탭 실제 필터 | 7 스위트 PASS |
-| `test-challenger-2.js` | 링크/보안 어드버세리얼 | **깨져 있음** |
+| `test-render-snapshot.js` | **5개 도메인 렌더 HTML + 모달 채움 골든 스냅샷** | 56/56 일치 |
 
-`test-challenger-2.js`는 루트 `app.js`를 읽는데(102행) 지금 그 경로에 파일이 없어 `ENOENT`로 즉시 죽는다. 되살리려면 `js/app.js`를 읽도록 고쳐야 한다. 손대지 않을 거면 실행 목록에서 빼둘 것.
+### 렌더 스냅샷 (`test-render-snapshot.js`)
+
+리팩토링 시 동작 보존을 증명하는 안전망이다. `test-dom-stub.js`의 최소 DOM 스텁으로 렌더러를 Node에서 실행해 생성 HTML을 `test-snapshots/`의 골든 파일과 바이트 단위로 비교한다.
+
+- 46 케이스: 5도메인 × (기본/카테고리/태그/검색/평점정렬/가격오름/가격내림/찜만/빈결과) + 타임라인
+- 10 케이스: 5도메인 × 모달 2개(첫/마지막 항목). 모달이 건드린 20~26개 엘리먼트의 `textContent`/`innerHTML`/`src`/`href`/`style`을 전부 덤프
+
+의도한 변경이면 `node test-render-snapshot.js --update` 후 **diff를 한 줄씩 확인하고** 커밋한다. DIFF가 났는데 원인을 모르겠으면 `--update`를 쓰지 말고 코드를 고쳐라.
+
+주의: 스냅샷은 **렌더 출력만** 커버한다. 이벤트 바인딩·탭 전환·히어로 문구는 커버하지 않으므로 그 부분을 건드리면 HTTP 서버로 브라우저 확인이 필요하다.
 
 `data.js`는 `module.exports`가 없어서 `test-activity.js`가 `fs.readFileSync` + `eval`로 읽는다 (107행). 나머지 데이터 파일은 `require()` 가능.
 
@@ -87,7 +116,7 @@ app.getFilteredCurrency();   // 실제 앱 코드
 
 **카운트·개수 단언은 데이터셋에서 파생시킬 것.** `includes('17곳')` 같은 하드코딩 리터럴은 데이터가 바뀌어도 안 잡힌다. `NHA_TRANG_X.length`로 기대값을 만들어라. OR로 여러 조건을 묶을 때 그중 하나가 항상 참이면 단언 전체가 무력화된다.
 
-`test-frontend.js` Suite 4b는 `js/app.js`가 템플릿 리터럴로 뱉는 모든 클래스가 `style.css`에 선언돼 있는지 검사한다. 기존 부채는 `KNOWN_UNSTYLED` 목록에 있고 **줄이기만 하고 늘리지 않는다.**
+`test-frontend.js` Suite 4b는 `js/app.js`가 템플릿 리터럴로 뱉는 모든 클래스(현재 95개)가 `style.css`에 선언돼 있는지 검사한다. `KNOWN_UNSTYLED` 예외 목록은 **현재 비어 있다** — 늘리지 말 것. 목록이 낡아도(이미 스타일이 생겼는데 남아 있어도) 실패한다.
 
 ## 절대 규칙: 실제 데이터만 (Zero Hallucination)
 

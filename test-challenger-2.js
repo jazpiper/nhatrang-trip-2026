@@ -99,16 +99,25 @@ const runner = new ChallengerRunner();
 // Load modules
 const staysDataPath = path.resolve(__dirname, 'stays-data.js');
 const { NHA_TRANG_STAYS } = require(staysDataPath);
+// The js/store, js/utils and js/components split was reverted — js/app.js is the
+// only script now. Read whatever of the old layout still exists so this suite
+// keeps working across either arrangement.
 const jsFiles = [
   path.resolve(__dirname, 'js', 'app.js'),
   path.resolve(__dirname, 'js', 'components', 'activity.js'),
   path.resolve(__dirname, 'js', 'components', 'gourmet.js'),
   path.resolve(__dirname, 'js', 'components', 'stay.js'),
   path.resolve(__dirname, 'js', 'components', 'shopping.js'),
+  path.resolve(__dirname, 'js', 'components', 'currency.js'),
   path.resolve(__dirname, 'js', 'store', 'state.js'),
   path.resolve(__dirname, 'js', 'utils', 'helpers.js'),
   path.resolve(__dirname, 'js', 'utils', 'storage.js')
-];
+].filter(f => fs.existsSync(f));
+
+if (jsFiles.length === 0) {
+  console.error('No application JavaScript found — expected at least js/app.js');
+  process.exit(1);
+}
 const appJsCode = jsFiles.map(f => fs.readFileSync(f, 'utf8')).join('\n');
 const indexHtmlPath = path.resolve(__dirname, 'index.html');
 const indexHtmlCode = fs.readFileSync(indexHtmlPath, 'utf8');
@@ -380,21 +389,34 @@ runner.test('Static Stay Dataset contains zero HTML tags or script injection vec
 });
 
 runner.test('Search input query cannot cause reflected XSS in DOM', () => {
-  // Check how searchQuery is used in app.js
-  const searchXSSPayload = '<img src=x onerror=alert(1)>';
-  
-  // In app.js, searchQuery is used as string search: .includes(q)
-  const isDirectlyInterpolatedInCount = appJsCode.includes('stayResultCountText.innerHTML = `총 <strong>${state.searchQuery}');
+  // The result-count line is the one place a raw query could plausibly be echoed
+  // back into innerHTML. Assert the invariant (only a number reaches it) rather
+  // than grepping for one exact source line — the previous version of this test
+  // pinned a literal template string and broke the moment the renderer was
+  // refactored, even though the behaviour was unchanged.
   assert.ok(
-    !isDirectlyInterpolatedInCount,
-    'Search query must NOT be interpolated directly into stayResultCountText.innerHTML'
+    !/ResultCountText\.innerHTML\s*=[^;]*state\.searchQuery/.test(appJsCode),
+    'Search query must NOT be interpolated into any result-count innerHTML'
   );
 
-  // Check that result count only interpolates list.length
+  // Count elements are populated from a countHtml(n) formatter fed the list length.
   assert.ok(
-    appJsCode.includes('stayResultCountText.innerHTML = `총 <strong>${list.length}</strong>개의 테마별 추천 숙소`'),
-    'stayResultCountText.innerHTML must only interpolate numeric list.length'
+    /countEl\.innerHTML\s*=\s*cfg\.countHtml\(list\.length\)/.test(appJsCode),
+    'Result count must be rendered via countHtml(list.length)'
   );
+
+  // Every countHtml formatter may interpolate only its numeric parameter.
+  const formatters = [...appJsCode.matchAll(/countHtml:\s*\((\w+)\)\s*=>\s*`([^`]*)`/g)];
+  assert.ok(formatters.length >= 5, `Expected a countHtml formatter per domain, found ${formatters.length}`);
+  formatters.forEach(([, param, tpl]) => {
+    const interpolations = [...tpl.matchAll(/\$\{([^}]*)\}/g)].map(m => m[1].trim());
+    interpolations.forEach(expr => {
+      assert.strictEqual(
+        expr, param,
+        `countHtml may only interpolate its numeric argument '${param}', found '\${${expr}}'`
+      );
+    });
+  });
 });
 
 runner.test('Modal text elements use safe textContent or value assignments', () => {

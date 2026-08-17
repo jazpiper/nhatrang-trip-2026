@@ -243,13 +243,11 @@ for (const m of appSrcForClasses.matchAll(/class="([^"`]*)"/g)) {
   });
 }
 
-// Pre-existing debt from before the class-invariant check existed. Shrink this list;
-// never grow it. New renderer code must not add entries here.
-const KNOWN_UNSTYLED = new Set([
-  'card-icon', 'day-header', 'day-number', 'hours', 'item-content', 'item-icon',
-  'item-meta', 'item-price', 'item-title', 'reviews', 'sub-imgs-grid',
-  'timeline-activities-list', 'timeline-activity-item'
-]);
+// Debt ledger for classes the renderers emit without a style.css rule. It is
+// currently EMPTY — the original 13 entries were all real drift (the whole
+// timeline view and the activity modal's sub-image column were rendering
+// unstyled) and have been given rules. Shrink this list; never grow it.
+const KNOWN_UNSTYLED = new Set([]);
 
 const undefinedClasses = [...usedClasses]
   .filter(c => !css.includes('.' + c) && !html.includes(`class="${c}`))

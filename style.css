@@ -756,6 +756,24 @@ input, textarea, select {
   min-width: 0;
 }
 
+/* Currency cards split the meta line into rating / reviews / hours spans. */
+.card-meta-line .rating {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.card-meta-line .reviews {
+  color: var(--color-text-secondary);
+}
+
+.card-meta-line .dot {
+  opacity: 0.5;
+}
+
+.card-meta-line .hours {
+  color: var(--color-text-secondary);
+}
+
 .card-tag-pill-list {
   display: flex;
   gap: 4px;
@@ -918,6 +936,92 @@ input, textarea, select {
   padding-bottom: 14px;
   border-bottom: 1px solid var(--color-border-light);
   margin-bottom: 16px;
+}
+
+/* renderTimeline() emits .day-header / .day-number rather than the
+   .timeline-day-head / .day-chip pair above — the CSS and the renderer had
+   drifted apart, leaving the whole timeline view unstyled. */
+.day-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: 16px;
+}
+
+.day-number {
+  background: var(--color-primary);
+  color: white;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.timeline-activities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timeline-activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  min-width: 0;
+}
+
+.timeline-activity-item:hover {
+  background: var(--color-bg-main);
+  border-color: var(--color-border-medium);
+  transform: translateX(2px);
+}
+
+.item-icon {
+  flex: 0 0 auto;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.item-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.item-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 3px;
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+}
+
+.item-price {
+  flex: 0 0 auto;
+  font-weight: 800;
+  font-size: 0.88rem;
+  color: var(--color-primary);
+  white-space: nowrap;
 }
 
 .day-badge-wrap {
@@ -1110,6 +1214,22 @@ input, textarea, select {
 }
 
 .modal-gallery-grid .sub-imgs img {
+  width: 100%;
+  height: calc(50% - 4px);
+  object-fit: cover;
+}
+
+/* The activity modal renderer emits .sub-imgs-grid, not the .sub-imgs above —
+   another renderer/CSS drift that left the sub-image column unstyled. */
+.modal-gallery-grid .sub-imgs-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.modal-gallery-grid .sub-imgs-grid img {
   width: 100%;
   height: calc(50% - 4px);
   object-fit: cover;
@@ -2451,6 +2571,20 @@ input, textarea, select {
   border-radius: var(--radius-sm);
   font-size: 0.82rem;
   font-weight: 600;
+}
+
+.supported-card-item .card-icon {
+  flex: 0 0 auto;
+  margin-right: 6px;
+  line-height: 1;
+}
+
+.supported-card-item .card-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .supported-card-item .card-status-badge {
