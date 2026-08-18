@@ -39,7 +39,6 @@ const dataSrc = fs.readFileSync(path.join(__dirname, 'data.js'), 'utf8');
 (0, eval)(
   dataSrc +
   '\n;globalThis.NHA_TRANG_ACTIVITIES = NHA_TRANG_ACTIVITIES;' +
-  '\n;globalThis.NHA_TRANG_SCHEDULE = NHA_TRANG_SCHEDULE;' +
   '\n;globalThis.DEFAULT_EXCHANGE_RATE = DEFAULT_EXCHANGE_RATE;'
 );
 
@@ -138,6 +137,7 @@ function capture(d, state) {
   const out = [
     `<!-- domain: ${d.key} | state: ${state.name} -->`,
     `<!-- count: ${dom.html(d.count) || dom.text(d.count)} -->`,
+    `<!-- container class: ${dom.cls(d.container)} -->`,
     dom.html(d.container)
   ].join('\n');
   app.resetStateFilters();
@@ -158,17 +158,34 @@ for (const d of DOMAINS) {
     cases.push({ file: `${d.key}.${state.name}.html`, produce: () => capture(d, state) });
   }
 }
-// Timeline is a second view of the activities tab, not a domain of its own.
+// 리스트가 기본 뷰라 위 케이스는 전부 행 마크업을 잡는다. 그리드는 같은 데이터를
+// 카드 템플릿으로 그리는 두 번째 뷰이므로 도메인별로 한 케이스씩 따로 고정한다.
+for (const d of DOMAINS) {
+  cases.push({
+    file: `${d.key}.grid-view.html`,
+    produce: () => {
+      const prev = app.state.currentView;
+      app.state.currentView = 'grid';
+      const out = capture(d, { name: 'grid-view', patch: {} });
+      app.state.currentView = prev;
+      return out;
+    }
+  });
+}
+
+// 밀도는 컨테이너 클래스만 바꾸므로 한 도메인에서만 확인한다.
 cases.push({
-  file: 'activity.timeline.html',
+  file: 'gourmet.comfy.html',
   produce: () => {
-    app.resetStateFilters();
-    app.renderTimeline();
-    const out = `<!-- domain: activity | state: timeline -->\n${dom.html('timelineContainer')}`;
-    app.resetStateFilters();
+    const prev = app.state.density;
+    app.state.density = 'comfy';
+    const out = capture(DOMAINS.find(d => d.key === 'gourmet'), { name: 'comfy', patch: {} });
+    app.state.density = prev;
     return out;
   }
 });
+
+// "지금 영업중" 필터는 시각에 따라 결과가 달라지므로 스냅샷으로 고정하지 않는다.
 
 // --- Modal snapshots --------------------------------------------------------
 // openXModal writes into ~30 individual elements each. Dumping every element the

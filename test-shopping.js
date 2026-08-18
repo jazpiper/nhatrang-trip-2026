@@ -309,7 +309,7 @@ runner.suite('DOM & Badge Synchronization in index.html');
 const htmlContent = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
 runner.test('Tab badge in header matches dataset count (18곳)', () => {
-  assert.ok(htmlContent.includes('실전 시세 18곳'), "Header tab badge does not contain '실전 시세 18곳'");
+  assert.ok(/<span class="tab-badge">18<\/span>/.test(htmlContent), "Header tab badge must show 18");
 });
 
 runner.test('Category all button matches dataset count (18곳)', () => {

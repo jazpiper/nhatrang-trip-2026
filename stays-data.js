@@ -6,12 +6,12 @@
 
 const NHA_TRANG_STAYS = [
   // ==========================================
-  // THEME 1: Day 1 웰컴 가성비 (Day 1 Welcome Budget <50k KRW in City Center)
+  // THEME 1: 웰컴 가성비 0.5박 (Welcome Budget <50k KRW in City Center)
   // ==========================================
   {
     id: "stay_01",
     theme: "theme1",
-    themeName: "Day 1 웰컴 가성비",
+    themeName: "웰컴 가성비 0.5박",
     nameKo: "레갈리아 골드 호텔",
     nameEn: "Regalia Gold Hotel",
     nameVi: "Khách sạn Regalia Gold",
@@ -53,7 +53,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_02",
     theme: "theme1",
-    themeName: "Day 1 웰컴 가성비",
+    themeName: "웰컴 가성비 0.5박",
     nameKo: "버고 호텔 나트랑",
     nameEn: "Virgo Hotel Nha Trang",
     nameVi: "Khách sạn Virgo Nha Trang",
@@ -95,7 +95,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_03",
     theme: "theme1",
-    themeName: "Day 1 웰컴 가성비",
+    themeName: "웰컴 가성비 0.5박",
     nameKo: "에리카 호텔 나트랑",
     nameEn: "Erica Nha Trang Hotel",
     nameVi: "Khách sạn Erica Nha Trang",
@@ -122,7 +122,7 @@ const NHA_TRANG_STAYS = [
     highlights: [
       "나트랑 번화가인 비엣투(Biệt Thự) 여행자 거리에 위치해 밤 늦게 도착해도 치안 안전",
       "해변까지 도보 4분(300m), 27층 루프탑에서 즐기는 탁 트인 바다 전망",
-      "1박 2~3만원대 믿기지 않는 가성비로 Day 1 밤비행기 도착 후 부담 없는 1박에 최적"
+      "1박 2~3만원대 믿기지 않는 가성비로 밤비행기 도착 후 부담 없는 1박에 최적"
     ],
     nearbySpots: [
       "나트랑 해변 (도보 4분 / 300m)",
@@ -137,7 +137,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_04",
     theme: "theme1",
-    themeName: "Day 1 웰컴 가성비",
+    themeName: "웰컴 가성비 0.5박",
     nameKo: "DTX 호텔 나트랑",
     nameEn: "DTX Hotel Nha Trang",
     nameVi: "Khách sạn DTX Nha Trang",
@@ -179,7 +179,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_05",
     theme: "theme1",
-    themeName: "Day 1 웰컴 가성비",
+    themeName: "웰컴 가성비 0.5박",
     nameKo: "봉주르 나트랑 호텔",
     nameEn: "Bonjour Nha Trang Hotel",
     nameVi: "Khách sạn Bonjour Nha Trang",
@@ -221,7 +221,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_06",
     theme: "theme1",
-    themeName: "Day 1 웰컴 가성비",
+    themeName: "웰컴 가성비 0.5박",
     nameKo: "리브라 호텔 나트랑",
     nameEn: "Libra Hotel Nha Trang",
     nameVi: "Khách sạn Libra Nha Trang",
@@ -262,12 +262,12 @@ const NHA_TRANG_STAYS = [
   },
 
   // ==========================================
-  // THEME 2: Day 2-4 5성급 럭셔리 (5-Star Luxury Resorts / Beachfront)
+  // THEME 2: 5성급 럭셔리 (5-Star Luxury Resorts / Beachfront)
   // ==========================================
   {
     id: "stay_07",
     theme: "theme2",
-    themeName: "Day 2-4 5성급 럭셔리",
+    themeName: "5성급 럭셔리",
     nameKo: "빈펄 리조트 나트랑 (혼째섬)",
     nameEn: "Vinpearl Resort Nha Trang",
     nameVi: "Vinpearl Resort Nha Trang (Đảo Hòn Tre)",
@@ -309,7 +309,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_08",
     theme: "theme2",
-    themeName: "Day 2-4 5성급 럭셔리",
+    themeName: "5성급 럭셔리",
     nameKo: "아미아나 리조트 나트랑",
     nameEn: "Amiana Resort Nha Trang",
     nameVi: "Khu nghỉ dưỡng Amiana Nha Trang",
@@ -351,7 +351,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_09",
     theme: "theme2",
-    themeName: "Day 2-4 5성급 럭셔리",
+    themeName: "5성급 럭셔리",
     nameKo: "인터컨티넨탈 나트랑",
     nameEn: "InterContinental Nha Trang",
     nameVi: "Khách sạn InterContinental Nha Trang",
@@ -393,7 +393,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_10",
     theme: "theme2",
-    themeName: "Day 2-4 5성급 럭셔리",
+    themeName: "5성급 럭셔리",
     nameKo: "쉐라톤 나트랑 호텔 & 스파",
     nameEn: "Sheraton Nha Trang Hotel & Spa",
     nameVi: "Khách sạn Sheraton Nha Trang",
@@ -435,7 +435,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_11",
     theme: "theme2",
-    themeName: "Day 2-4 5성급 럭셔리",
+    themeName: "5성급 럭셔리",
     nameKo: "미아 리조트 나트랑",
     nameEn: "Mia Resort Nha Trang",
     nameVi: "Khu nghỉ dưỡng Mia Nha Trang",
@@ -477,7 +477,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_12",
     theme: "theme2",
-    themeName: "Day 2-4 5성급 럭셔리",
+    themeName: "5성급 럭셔리",
     nameKo: "퓨전 리조트 깜라인",
     nameEn: "Fusion Resort Cam Ranh",
     nameVi: "Khu nghỉ dưỡng Fusion Cam Ranh",
@@ -518,12 +518,12 @@ const NHA_TRANG_STAYS = [
   },
 
   // ==========================================
-  // THEME 3: Day 4-6 감성 풀빌라 (Private Pool Villas & Peaceful Healing)
+  // THEME 3: 감성 풀빌라 (Private Pool Villas & Peaceful Healing)
   // ==========================================
   {
     id: "stay_13",
     theme: "theme3",
-    themeName: "Day 4-6 감성 풀빌라",
+    themeName: "감성 풀빌라",
     nameKo: "식스센스 닌반베이",
     nameEn: "Six Senses Ninh Van Bay",
     nameVi: "Six Senses Ninh Vân Bay",
@@ -564,7 +564,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_14",
     theme: "theme3",
-    themeName: "Day 4-6 감성 풀빌라",
+    themeName: "감성 풀빌라",
     nameKo: "안람 리트리츠 닌반베이",
     nameEn: "An Lam Retreats Ninh Van Bay",
     nameVi: "An Lâm Retreats Ninh Vân Bay",
@@ -605,7 +605,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_15",
     theme: "theme3",
-    themeName: "Day 4-6 감성 풀빌라",
+    themeName: "감성 풀빌라",
     nameKo: "그란 멜리아 나트랑",
     nameEn: "Gran Meliá Nha Trang (Villa Le Corail)",
     nameVi: "Gran Meliá Nha Trang",
@@ -646,7 +646,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_16",
     theme: "theme3",
-    themeName: "Day 4-6 감성 풀빌라",
+    themeName: "감성 풀빌라",
     nameKo: "미아 리조트 나트랑 (풀빌라)",
     nameEn: "Mia Resort Nha Trang - Cliff & Beachfront Villas",
     nameVi: "Mia Resort Nha Trang",
@@ -687,7 +687,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_17",
     theme: "theme3",
-    themeName: "Day 4-6 감성 풀빌라",
+    themeName: "감성 풀빌라",
     nameKo: "퓨전 리조트 깜란 (올 스파 풀빌라)",
     nameEn: "Fusion Resort Cam Ranh - All Spa Inclusive",
     nameVi: "Fusion Resort Cam Ranh",
@@ -728,7 +728,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_18",
     theme: "theme3",
-    themeName: "Day 4-6 감성 풀빌라",
+    themeName: "감성 풀빌라",
     nameKo: "랄리아 닌반베이",
     nameEn: "L'Alya Ninh Van Bay",
     nameVi: "L'Alya Ninh Vân Bay",
@@ -768,12 +768,12 @@ const NHA_TRANG_STAYS = [
   },
 
   // ==========================================
-  // THEME 4: Day 6 0.5박 출국팩 (Late Check-out Budget Stays <50k KRW)
+  // THEME 4: 출국 전 0.5박 (Late Check-out Budget Stays <50k KRW)
   // ==========================================
   {
     id: "stay_19",
     theme: "theme4",
-    themeName: "Day 6 0.5박 출국팩",
+    themeName: "출국 전 0.5박",
     nameKo: "씨에스타 호텔 나트랑",
     nameEn: "Seaesta Nha Trang Hotel",
     nameVi: "Khách Sạn Seaesta Nha Trang",
@@ -815,7 +815,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_20",
     theme: "theme4",
-    themeName: "Day 6 0.5박 출국팩",
+    themeName: "출국 전 0.5박",
     nameKo: "레 스참 호텔 나트랑",
     nameEn: "Le's Cham Hotel Nha Trang",
     nameVi: "Khách Sạn Le's Cham Nha Trang",
@@ -857,7 +857,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_21",
     theme: "theme4",
-    themeName: "Day 6 0.5박 출국팩",
+    themeName: "출국 전 0.5박",
     nameKo: "메이플 호텔 & 아파트먼트",
     nameEn: "Maple Hotel & Apartment Nha Trang",
     nameVi: "Khách Sạn Maple Nha Trang",
@@ -899,7 +899,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_22",
     theme: "theme4",
-    themeName: "Day 6 0.5박 출국팩",
+    themeName: "출국 전 0.5박",
     nameKo: "퀸터 센트럴 나트랑",
     nameEn: "Quinter Central Nha Trang",
     nameVi: "Khách Sạn Quinter Central Nha Trang",
@@ -941,7 +941,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_23",
     theme: "theme4",
-    themeName: "Day 6 0.5박 출국팩",
+    themeName: "출국 전 0.5박",
     nameKo: "멜리사 호텔 나트랑",
     nameEn: "Melissa Hotel Nha Trang",
     nameVi: "Khách Sạn Melissa Nha Trang",
@@ -983,7 +983,7 @@ const NHA_TRANG_STAYS = [
   {
     id: "stay_24",
     theme: "theme4",
-    themeName: "Day 6 0.5박 출국팩",
+    themeName: "출국 전 0.5박",
     nameKo: "세아나 호텔 나트랑",
     nameEn: "Seana Hotel Nha Trang",
     nameVi: "Khách Sạn Seana Nha Trang",

@@ -36,7 +36,7 @@ stayModalPriceRange
 stayModalRating
     text="★ 4.4 (850개 구글 리뷰)"
 stayModalThemeBadge
-    text="Day 6 0.5박 출국팩"
+    text="출국 전 0.5박"
 stayModalThumbs
     html="\n        <div class=\"gallery-thumb active\" data-index=\"0\">\n          <img src=\"https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80\" alt=\"숙소 사진 1\" loading=\"lazy\" />\n        </div>\n      "
 stayModalTip

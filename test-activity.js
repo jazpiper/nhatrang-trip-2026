@@ -7,14 +7,13 @@
  * Verifies NHA_TRANG_ACTIVITIES from data.js against:
  * 1. Dataset size: Total activities >= 40 (specifically 43).
  * 2. Unique IDs: Strictly unique alphanumeric identifiers (act-01 to act-43).
- * 3. Schema completeness: All 23 schema fields present and non-empty.
+ * 3. Schema completeness: All 22 schema fields present and non-empty.
  * 4. Data types & bounds: rating (1.0 <= r <= 5.0), reviewCount (> 0 integer), priceVnd (>= 0).
  * 5. Category taxonomy: Exactly matches the 10 allowed categories.
  * 6. Image URLs: Non-empty array with >= 3 valid HTTP/HTTPS URLs per entry.
  * 7. Google Map queries & Booking URLs: Non-empty query strings and valid URLs.
  * 8. Sub-array fields: tags, included, notIncluded, whatToBring are populated arrays.
  * 9. Text integrity & Security: No corrupted placeholders, no XSS vectors.
- * 10. Schedule integrity: Referenced activity IDs in NHA_TRANG_SCHEDULE exist in activities dataset.
  * ============================================================================
  */
 
@@ -100,18 +99,24 @@ runner.test('data.js exists on disk', () => {
 });
 
 let activities = [];
-let schedule = [];
 
-runner.test('data.js loads and exports NHA_TRANG_ACTIVITIES and NHA_TRANG_SCHEDULE', () => {
+runner.test('data.js loads and exports NHA_TRANG_ACTIVITIES', () => {
   const dataCode = fs.readFileSync(DATA_FILE_PATH, 'utf8').replace(/const /g, 'global.');
   eval(dataCode);
-  
+
   activities = global.NHA_TRANG_ACTIVITIES;
-  schedule = global.NHA_TRANG_SCHEDULE;
 
   assert.ok(Array.isArray(activities), 'NHA_TRANG_ACTIVITIES must be an array');
   assert.ok(activities.length > 0, 'NHA_TRANG_ACTIVITIES must not be empty');
-  assert.ok(Array.isArray(schedule), 'NHA_TRANG_SCHEDULE must be an array');
+});
+
+// 여행 일정(NHA_TRANG_SCHEDULE)과 suggestedDay는 실제 여행 날짜를 노출하므로
+// 공개 배포를 위해 데이터에서 제거했다. 다시 들어오지 않는지 확인한다.
+runner.test('개인 여행 일정 데이터가 노출되지 않는다', () => {
+  const raw = fs.readFileSync(DATA_FILE_PATH, 'utf8');
+  assert.ok(typeof global.NHA_TRANG_SCHEDULE === 'undefined', 'NHA_TRANG_SCHEDULE must not exist');
+  assert.ok(!/suggestedDay/.test(raw), 'data.js must not contain suggestedDay');
+  assert.ok(!/9\/1[0-9]|9\/2[0-9]|Day ?[1-7]/.test(raw), 'data.js must not contain trip dates or Day markers');
 });
 
 // ==========================================
@@ -152,11 +157,11 @@ runner.test('Every activity has a unique, well-formatted string ID (e.g., act-01
 });
 
 // ==========================================
-// 4. Schema Completeness (23 Required Fields)
+// 4. Schema Completeness (22 Required Fields)
 // ==========================================
-runner.suite('Schema Completeness (All 23 Required Fields)');
+runner.suite('Schema Completeness (All 22 Required Fields)');
 
-const ALL_23_SCHEMA_FIELDS = [
+const ALL_22_SCHEMA_FIELDS = [
   'id',
   'title',
   'titleEn',
@@ -178,14 +183,13 @@ const ALL_23_SCHEMA_FIELDS = [
   'notIncluded',
   'whatToBring',
   'coupleTip',
-  'suggestedDay',
   'bookingUrl'
 ];
 
-runner.test('Every activity contains all 23 schema fields with non-empty values', () => {
+runner.test('Every activity contains all 22 schema fields with non-empty values', () => {
   activities.forEach((act, idx) => {
     const missing = [];
-    ALL_23_SCHEMA_FIELDS.forEach(field => {
+    ALL_22_SCHEMA_FIELDS.forEach(field => {
       const val = act[field];
       if (val === undefined || val === null || val === '') {
         missing.push(field);
@@ -383,20 +387,6 @@ runner.test('Security check: No text fields contain dangerous HTML or script inj
       assert.ok(
         !pattern.test(jsonStr),
         `Activity #${idx + 1} (${act.id}) failed security check: contains unsafe pattern ${pattern}`
-      );
-    });
-  });
-});
-
-runner.test('Schedule integrity: All activity IDs in NHA_TRANG_SCHEDULE exist in activities dataset', () => {
-  const activityIdSet = new Set(activities.map(a => a.id));
-  schedule.forEach((day, dIdx) => {
-    const actIds = day.activities || day.activityIds || [];
-    assert.ok(Array.isArray(actIds), `Schedule Day ${dIdx + 1} activities must be an array`);
-    actIds.forEach(id => {
-      assert.ok(
-        activityIdSet.has(id),
-        `Schedule Day ${dIdx + 1} references non-existent activity ID "${id}"`
       );
     });
   });

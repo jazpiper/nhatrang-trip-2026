@@ -3,13 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>나트랑 여행 플래너 2026 🌴 | 힐링 여행 가이드 (9/19 ~ 9/25)</title>
-  <meta name="description" content="2026년 9월 19일부터 9월 25일까지 나트랑 여행을 위한 에어비앤비 스타일 액티비티, 숙소, 맛집, 환전, 쇼핑 큐레이션 플래너">
-  
-  <!-- Google Fonts: Plus Jakarta Sans -->
+  <title>나트랑 로컬 가이드</title>
+  <meta name="description" content="나트랑 액티비티·맛집·숙소·쇼핑·환전 큐레이션">
+
+  <!-- 검색 색인과 외부 유입 추적을 막는다 (개인 여행용 비공개 페이지) -->
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+
+  <!-- Google Fonts: Be Vietnam Pro (베트남어 성조) + Fraunces (디스플레이) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
   
   <!-- Stylesheet -->
   <link rel="stylesheet" href="./style.css">
@@ -20,33 +25,32 @@
   <header class="site-header">
     <div class="container header-inner">
       <!-- Brand Logo -->
-      <a href="#" class="brand-logo" title="나트랑 여행 2026">
+      <a href="#" class="brand-logo" title="나트랑 로컬 가이드">
         <span class="logo-icon">🌴</span>
-        <span>NhaTrang 2026</span>
-        <span class="brand-badge">9/19 - 9/25</span>
+        <span>Nha Trang</span>
       </a>
 
       <!-- Center Tabs (Activities, Stays, Gourmet, Shopping, Currency) -->
       <nav class="header-nav-tabs" aria-label="메인 카테고리">
         <button class="nav-tab-btn active" data-tab="activities">
           <span>🤿 액티비티</span>
-          <span class="tab-badge" style="background: #E6F7F8; color: #008489;">엄선 43선</span>
+          <span class="tab-badge">43</span>
         </button>
         <button class="nav-tab-btn" data-tab="gourmet">
-          <span>🍜 로컬 맛집</span>
-          <span class="tab-badge" style="background: #E6F7F8; color: #008489;">Google 검증 113곳</span>
+          <span>🍜 맛집</span>
+          <span class="tab-badge">113</span>
         </button>
         <button class="nav-tab-btn" data-tab="stays">
           <span>🏨 숙소</span>
-          <span class="tab-badge" style="background: #E6F7F8; color: #008489;">4개 테마 24선</span>
+          <span class="tab-badge">24</span>
         </button>
         <button class="nav-tab-btn" data-tab="shopping">
-          <span>🛍️ 짝퉁/쇼핑</span>
-          <span class="tab-badge" style="background: #FFF0F2; color: #FF385C;">실전 시세 18곳</span>
+          <span>🛍️ 쇼핑</span>
+          <span class="tab-badge">18</span>
         </button>
         <button class="nav-tab-btn" data-tab="currency">
-          <span>💱 환전 & ATM</span>
-          <span class="tab-badge" style="background: #ECFDF5; color: #059669;">수수료 0원 17곳</span>
+          <span>💱 환전</span>
+          <span class="tab-badge">17</span>
         </button>
       </nav>
 
@@ -59,9 +63,9 @@
         </button>
 
         <!-- Weather & Tip Guide -->
-        <button class="action-pill-btn" id="openGuideBtn" title="9월 나트랑 날씨 & 여행 꿀팁">
+        <button class="action-pill-btn" id="openGuideBtn" title="나트랑 날씨 & 여행 꿀팁">
           <span>💡</span>
-          <span>9월 가이드</span>
+          <span>가이드</span>
         </button>
 
         <!-- Wishlist Toggle -->
@@ -78,20 +82,14 @@
   <section class="hero-section">
     <div class="container hero-content">
       <div class="hero-title-area">
-        <h1 id="heroTitle">나트랑 힐링 여행 🌴</h1>
+        <h1 id="heroTitle">액티비티</h1>
         <p class="hero-subtitle" id="heroSubtitle">
-          <span>2026년 9월 19일 (금) ~ 9월 25일 (목)</span>
-          <span class="dot-separator">•</span>
-          <span>6박 7일 일정</span>
-          <span class="dot-separator">•</span>
           <span id="heroSubtitleDesc">호핑, 스파, 빈원더스, 선셋 크루즈 큐레이션</span>
         </p>
       </div>
       <div class="hero-tags" id="heroTagsArea">
-        <span class="hero-stat-pill"><span class="icon">✨</span> 엄선된 43개 리얼 액티비티</span>
-        <span class="hero-stat-pill"><span class="icon">💆</span> 프라이빗 스파 & 머드온천</span>
-        <span class="hero-stat-pill"><span class="icon">⛵</span> 럭셔리 선셋 크루즈 & 호핑</span>
-        <span class="hero-stat-pill"><span class="icon">🏜️</span> 달랏 / 무이네 근교투어</span>
+        <span class="hero-stat-pill"><span class="icon">✨</span> 43곳</span>
+        <span class="hero-stat-pill"><span class="icon">📍</span> 구글 지도 실측 정보</span>
       </div>
     </div>
   </section>
@@ -189,19 +187,19 @@
       </button>
       <button class="category-item-btn" data-scategory="welcome">
         <span class="cat-icon">🌙</span>
-        <span>9/19 웰컴 0.5박 (<5만)</span>
+        <span>웰컴 0.5박 (5만원 이하)</span>
       </button>
       <button class="category-item-btn" data-scategory="luxury">
         <span class="cat-icon">👑</span>
-        <span>9/20~22 5성급 럭셔리</span>
+        <span>5성급 럭셔리</span>
       </button>
       <button class="category-item-btn" data-scategory="poolvilla">
         <span class="cat-icon">🏊</span>
-        <span>9/22~24 가성비 풀빌라</span>
+        <span>가성비 풀빌라</span>
       </button>
       <button class="category-item-btn" data-scategory="goodbye">
         <span class="cat-icon">🛍️</span>
-        <span>9/24 출국 전 0.5박 (<5만)</span>
+        <span>출국 전 0.5박 (5만원 이하)</span>
       </button>
     </div>
   </nav>
@@ -340,6 +338,8 @@
 
       <!-- Controls: Sort & View Toggle -->
       <div class="toolbar-controls">
+        <button class="tag-chip-btn" id="openNowChip" title="지금 문을 연 곳만" aria-pressed="false">🕘 지금 영업중</button>
+
         <select class="sort-select" id="sortSelect" aria-label="정렬 기준">
           <option value="recommended">추천순 정렬</option>
           <option value="rating">평점 높은 순</option>
@@ -347,13 +347,18 @@
           <option value="price-desc">가격 높은 순</option>
         </select>
 
-        <div id="viewToggleButtons" style="display: flex; gap: 8px;">
-          <button class="view-toggle-btn active" id="viewGridBtn" title="카드 그리드 뷰">
-            <span>▦</span> <span>카드 뷰</span>
+        <div id="viewToggleButtons">
+          <button class="view-toggle-btn active" id="viewListBtn" title="정보 위주 리스트 뷰">
+            <span>☰</span> <span>리스트</span>
           </button>
-          <button class="view-toggle-btn" id="viewTimelineBtn" title="6박 7일 타임라인 뷰">
-            <span>📅</span> <span>일정 뷰</span>
+          <button class="view-toggle-btn" id="viewGridBtn" title="사진 위주 그리드 뷰">
+            <span>▦</span> <span>그리드</span>
           </button>
+        </div>
+
+        <div id="densityToggleButtons">
+          <button class="view-toggle-btn active" id="densityTightBtn" title="한 화면에 더 많이">밀집</button>
+          <button class="view-toggle-btn" id="densityComfyBtn" title="여유 있게">넉넉</button>
         </div>
       </div>
     </div>
@@ -394,7 +399,7 @@
     <div class="container">
       <div class="results-info-bar">
         <span id="stayResultCountText">총 <strong>24</strong>개의 테마별 추천 숙소</span>
-        <span>🏨 9/19 웰컴부터 럭셔리 호캉스, 가성비 풀빌라, 9/24 굿바이 0.5박까지 엄선된 숙소 리스트입니다.</span>
+        <span>🏨 웰컴 0.5박부터 럭셔리 호캉스, 가성비 풀빌라, 출국 전 0.5박까지 엄선된 숙소 리스트입니다.</span>
       </div>
 
       <!-- Stays Grid Cards Container -->
@@ -423,61 +428,61 @@
   <main class="activities-section" id="currencyGridSection" style="display: none;">
     <div class="container">
       <!-- Embedded VND <-> KRW Interactive Currency Calculator Widget -->
-      <section class="currency-calculator-widget-wrap" style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); color: white; border-radius: var(--radius-lg); padding: 28px 24px; margin-bottom: 32px; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15);">
+      <section class="currency-calculator-widget-wrap" style="background: linear-gradient(135deg, #0E3538 0%, #164B4F 100%); color: white; border-radius: var(--radius-lg); padding: 28px 24px; margin-bottom: 32px; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15);">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-size: 1.5rem;">💱</span>
-              <h2 style="font-size: 1.35rem; font-weight: 800; color: #F8FAFC; margin: 0;">실시간 동(VND) ↔ 원화(KRW) 계산기</h2>
-              <span class="mini-tag" style="background: rgba(16, 185, 129, 0.2); color: #34D399; font-weight: 700; border: 1px solid rgba(52, 211, 153, 0.3);">실시간 양방향 연동</span>
+              <h2 style="font-size: 1.35rem; font-weight: 800; color: #F5FBFA; margin: 0;">실시간 동(VND) ↔ 원화(KRW) 계산기</h2>
+              <span class="mini-tag" style="background: rgba(16, 185, 129, 0.2); color: #5FD3D8; font-weight: 700; border: 1px solid rgba(52, 211, 153, 0.3);">실시간 양방향 연동</span>
             </div>
-            <p style="color: #94A3B8; font-size: 0.88rem; margin-top: 4px;">100,000 VND ≈ 약 5,450 KRW (실시간 환율 직접 설정 및 원터치 프리셋 지원)</p>
+            <p style="color: #8FB6B5; font-size: 0.88rem; margin-top: 4px;">100,000 VND ≈ 약 5,450 KRW (실시간 환율 직접 설정 및 원터치 프리셋 지원)</p>
           </div>
 
           <!-- Rate Switcher Buttons -->
           <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.06); padding: 6px 12px; border-radius: var(--radius-pill); border: 1px solid rgba(255,255,255,0.1);">
-            <span style="font-size: 0.78rem; color: #CBD5E1; font-weight: 600;">적용 환율:</span>
-            <button class="calc-rate-btn active" id="calcRate545Btn" data-rate="5.45" style="padding: 4px 10px; background: #059669; color: white; border: none; border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; cursor: pointer;">5.45</button>
-            <button class="calc-rate-btn" id="calcRate540Btn" data-rate="5.40" style="padding: 4px 10px; background: rgba(255,255,255,0.1); color: #E2E8F0; border: none; border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 600; cursor: pointer;">5.40</button>
-            <button class="calc-rate-btn" id="calcRate550Btn" data-rate="5.50" style="padding: 4px 10px; background: rgba(255,255,255,0.1); color: #E2E8F0; border: none; border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 600; cursor: pointer;">5.50</button>
+            <span style="font-size: 0.78rem; color: #B4D4D2; font-weight: 600;">적용 환율:</span>
+            <button class="calc-rate-btn active" id="calcRate545Btn" data-rate="5.45" style="padding: 4px 10px; background: #0B7F87; color: white; border: none; border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; cursor: pointer;">5.45</button>
+            <button class="calc-rate-btn" id="calcRate540Btn" data-rate="5.40" style="padding: 4px 10px; background: rgba(255,255,255,0.1); color: #D7EDE9; border: none; border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 600; cursor: pointer;">5.40</button>
+            <button class="calc-rate-btn" id="calcRate550Btn" data-rate="5.50" style="padding: 4px 10px; background: rgba(255,255,255,0.1); color: #D7EDE9; border: none; border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 600; cursor: pointer;">5.50</button>
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
           <!-- VND Input Group -->
           <div class="calc-main-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-md); padding: 18px;">
-            <label for="calcVndInputMain" style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: #94A3B8; margin-bottom: 8px;">
+            <label for="calcVndInputMain" style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: #8FB6B5; margin-bottom: 8px;">
               <span>🇻🇳 베트남 동 (VND)</span>
-              <span id="calcVndHelperMain" style="color: #34D399; font-weight: 700;">10만 동 (100k VND)</span>
+              <span id="calcVndHelperMain" style="color: #5FD3D8; font-weight: 700;">10만 동 (100k VND)</span>
             </label>
             <div style="position: relative; display: flex; align-items: center;">
               <input type="text" id="calcVndInputMain" placeholder="100,000" style="width: 100%; height: 50px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-sm); padding: 0 50px 0 16px; font-size: 1.25rem; font-weight: 800; color: #FFFFFF; outline: none;" />
-              <span style="position: absolute; right: 16px; font-size: 0.9rem; font-weight: 700; color: #64748B;">VND</span>
+              <span style="position: absolute; right: 16px; font-size: 0.9rem; font-weight: 700; color: #557C7E;">VND</span>
             </div>
             <!-- Preset Pills -->
             <div class="calc-preset-pills-main" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;">
-              <button type="button" class="btn-calc-preset" data-addvnd="50000" style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: #E2E8F0; cursor: pointer;">+50k</button>
-              <button type="button" class="btn-calc-preset" data-addvnd="100000" style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: #E2E8F0; cursor: pointer;">+100k</button>
-              <button type="button" class="btn-calc-preset" data-addvnd="200000" style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: #E2E8F0; cursor: pointer;">+200k</button>
-              <button type="button" class="btn-calc-preset" data-addvnd="500000" style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: #E2E8F0; cursor: pointer;">+500k</button>
-              <button type="button" class="btn-calc-preset" data-addvnd="1000000" style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: #E2E8F0; cursor: pointer;">+1M</button>
-              <button type="button" class="btn-calc-preset" data-addvnd="2000000" style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: #E2E8F0; cursor: pointer;">+2M</button>
+              <button type="button" class="btn-calc-preset" data-addvnd="50000" style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: #D7EDE9; cursor: pointer;">+50k</button>
+              <button type="button" class="btn-calc-preset" data-addvnd="100000" style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: #D7EDE9; cursor: pointer;">+100k</button>
+              <button type="button" class="btn-calc-preset" data-addvnd="200000" style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: #D7EDE9; cursor: pointer;">+200k</button>
+              <button type="button" class="btn-calc-preset" data-addvnd="500000" style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: #D7EDE9; cursor: pointer;">+500k</button>
+              <button type="button" class="btn-calc-preset" data-addvnd="1000000" style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: #D7EDE9; cursor: pointer;">+1M</button>
+              <button type="button" class="btn-calc-preset" data-addvnd="2000000" style="padding: 4px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: #D7EDE9; cursor: pointer;">+2M</button>
               <button type="button" class="btn-calc-reset" id="calcResetBtnMain" style="padding: 4px 10px; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: #FCA5A5; cursor: pointer;">↺ 초기화</button>
             </div>
           </div>
 
           <!-- KRW Input Group -->
           <div class="calc-main-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-md); padding: 18px;">
-            <label for="calcKrwInputMain" style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: #94A3B8; margin-bottom: 8px;">
+            <label for="calcKrwInputMain" style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: #8FB6B5; margin-bottom: 8px;">
               <span>🇰🇷 대한민국 원 (KRW)</span>
               <span id="calcKrwHelperMain" style="color: #60A5FA; font-weight: 700;">약 5,450원</span>
             </label>
             <div style="position: relative; display: flex; align-items: center;">
               <input type="text" id="calcKrwInputMain" placeholder="5,450" style="width: 100%; height: 50px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-sm); padding: 0 50px 0 16px; font-size: 1.25rem; font-weight: 800; color: #FFFFFF; outline: none;" />
-              <span style="position: absolute; right: 16px; font-size: 0.9rem; font-weight: 700; color: #64748B;">원</span>
+              <span style="position: absolute; right: 16px; font-size: 0.9rem; font-weight: 700; color: #557C7E;">원</span>
             </div>
             <!-- Mental Math Rule Banner -->
-            <div style="margin-top: 10px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 0.8rem; color: #A7F3D0; line-height: 1.4;">
+            <div style="margin-top: 10px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 0.8rem; color: #BFE9E8; line-height: 1.4;">
               💡 <strong>1초 암산 공식:</strong> 동 가격에서 <strong>'0 하나 빼고(÷10) 2로 나누기(÷2)'</strong> (예: 200,000동 → 10,000원)
             </div>
           </div>
@@ -497,14 +502,14 @@
           </p>
 
           <!-- Interactive POS Terminal Simulator -->
-          <div style="background: #0F172A; border-radius: var(--radius-md); padding: 14px; color: white;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94A3B8; border-bottom: 1px solid #334155; padding-bottom: 6px; margin-bottom: 10px;">
+          <div style="background: #0E3538; border-radius: var(--radius-md); padding: 14px; color: white;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #8FB6B5; border-bottom: 1px solid #334155; padding-bottom: 6px; margin-bottom: 10px;">
               <span>📟 POS TERMINAL SIMULATOR</span>
               <span>결제 금액: 500,000 VND</span>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-              <button type="button" class="btn-pos-choice" onclick="alert('🎉 정답입니다! 현지 통화(VND) 결제로 추가 수수료 0원을 방어했습니다.')" style="padding: 10px 8px; background: #059669; border: 1px solid #10B981; border-radius: var(--radius-sm); color: white; text-align: left; cursor: pointer;">
-                <div style="font-size: 0.7rem; color: #A7F3D0; font-weight: 700;">✅ 추천 (선택)</div>
+              <button type="button" class="btn-pos-choice" onclick="alert('🎉 정답입니다! 현지 통화(VND) 결제로 추가 수수료 0원을 방어했습니다.')" style="padding: 10px 8px; background: #0B7F87; border: 1px solid #10B981; border-radius: var(--radius-sm); color: white; text-align: left; cursor: pointer;">
+                <div style="font-size: 0.7rem; color: #BFE9E8; font-weight: 700;">✅ 추천 (선택)</div>
                 <div style="font-size: 0.95rem; font-weight: 800; margin-top: 2px;">500,000 VND</div>
                 <div style="font-size: 0.7rem; color: #D1FAE5; margin-top: 2px;">수수료 0% (약 27,250원)</div>
               </button>
@@ -514,7 +519,7 @@
                 <div style="font-size: 0.7rem; color: #FECACA; margin-top: 2px;">DCC 수수료 +2,450원 낭비</div>
               </button>
             </div>
-            <div style="font-size: 0.72rem; color: #94A3B8; margin-top: 8px; text-align: center;">
+            <div style="font-size: 0.72rem; color: #8FB6B5; margin-top: 8px; text-align: center;">
               💬 직원에게: <em>"Xin vui lòng thanh toán bằng tiền Đồng (VND)."</em> (동으로 결제해주세요)
             </div>
           </div>
@@ -527,13 +532,13 @@
             <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--color-text-primary); margin: 0;">7단계 안전 ATM 인출 & 카드 먹힘 방지</h3>
           </div>
           <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.83rem; color: var(--color-text-primary); display: flex; flex-direction: column; gap: 6px;">
-            <li style="display: flex; gap: 6px;"><span style="color: #059669; font-weight: 800;">1.</span> <strong>카드 삽입 & 언어:</strong> 영문(English) 선택</li>
-            <li style="display: flex; gap: 6px;"><span style="color: #059669; font-weight: 800;">2.</span> <strong>6자리 PIN 입력:</strong> 4자리 비밀번호 + 뒤에 00 입력 후 ENTER</li>
-            <li style="display: flex; gap: 6px;"><span style="color: #059669; font-weight: 800;">3.</span> <strong>계좌 종류:</strong> 반드시 [Checking / Current Account] 선택</li>
-            <li style="display: flex; gap: 6px;"><span style="color: #059669; font-weight: 800;">4.</span> <strong>금액 선택:</strong> VPBank(500만), TPBank LiveBank(1,000만동)</li>
+            <li style="display: flex; gap: 6px;"><span style="color: #0B7F87; font-weight: 800;">1.</span> <strong>카드 삽입 & 언어:</strong> 영문(English) 선택</li>
+            <li style="display: flex; gap: 6px;"><span style="color: #0B7F87; font-weight: 800;">2.</span> <strong>6자리 PIN 입력:</strong> 4자리 비밀번호 + 뒤에 00 입력 후 ENTER</li>
+            <li style="display: flex; gap: 6px;"><span style="color: #0B7F87; font-weight: 800;">3.</span> <strong>계좌 종류:</strong> 반드시 [Checking / Current Account] 선택</li>
+            <li style="display: flex; gap: 6px;"><span style="color: #0B7F87; font-weight: 800;">4.</span> <strong>금액 선택:</strong> VPBank(500만), TPBank LiveBank(1,000만동)</li>
             <li style="display: flex; gap: 6px;"><span style="color: #DC2626; font-weight: 800;">5.</span> <strong>★DCC 거절:</strong> 'Without Conversion' / 'No' 선택</li>
             <li style="display: flex; gap: 6px;"><span style="color: #DC2626; font-weight: 800;">6.</span> <strong>★★카드 먼저 회수!:</strong> 현금보다 카드가 먼저 나옵니다 (30초 내 회수)</li>
-            <li style="display: flex; gap: 6px;"><span style="color: #059669; font-weight: 800;">7.</span> <strong>현금 & 영수증:</strong> 50만동 지폐 매수 확인 후 수령</li>
+            <li style="display: flex; gap: 6px;"><span style="color: #0B7F87; font-weight: 800;">7.</span> <strong>현금 & 영수증:</strong> 50만동 지폐 매수 확인 후 수령</li>
           </ul>
         </div>
       </section>
@@ -549,20 +554,6 @@
       </div>
     </div>
   </main>
-
-  <!-- Timeline Schedule View (Day 1 - Day 7) -->
-  <section class="timeline-section" id="timelineSection">
-    <div class="container">
-      <div class="timeline-header">
-        <h2>📅 6박 7일 추천 일정 타임라인 (9/19 ~ 9/25)</h2>
-        <p>각 날짜별 이동 동선과 추천 액티비티 매핑입니다. 항목을 클릭하면 세부 내용을 볼 수 있습니다.</p>
-      </div>
-
-      <div class="timeline-container" id="timelineContainer">
-        <!-- Rendered dynamically by app.js -->
-      </div>
-    </div>
-  </section>
 
   <!-- Modal chrome(overlay/box/close button/body wrapper)은 app.js의
        buildModals()가 한 번만 만든다. 도메인별 마크업은 아래 template에
@@ -581,7 +572,6 @@
           <div class="modal-badges-row">
             <span class="card-badge-top-left" id="modalBadge">인기 No.1</span>
             <span class="mini-tag" id="modalCategory">호핑 & 스노클링</span>
-            <span class="card-badge-day" id="modalDay">Day 3 (9/21 일)</span>
           </div>
           <h2 class="modal-title" id="modalTitle">액티비티 제목</h2>
           <p class="modal-title-en" id="modalTitleEn">Activity English Title</p>
@@ -635,7 +625,7 @@
         <!-- Couple Note Section -->
         <div class="couple-notes-container">
           <h4>📝 나만의 여행 메모 (자동 저장)</h4>
-          <textarea id="modalNoteInput" placeholder="예: '9/21 오전 예약 확정하기', '스노클링 후 샤워하고 마사지 받으러 가기' 등 메모를 남겨보세요."></textarea>
+          <textarea id="modalNoteInput" placeholder="예: '오전에 예약 확정하기', '스노클링 후 샤워하고 마사지 받으러 가기' 등 메모를 남겨보세요."></textarea>
           <span class="note-save-status" id="modalNoteStatus"></span>
         </div>
 
@@ -660,13 +650,13 @@
   <template class="modal-tpl" data-modal="gourmetModal" data-close="gourmetModalCloseBtn">
 
       <!-- Google Photos Hero Action Banner -->
-      <div id="gourmetModalPhotoBanner" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); color: white; padding: 28px 24px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div id="gourmetModalPhotoBanner" style="background: linear-gradient(135deg, #164B4F 0%, #0E3538 100%); color: white; padding: 28px 24px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
         <div>
-          <div style="font-size: 0.8rem; color: #94A3B8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Google Maps Verified Live Photos</div>
+          <div style="font-size: 0.8rem; color: #8FB6B5; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Google Maps Verified Live Photos</div>
           <div style="font-size: 1.25rem; font-weight: 800; margin-top: 4px;">📸 구글 지도 실제 방문객 사진 보기</div>
-          <div style="font-size: 0.85rem; color: #CBD5E1; margin-top: 2px;">실시간 현장 음식 사진, 메뉴판, 매장 내부를 구글맵에서 확인하세요.</div>
+          <div style="font-size: 0.85rem; color: #B4D4D2; margin-top: 2px;">실시간 현장 음식 사진, 메뉴판, 매장 내부를 구글맵에서 확인하세요.</div>
         </div>
-        <a href="#" target="_blank" rel="noopener noreferrer" id="gourmetModalPhotosBtn" class="btn-primary-reserve" style="background: #FF385C; box-shadow: 0 4px 14px rgba(255, 56, 92, 0.4);">
+        <a href="#" target="_blank" rel="noopener noreferrer" id="gourmetModalPhotosBtn" class="btn-primary-reserve" style="background: #C9451F; box-shadow: 0 4px 14px rgba(201, 69, 31, 0.35);">
           구글 실시간 사진 갤러리 ↗
         </a>
       </div>
@@ -677,7 +667,7 @@
           <div class="modal-badges-row">
             <span class="card-badge-top-left" id="gourmetModalBadge">현지인 1위</span>
             <span class="mini-tag" id="gourmetModalCategory">반쎄오 & 반깐</span>
-            <span class="mini-tag" style="background: #E6F7F8; color: #008489; font-weight: 700;">📍 Google Maps 인증</span>
+            <span class="mini-tag" style="background: #DFF4F4; color: #0B7F87; font-weight: 700;">📍 Google Maps 인증</span>
           </div>
           <h2 class="modal-title" id="gourmetModalTitle">식당 이름</h2>
           <p class="modal-title-en" id="gourmetModalNameVi" style="color: var(--color-ocean); font-weight: 600;">베트남 공식 상호</p>
@@ -704,7 +694,7 @@
 
         <!-- Google Address Box with Copy Button -->
         <div class="modal-section-block">
-          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 14px 18px; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <div style="background: #F5FBFA; border: 1px solid #D7EDE9; padding: 14px 18px; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
             <div>
               <div style="font-size: 0.75rem; color: var(--color-text-secondary); font-weight: 700; text-transform: uppercase;">그랩(Grab) 목적지 주소</div>
               <div id="gourmetModalAddress" style="font-size: 0.95rem; font-weight: 700; color: var(--color-text-primary); margin-top: 2px;">주소</div>
@@ -743,7 +733,7 @@
         <!-- Couple Gourmet Note -->
         <div class="couple-notes-container">
           <h4>📝 나만의 맛집 메모 (자동 저장)</h4>
-          <textarea id="gourmetNoteInput" placeholder="예: 'Day 3 호핑 끝나고 저녁에 꼭 가기!', '맛조개 모닝글로리 2접시 시키기' 등 메모를 남겨보세요."></textarea>
+          <textarea id="gourmetNoteInput" placeholder="예: '호핑 끝나고 저녁에 꼭 가기!', '맛조개 모닝글로리 2접시 시키기' 등 메모를 남겨보세요."></textarea>
           <span class="note-save-status" id="gourmetNoteStatus"></span>
         </div>
 
@@ -760,7 +750,7 @@
             <a href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary-link" id="gourmetModalOfficialBtn">
               🌐 식당 공식 페이지 ↗
             </a>
-            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary-reserve" id="gourmetModalMapBtn" style="background: #008489;">
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary-reserve" id="gourmetModalMapBtn" style="background: #0B7F87;">
               📍 구글 지도로 길찾기 ↗
             </a>
           </div>
@@ -786,8 +776,8 @@
         <div class="modal-header-section">
           <div class="modal-badges-row">
             <span class="card-badge-top-left" id="stayModalBadge">가성비 1위</span>
-            <span class="mini-tag" id="stayModalCategory" style="background: #E8F5E9; color: #2E7D32; font-weight: 700;">호텔</span>
-            <span class="mini-tag" id="stayModalThemeBadge" style="background: #E0F2FE; color: #0369A1; font-weight: 700;">9/19 웰컴 0.5박</span>
+            <span class="mini-tag" id="stayModalCategory" style="background: #EAF7F6; color: #0B7F87; font-weight: 700;">호텔</span>
+            <span class="mini-tag" id="stayModalThemeBadge">웰컴 가성비 0.5박</span>
           </div>
           <h2 class="modal-title" id="stayModalTitle">숙소 이름</h2>
           <p class="modal-title-en" id="stayModalNameVi" style="color: var(--color-ocean); font-weight: 600;">🇻🇳 베트남 공식 상호</p>
@@ -827,7 +817,7 @@
         </div>
 
         <!-- Highlight Box -->
-        <div class="modal-highlight-box" style="background: #F0FDF4; border-left-color: #16A34A;">
+        <div class="modal-highlight-box" style="background: #EAF7F6; border-left-color: #0B7F87;">
           <span class="icon">✨</span>
           <p id="stayModalHighlight">핵심 추천 하이라이트</p>
         </div>
@@ -867,7 +857,7 @@
         <!-- Couple Stay Note -->
         <div class="couple-notes-container">
           <h4>📝 나만의 숙소 메모 (자동 저장)</h4>
-          <textarea id="stayNoteInput" placeholder="예: '9/19 밤 11시 늦은 체크인 알림 완료', '고층 오션뷰 요청하기' 등 메모를 남겨보세요."></textarea>
+          <textarea id="stayNoteInput" placeholder="예: '밤 11시 늦은 체크인 알림 완료', '고층 오션뷰 요청하기' 등 메모를 남겨보세요."></textarea>
           <span class="note-save-status" id="stayNoteStatus"></span>
         </div>
 
@@ -910,9 +900,9 @@
         <div class="modal-header-section">
           <div class="modal-badges-row">
             <span class="card-badge-top-left" id="shoppingModalBadge">미러급 1위</span>
-            <span class="mini-tag" id="shoppingModalCategory" style="background: #E8F5E9; color: #2E7D32; font-weight: 700;">크록스 & 슈즈</span>
+            <span class="mini-tag" id="shoppingModalCategory" style="background: #EAF7F6; color: #0B7F87; font-weight: 700;">크록스 & 슈즈</span>
             <span class="mini-tag" id="shoppingModalQualityBadge" style="background: #FEF3C7; color: #92400E; font-weight: 700;">미러급/SA급</span>
-            <span class="mini-tag" id="shoppingModalAcBadge" style="background: #E0F2FE; color: #0369A1; font-weight: 700;">❄️ 에어컨 완비</span>
+            <span class="mini-tag" id="shoppingModalAcBadge" style="background: #DFF4F4; color: #0B7F87; font-weight: 700;">❄️ 에어컨 완비</span>
           </div>
           <h2 class="modal-title" id="shoppingModalTitle">매장 이름</h2>
           <p class="modal-title-en" id="shoppingModalNameVi" style="color: var(--color-ocean); font-weight: 600;">🇻🇳 베트남 공식 상호</p>
@@ -952,7 +942,7 @@
         </div>
 
         <!-- Highlight Box -->
-        <div class="modal-highlight-box" style="background: #F0FDF4; border-left-color: #16A34A;">
+        <div class="modal-highlight-box" style="background: #EAF7F6; border-left-color: #0B7F87;">
           <span class="icon">✨</span>
           <p id="shoppingModalHighlight">핵심 추천 하이라이트</p>
         </div>
@@ -1023,7 +1013,7 @@
             <a href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary-link" id="shoppingModalPhotosBtn">
               📸 실시간 사진 ↗
             </a>
-            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary-reserve" id="shoppingModalMapBtn" style="background: #FF385C;">
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary-reserve" id="shoppingModalMapBtn" style="background: #C9451F;">
               📍 구글 지도로 길찾기 ↗
             </a>
           </div>
@@ -1049,8 +1039,8 @@
         <div class="modal-header-section">
           <div class="modal-badges-row">
             <span class="card-badge-top-left" id="currencyModalBadge">수수료 0원</span>
-            <span class="mini-tag" id="currencyModalCategory" style="background: #ECFDF5; color: #059669; font-weight: 700;">수수료 무료 ATM</span>
-            <span class="mini-tag" id="currencyModalFeeBadge" style="background: #E0F2FE; color: #0369A1; font-weight: 700;">현지 수수료 0 VND</span>
+            <span class="mini-tag" id="currencyModalCategory" style="background: #EAF7F6; color: #0B7F87; font-weight: 700;">수수료 무료 ATM</span>
+            <span class="mini-tag" id="currencyModalFeeBadge" style="background: #DFF4F4; color: #0B7F87; font-weight: 700;">현지 수수료 0 VND</span>
           </div>
           <h2 class="modal-title" id="currencyModalTitle">환전소 또는 ATM 명칭</h2>
           <p class="modal-title-en" id="currencyModalNameVi" style="color: var(--color-ocean); font-weight: 600;">🇻🇳 베트남 공식 상호</p>
@@ -1090,7 +1080,7 @@
         </div>
 
         <!-- Highlight Box -->
-        <div class="modal-highlight-box" id="currencyModalHighlight" style="background: #F0FDF4; border-left-color: #16A34A;">
+        <div class="modal-highlight-box" id="currencyModalHighlight" style="background: #EAF7F6; border-left-color: #0B7F87;">
           <span class="icon">✨</span>
           <p id="currencyModalHighlightText">핵심 환전 및 ATM 추천 하이라이트</p>
         </div>
@@ -1157,7 +1147,7 @@
         <!-- Modal Bottom Sticky Bar -->
         <div class="modal-footer-bar">
           <div class="modal-price-display">
-            <span class="vnd" style="color: #059669;">수수료 0 VND</span>
+            <span class="vnd" style="color: #0B7F87;">수수료 0 VND</span>
             <span class="krw" style="color: var(--color-text-secondary); font-size: 0.88rem;">(실시간 기준환율 100% 우대)</span>
           </div>
 
@@ -1166,7 +1156,7 @@
             <a href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary-link" id="currencyModalPhotosBtn">
               📸 실시간 사진 ↗
             </a>
-            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary-reserve" id="currencyModalMapBtn" style="background: #059669;">
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary-reserve" id="currencyModalMapBtn" style="background: #0B7F87;">
               📍 구글 지도로 길찾기 ↗
             </a>
           </div>
@@ -1220,7 +1210,7 @@
       <button class="modal-close-btn" id="guideCloseBtn" aria-label="닫기">✕</button>
       <h2 style="margin-bottom: 6px;">🌴 9월 나트랑 여행 필수 가이드</h2>
       <p style="color: var(--color-text-secondary); margin-bottom: 24px; font-size: 0.9rem;">
-        2026.09.19 ~ 09.25 나트랑 여행을 위한 완벽 대비 체크리스트
+        나트랑 여행 완벽 대비 체크리스트
       </p>
 
       <div class="modal-section-block">
@@ -1256,14 +1246,33 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <div>
-        <strong>Nha Trang Trip 2026</strong> | 2026.09.19 ~ 2026.09.25
-        <p style="margin-top: 4px;">나트랑 여행 플래너 2026 · 스마트 트래블 가이드</p>
+        <strong>Nha Trang</strong>
+        <p style="margin-top: 4px;">액티비티 · 맛집 · 숙소 · 쇼핑 · 환전 큐레이션</p>
       </div>
       <div class="footer-love">
-        <span>Made with ❤️ for our Vietnam Vacation</span>
+        <span>모든 수치는 Google Maps 실측값</span>
       </div>
     </div>
   </footer>
+
+  <!-- Mobile Bottom Tab Bar (상단 탭이 숨는 좁은 화면 전용) -->
+  <nav class="mobile-tabbar" id="mobileTabbar" aria-label="메인 카테고리 (모바일)">
+    <button class="mobile-tab-btn active" data-tab="activities">
+      <span class="mt-icon">🤿</span><span>액티비티</span>
+    </button>
+    <button class="mobile-tab-btn" data-tab="gourmet">
+      <span class="mt-icon">🍜</span><span>맛집</span>
+    </button>
+    <button class="mobile-tab-btn" data-tab="stays">
+      <span class="mt-icon">🏨</span><span>숙소</span>
+    </button>
+    <button class="mobile-tab-btn" data-tab="shopping">
+      <span class="mt-icon">🛍️</span><span>쇼핑</span>
+    </button>
+    <button class="mobile-tab-btn" data-tab="currency">
+      <span class="mt-icon">💱</span><span>환전</span>
+    </button>
+  </nav>
 
   <!-- Scripts -->
   <script src="./data.js"></script>

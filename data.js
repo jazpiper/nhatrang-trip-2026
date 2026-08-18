@@ -1,5 +1,5 @@
 /**
- * Nha Trang Activity Dataset (2026.09.19 - 09.25)
+ * Nha Trang Activity Dataset
  * Comprehensive, Real, Curated for Couple's Trip to Nha Trang, Vietnam.
  * Contains 24+ high quality, authentic Nha Trang activities & experiences.
  */
@@ -40,7 +40,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["개인 스쿠버다이빙 추가 옵션", "개인 타월 및 매너 팁"],
     whatToBring: ["래시가드/수영복 (미리 착용)", "아쿠아슈즈", "방수팩", "선크림 & 선글라스", "비치타월"],
     coupleTip: "아침 일찍 출발하는 보트일수록 혼문섬 시야가 투명하고 사람이 적어요. 패들보드에서 둘이 마주보고 찍는 사진이 인생샷 명당입니다!",
-    suggestedDay: "Day 3 (9/21 일)",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=nhatrang%20snorkeling"
   },
   {
@@ -73,7 +72,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["호핑투어 선박 이동 요금 (호핑 연계 필수)"],
     whatToBring: ["수영복 또는 래시가드", "수중용 헤어밴드 (머리 정리용)"],
     coupleTip: "수영을 전혀 못하거나 렌즈/화장을 한 상태에서도 머리가 젖지 않아 여행자분들의 만족도가 매우 높습니다! 둘이 손잡고 수중에서 하트 포즈를 취해보세요.",
-    suggestedDay: "Day 3 (9/21 일)",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=nha%20trang%20sea%20walker"
   },
   {
@@ -107,7 +105,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["제트스키/바나나보트 개별 추가 옵션", "비치 레스토랑 개별 주문"],
     whatToBring: ["선글라스 & 비치 모자", "예쁜 비치웨어/수영복", "비치타월"],
     coupleTip: "중국 단체 관광객이 거의 없는 프라이빗한 비치라 조용히 사진 찍고 힐링하기에 최적입니다. 2인 동반 패러세일링 시 공중에서 내려다보는 나트랑 바다는 압권입니다.",
-    suggestedDay: "Day 3 (9/21 일) 또는 Day 4 (9/22 월)",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=mini%20beach%20nhatrang"
   },
   {
@@ -142,7 +139,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["스파 마사지 트리트먼트 추가", "개인 주류 주문"],
     whatToBring: ["어두운 색상 수영복", "선크림", "방수 파우치"],
     coupleTip: "시내 육지 머드온천(아이리조트)과 달리 바다를 눈앞에 두고 산중턱 테라스에서 받는 머드온천이라 뷰가 훨씬 웅장합니다. 점심 뷔페 퀄리티도 매우 우수해요!",
-    suggestedDay: "Day 4 (9/22 월)",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=hon%20tam%20mud%20bath"
   },
   {
@@ -177,7 +173,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["해양 스포츠 개인 이용료", "개인 경비"],
     whatToBring: ["카메라/스마트폰 완충", "하늘거리는 원피스", "모자 & 선글라스", "아쿠아슈즈"],
     coupleTip: "밀물과 썰물 시간을 맞춰 바다 위를 걷는 듯한 신비로운 사진을 남길 수 있습니다. 도크렛 비치의 모래는 밀가루처럼 부드러워 걷기만 해도 힐링됩니다.",
-    suggestedDay: "Day 5 (9/23 화)",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=diep%20son%20island"
   },
   {
@@ -212,7 +207,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["멀미약 (멀미 심한 분은 사전 복용 권장)"],
     whatToBring: ["얇은 바람막이 (밤바다 바람 대비)", "편한 슬리퍼"],
     coupleTip: "초보자도 현지 스태프가 채비와 챔질 타이밍을 친절하게 다 알려줍니다. 갓 잡은 투명한 한치 회와 밤바다에서 먹는 라면의 맛은 잊을 수 없습니다!",
-    suggestedDay: "Day 4 (9/22 월) 또는 Day 5 (9/23 화) 밤",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=nha%20trang%20squid%20fishing"
   },
 
@@ -251,7 +245,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["시내 왕복 그랩 요금 (약 7~8만 동)", "식음료 및 개인 마사지"],
     whatToBring: ["짙은 색 또는 편하게 입을 수영복 (머드 착색 대비)", "갈아입을 옷", "방수팩"],
     coupleTip: "일반 공용풀 대신 꼭 '프라이빗 머드 욕조'로 선택하세요! 둘만의 프라이빗한 정원에서 따뜻하게 머드를 즐긴 후 수영장 썬베드에서 마시는 코코넛 음료는 최고입니다.",
-    suggestedDay: "Day 4 (9/22 월)",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=i-resort%20nhatrang"
   },
   {
@@ -285,7 +278,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["테라피스트 팁 (선택 사항, 보통 5~10만 동)"],
     whatToBring: ["가벼운 옷차림 (스파 가운 제공)"],
     coupleTip: "카카오톡 채널로 2~3일 전 커플룸 사전 예약은 필수입니다! 호핑투어나 많이 걸은 날 저녁에 일정 잡아두면 하루의 피로가 싹 풀립니다.",
-    suggestedDay: "Day 3 (9/21 일) 저녁",
     bookingUrl: "https://senspanhatrang.com"
   },
   {
@@ -318,7 +310,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["수영복 대여료 (개인 지참 권장)"],
     whatToBring: ["검은색 수영복", "샤워용품 (간단 어메니티 구비)"],
     coupleTip: "포나가르 참탑 구경 후 차로 5분 거리라 오전에 사원 들렀다가 바로 머드 온천으로 이동하는 루트를 강력 추천합니다.",
-    suggestedDay: "Day 5 (9/23 화) 낮",
     bookingUrl: "https://tambunthapba.vn"
   },
   {
@@ -353,7 +344,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["개인 매너 팁 (보통 5만동 내외)"],
     whatToBring: ["가벼운 복장"],
     coupleTip: "여행자분들이 여행 중 가장 만족스러워하는 코스 중 하나입니다! 동행과 함께 나란히 누워 케어 받으면 더위에 지친 몸과 두피가 완전히 리셋됩니다.",
-    suggestedDay: "Day 2 (9/20 토) 또는 Day 4 (9/22 월)",
     bookingUrl: "https://www.google.com/maps/search/Royal+Salon+Nha+Trang"
   },
   {
@@ -386,8 +376,7 @@ const NHA_TRANG_ACTIVITIES = [
     ],
     notIncluded: ["파츠 추가 옵션 (소액)"],
     whatToBring: ["원하는 네일 디자인 사진 (캡처본)"],
-    coupleTip: "여행 첫날이나 둘째 날 오전에 네일/패디를 받으면 남은 6박 7일 내내 바다와 리조트에서 찍는 손/발 사진이 훨씬 화사하고 예쁘게 나옵니다!",
-    suggestedDay: "Day 1 (9/19 금) 또는 Day 2 (9/20 토)",
+    coupleTip: "여행 첫날이나 둘째 날 오전에 네일/패디를 받으면 남은 여행 내내 바다와 리조트에서 찍는 손/발 사진이 훨씬 화사하고 예쁘게 나옵니다!",
     bookingUrl: "https://www.google.com/maps/search/Mango+Nail+Nha+Trang"
   },
   {
@@ -421,7 +410,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["기사 및 테라피스트 매너 팁"],
     whatToBring: ["비행기 탑승용 편안한 옷 (기내용)"],
     coupleTip: "마지막 날 호텔 체크아웃(12:00) 후 짐 맡겨두고 시내 카페/쇼핑 즐기다가, 저녁에 마사지 받고 샤워 싹 하고 공항 가면 피로감 없이 밤비행기 꿀잠 가능합니다!",
-    suggestedDay: "Day 7 (9/25 목) 귀국일",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=nhatrang%20spa%20airport"
   },
 
@@ -459,7 +447,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["파크 내 식음료 & 기념품", "사파리 먹이주기 체험 (소액)"],
     whatToBring: ["수영복 & 비치타월 (워터파크용)", "편한 운동화 & 모자", "보조배터리", "얇은 셔츠"],
     coupleTip: "알파인 코스터는 입장 직후나 오후 4시경 타는 것이 대기가 적어요. 둘이서 한 썰매에 같이 타고 바다를 보며 내려오는 스릴이 최고! 밤 7:30 타타쇼는 30분 전 메인 성 앞 명당자리를 미리 선점하세요.",
-    suggestedDay: "Day 2 (9/20 토)",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=vinwonders%20nha%20trang"
   },
   {
@@ -492,7 +479,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["하버 내 레스토랑 & 펍 식음료 비용"],
     whatToBring: ["예쁜 데이트 룩", "스마트폰 카메라"],
     coupleTip: "빈원더스에 종일 가지 않더라도, 저녁에 케이블카 타고 하버만 방문해서 야경과 바다 분수쇼 보며 맥주 한잔하는 가벼운 나이트 코스로도 아주 훌륭합니다.",
-    suggestedDay: "Day 2 (9/20 토) 또는 Day 6 (9/24 수)",
     bookingUrl: "https://www.google.com/maps/search/Vinpearl+Harbour+Nha+Trang"
   },
   {
@@ -527,7 +513,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["개인 음료 및 기념품"],
     whatToBring: ["수영복 & 비치타월", "편한 운동화/샌들", "모기 기피제"],
     coupleTip: "바다와는 또 다른 나트랑의 울창한 산림 매력을 느낄 수 있습니다. 거대한 200년 된 소원나무에 둘만의 사랑과 건강을 기원하는 소원 리본을 매달아보세요!",
-    suggestedDay: "Day 5 (9/23 화)",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=yang%20bay%20waterfall"
   },
 
@@ -564,7 +549,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["이동 그랩 비용 (시내에서 편도 5~6만 동)", "사원 내 소원 초 구매"],
     whatToBring: ["무릎과 어깨를 가리는 얇은 린넨 셔츠/로브 (사원 내부 입장 시 필요)", "양산 또는 모자"],
     coupleTip: "포나가르 탑 붉은 벽돌과 푸른 하늘의 색감 대비가 엄청납니다. 흰색 원피스나 밝은 린넨 룩을 입으면 사진이 화사하게 나옵니다. 사원 바로 앞 카이강 뷰도 훌륭해요!",
-    suggestedDay: "Day 5 (9/23 화) 오전",
     bookingUrl: "https://www.google.com/maps/search/Ponagar+Cham+Towers"
   },
   {
@@ -598,7 +582,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["기사/가이드 팁", "개인 쇼핑 비용"],
     whatToBring: ["가벼운 외투/가디건 (달랏은 선선하고 쌀쌀함)", "편한 운동화", "보조배터리"],
     coupleTip: "나트랑의 더위를 피해 하루쯤 선선한 봄 날씨의 달랏을 다녀오는 것은 최고의 선택입니다. 다딴라 폭포를 관통하는 루지는 둘이 타면 스릴과 낭만이 2배!",
-    suggestedDay: "Day 5 (9/23 화) 또는 Day 6 (9/24 수)",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=dalat%20tour%20from%20nha%20trang"
   },
   {
@@ -632,7 +615,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["화이트샌즈 ATV 개별 렌탈비 (인당 약 30만동)", "식사비"],
     whatToBring: ["선글라스 & 스카프 (사막 모래바람 대비)", "화려한 색상의 옷/원피스 (사진 필수)", "물티슈"],
     coupleTip: "컬러풀한 지프차 보닛 위에 둘이 올라앉아 사막을 배경으로 찍는 사진은 무조건 인스타그램 메인 사진감입니다!",
-    suggestedDay: "Day 6 (9/24 수)",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=mui%20ne%20tour%20from%20nha%20trang"
   },
   {
@@ -664,7 +646,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["교통비"],
     whatToBring: ["편한 신발"],
     coupleTip: "케이블카 선착장 바로 근처라 빈원더스 들어가기 전이나 호핑투어 끝난 후 가볍게 들르기 좋습니다. 2천 원대 입장료 대비 볼거리가 쏠쏠합니다.",
-    suggestedDay: "Day 2 (9/20 토) 또는 Day 5 (9/23 화)",
     bookingUrl: "https://www.google.com/maps/search/National+Oceanographic+Museum+Nha+Trang"
   },
 
@@ -703,7 +684,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["고급 프리미엄 샴페인 별도 주문", "개인 팁"],
     whatToBring: ["스마트 캐주얼/원피스 (인생 사진용)", "가벼운 가디건 (밤바다 바람 대비)"],
     coupleTip: "여행 6일 차 기념일 디너로 강력 추천합니다! 선셋 골든아워에 갑판에서 칵테일 잔을 들고 찍는 사진은 평생 남을 인생 사진이 됩니다.",
-    suggestedDay: "Day 6 (9/24 수)",
     bookingUrl: "https://emperorcruises.com"
   },
   {
@@ -736,7 +716,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["음료 및 안주 주문 금액 (단품 주문)"],
     whatToBring: ["해변 슬리퍼", "가벼운 밤마실 룩"],
     coupleTip: "해변 바로 앞 모래사장 테이블에 앉으려면 19:30 전에 도착하거나 미리 예약해두는 것이 좋습니다. 밤바다 바람 맞으며 칵테일 한잔하기에 분위기가 너무 좋아요.",
-    suggestedDay: "Day 1 (9/19 금) 또는 Day 5 (9/23 화) 밤",
     bookingUrl: "https://sailingclubnhatrang.com"
   },
   {
@@ -769,7 +748,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["추가 주류 주문"],
     whatToBring: ["세련된 이브닝 캐주얼 복장 (슬리퍼는 제한될 수 있음)"],
     coupleTip: "유리 바닥 스카이워크에서 발밑으로 펼쳐지는 아찔한 야경을 배경으로 커플 사진을 꼭 남겨보세요!",
-    suggestedDay: "Day 3 (9/21 일) 또는 Day 4 (9/22 월) 밤",
     bookingUrl: "https://www.google.com/maps/search/Skylight+Nha+Trang"
   },
   {
@@ -801,7 +779,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["음식 및 주류 단품 주문"],
     whatToBring: ["가벼운 해변 복장"],
     coupleTip: "4가지 대표 수제맥주를 맛볼 수 있는 '샘플러 트레이'와 바삭한 화덕 깔조네 피자 조합을 추천합니다. 해질녘 바다를 보며 짠하기 딱 좋습니다.",
-    suggestedDay: "Day 2 (9/20 토) 또는 Day 4 (9/22 월) 저녁",
     bookingUrl: "https://www.google.com/maps/search/Louisiane+Brewhouse+Nha+Trang"
   },
 
@@ -837,7 +814,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["개인 쇼핑 비용", "현금 필수 지참"],
     whatToBring: ["소액 베트남 동 현금 (1만, 2만, 5만, 10만 동)", "에코백 또는 장바구니"],
     coupleTip: "담시장에서는 정가의 20~30% 정도 기분 좋게 흥정하는 재미가 쏠쏠합니다! 착용감이 편한 커플 휴양지 셔츠와 라탄백은 여행 초반에 사서 여행 내내 입고 다니면 사진이 예쁩니다.",
-    suggestedDay: "Day 1 (9/19 금) 또는 Day 2 (9/20 토)",
     bookingUrl: "https://www.google.com/maps/search/Dam+Market+Nha+Trang"
   },
   {
@@ -869,7 +845,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["유료 비닐봉투 (에코백 챙김 권장)"],
     whatToBring: ["캐리어 여유 공간 또는 큰 타포린 쇼핑백", "트래블 카드"],
     coupleTip: "시내 중심 '골드코스트점(Gold Coast)'으로 가시면 접근성이 가장 좋습니다. 체리쉬 망고 젤리는 노란색 오리지널과 망고스틴 맛을 섞어서 사시면 가족/지인 선물로 호불호 없이 최고 인기입니다.",
-    suggestedDay: "Day 6 (9/24 수) 또는 Day 7 (9/25 목)",
     bookingUrl: "https://www.google.com/maps/search/Lotte+Mart+Gold+Coast+Nha+Trang"
   },
   {
@@ -901,7 +876,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["주문 음료 및 디저트 비용"],
     whatToBring: ["카메라 또는 스마트폰 (인생샷 준비)"],
     coupleTip: "가장 더운 한낮에 레인포레스트 2층 해먹 좌석이나 나무 그네 좌석에 앉아 코코넛 커피와 망고 요거트를 마시면 최고의 휴식이 됩니다.",
-    suggestedDay: "Day 2 (9/20 토) 또는 Day 4 (9/22 월) 오후",
     bookingUrl: "https://www.google.com/maps/search/Rainforest+Nha+Trang"
   },
   {
@@ -935,7 +909,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["추가 주류 음료"],
     whatToBring: ["편한 신발", "맛있게 먹을 배!"],
     coupleTip: "둘이서 앞치마를 두르고 알콩달콩 요리하며 베트남 향신료 비법을 배우는 색다른 데이트 코스입니다. 한국에 돌아와서도 생각나는 맛있는 추억이 됩니다.",
-    suggestedDay: "Day 5 (9/23 화) 오전",
     bookingUrl: "https://www.klook.com/ko/search/result/?query=nha%20trang%20cooking%20class"
   },
   // ==========================================
@@ -971,7 +944,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["카페 음료 주문 비용", "교통비 (시내에서 그랩 편도 약 5~6만 동)"],
     whatToBring: ["편한 샌들/운동화 (바위 위 미끄럼 주의)", "선글라스 & 양산", "스마트폰 카메라 완충"],
     coupleTip: "바위 끝자락에 서서 나트랑 북부 해안선과 바다를 배경으로 사진을 찍으면 장관입니다. 관람 후 바로 옆 혼총 카페 테라스에서 바닷바람 맞으며 카페 쓰어다 한잔 즐겨보세요.",
-    suggestedDay: "Day 5 (9/23 화) 오전",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=H%C3%B2n%20Ch%E1%BB%93ng%20Kh%C3%B3m%20H%C3%B2n%20Ch%E1%BB%93ng%20Ph%C6%B0%E1%BB%9Bc%20Nha%20Trang"
   },
   {
@@ -1005,7 +977,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["왕복 그랩/차량 렌트비 (편도 약 25만 동)", "개인 락커 대여료 (소액)", "식음료"],
     whatToBring: ["아쿠아슈즈 또는 미끄럼 방지 샌들", "수영복 또는 래시가드", "비치타월 & 방수팩", "모기 기피제"],
     coupleTip: "1호수는 수심이 적당하고 카약 타기 좋아 함께 놀기에 최고입니다. 바위에 걸터앉아 맑은 계곡물에 발을 담그고 사진을 찍으면 영화 속 한 장면 같은 분위기가 연출됩니다.",
-    suggestedDay: "Day 5 (9/23 화) 낮",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Khu%20du%20l%E1%BB%8Bch%20Ba%20H%E1%BB%93%20Th%C3%B4n%20V%E1%BA%A1n%20Thu%E1%BA%ADn%20Ninh%20%C3%8Dch%20Ninh%20H%C3%B2a%20Kh%C3%A1nh%20H%C3%B2a"
   },
   {
@@ -1038,7 +1009,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["향 또는 소원 공양비 (자율 보시)", "주차비 (오토바이 이용 시 소액)"],
     whatToBring: ["무릎과 어깨를 가리는 복장 (사원 예절)", "편한 운동화/샌들", "부채 또는 손선풍기", "생수"],
     coupleTip: "백불상 아래에 서서 올려다보며 사진을 찍으면 웅장한 사진을 얻을 수 있습니다. 정상 전망대에서는 나트랑 시내와 푸른 산세가 파노라마로 펼쳐져 여행 기념사진을 찍기에 훌륭합니다.",
-    suggestedDay: "Day 2 (9/20 토) 또는 Day 5 (9/23 화) 오전",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Ch%C3%B9a%20Long%20S%C6%A1n%2022%20%C4%90%C6%B0%E1%BB%9Dng%2023%20Th%C3%A1ng%2010%20Ph%C6%B0%C6%A1ng%20S%C6%A1n%20Nha%20Trang"
   },
   {
@@ -1071,7 +1041,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["정문 주변 비공식 호객/가이드 팁 요구 (무시 권장)"],
     whatToBring: ["단정한 복장 (민소매/초미니스커트 지양)", "카메라"],
     coupleTip: "성당 옆 회랑 돌기둥 사이로 빛이 들어올 때 찍는 인물 사진이 마치 유럽 여행에 온 듯한 느낌을 줍니다. 밝은 색 옷을 입으면 짙은 회색 석조 벽과 대비되어 사진이 더욱 선명합니다.",
-    suggestedDay: "Day 1 (9/19 금) 또는 Day 7 (9/25 목)",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Nh%C3%A0%20th%E1%BB%9D%20Ch%C3%A1nh%20T%C3%B2a%20Kit%C3%B4%20Vua%2001%20Th%C3%A1i%20Nguy%C3%AAn%20Ph%C6%B0%E1%BB%9Bc%20T%C3%A2n%20Nha%20Trang"
   },
   {
@@ -1104,7 +1073,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["가이드 해설료 (필요 시 현장 요청)"],
     whatToBring: ["편안한 신발", "가벼운 복장"],
     coupleTip: "해변 도로(Trần Phú) 바로 앞에 위치하여 롯데마트 골드코스트점이나 해변 산책과 묶어 방문하기 좋습니다. 베트남 사람들이 존경하는 프랑스 의학자의 따뜻한 스토리를 나누며 조용히 관람하기 좋습니다.",
-    suggestedDay: "Day 6 (9/24 수) 또는 Day 7 (9/25 목)",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=B%E1%BA%A3o%20t%C3%A0ng%20Alexandre%20Yersin%2010%20Tr%E1%BA%A7n%20Ph%C3%BA%20X%C6%B0%C6%A1ng%20Hu%C3%A2n%20Nha%20Trang"
   },
   {
@@ -1139,7 +1107,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["개인 간식 및 음료", "원숭이 간식(바나나/땅콩) 개별 구매 (약 1~2만 동)"],
     whatToBring: ["모자 & 선글라스", "소지품 잠금 가능한 가방 (원숭이가 물건을 낚아챌 수 있음)", "물티슈"],
     coupleTip: "화란섬의 하트 모양 난초 터널과 숲속 사슴 먹이주기 공간에서 감성 가득한 커플 사진을 남겨보세요. 원숭이섬에서는 주머니 속 반짝이는 물건이나 안경을 조심하세요!",
-    suggestedDay: "Day 4 (9/22 월) 또는 Day 5 (9/23 화)",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=B%E1%BA%BFn%20T%C3%A0u%20Du%20Thuy%E1%BB%81n%20Long%20Ph%C3%BA%20Qu%E1%BB%91c%20l%E1%BB%99%201A%20V%C4%A9nh%20L%C6%B0%C6%A1ng%20Nha%20Trang"
   },
   {
@@ -1172,7 +1139,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["개인 쇼핑 및 식음료 구매 금액"],
     whatToBring: ["신용카드 / 트래블로그 카드", "에코백"],
     coupleTip: "낮에 더위를 피해 시원한 에어컨 바람을 쐬며 윈마트에서 베트남 맥주, 건망고, 라면 등을 카드로 편하게 구매하기 좋습니다. 쇼핑몰 3~4층에서 내려다보는 바다 뷰도 근사합니다.",
-    suggestedDay: "Day 1 (9/19 금) 또는 Day 4 (9/22 월)",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Vincom%20Plaza%20Tr%E1%BA%A7n%20Ph%C3%BA%2078%20Tr%E1%BA%A7n%20Ph%C3%BA%20L%E1%BB%99c%20Th%E1%BB%8D%20Nha%20Trang"
   },
   {
@@ -1204,7 +1170,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["개인 쇼핑 및 음식 구매비 (현금 결제 권장)"],
     whatToBring: ["소액 베트남 동 현금 (1만~5만 동 권종)", "크로스백 (소매치기 주의)"],
     coupleTip: "저녁 식사 후 슬슬 걸어 나와 즉석 생과일 철판 아이스크림을 하나씩 들고 가게들을 구경해보세요. 가격은 첫 제시가의 70~80% 선에서 웃으며 흥정하면 재미있는 쇼핑이 됩니다.",
-    suggestedDay: "Day 1 (9/19 금) 또는 Day 3 (9/21 일) 밤",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Ch%E1%BB%A3%20%C4%90%C3%AAm%20Nha%20Trang%2046%20Tr%E1%BA%A7n%20Ph%C3%BA%20L%E1%BB%99c%20Th%E1%BB%8D%20Nha%20Trang"
   },
   {
@@ -1237,7 +1202,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["개인 쇼핑 비용"],
     whatToBring: ["원하는 쇼핑 목록 메모", "트래블 카드 또는 스마트폰 뱅킹"],
     coupleTip: "담시장 흥정에 피로감을 느끼시는 분들께 적극 추천합니다! 가격표가 투명하게 다 붙어 있어 누구나 편안하게 라탄백과 예쁜 자수 파우치를 고를 수 있습니다.",
-    suggestedDay: "Day 2 (9/20 토) 또는 Day 6 (9/24 수)",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=JW%20Gift%2092a%20H%E1%BB%93ng%20B%C3%A0ng%20T%C3%A2n%20L%E1%BA%ADp%20Nha%20Trang"
   },
   {
@@ -1270,7 +1234,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["개인 구매 비용"],
     whatToBring: ["선물할 지인 명단"],
     coupleTip: "모든 제품을 직접 맛보고 살 수 있어 실패가 없습니다. 무설탕 건망고와 패션후르츠 청, 장미/국화 꽃차는 부모님이나 직장 동료 선물로 포장이 아주 고급스러워 만족도가 높습니다.",
-    suggestedDay: "Day 6 (9/24 수) 또는 Day 7 (9/25 목)",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=L%20Store%2037%20T%C3%B4%20Hi%E1%BA%BFn%20Th%C3%A0nh%20T%C3%A2n%20L%E1%BA%ADp%20Nha%20Trang"
   },
   {
@@ -1303,7 +1266,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["개인 구매 비용"],
     whatToBring: ["트래블 카드"],
     coupleTip: "리조트나 호텔 발코니에서 둘만의 로맨틱한 와인 타임을 계획 중이라면 필수 코스입니다! 프랑스산 브리치즈와 프로슈토, 크래커, 와인 한 병을 사서 밤바다를 보며 짠해보세요.",
-    suggestedDay: "Day 3 (9/21 일) 또는 Day 5 (9/23 화)",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Moonmilk%2063%20Nguy%E1%BB%85n%20Thi%E1%BB%87n%20Thu%E1%BA%ADt%20L%E1%BB%99c%20Th%E1%BB%8D%20Nha%20Trang"
   },
   {
@@ -1336,7 +1298,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["시내 중심에서 왕복 그랩 요금 (편도 약 4~5만 동)"],
     whatToBring: ["대형 에코백 또는 장바구니", "트래블로그 카드"],
     coupleTip: "롱선사 관광 직후 도보 3분 거리라 롱선사 구경 후 시원한 에어컨 아래에서 장보기에 동선이 완벽합니다. 대량 구매 시 박스 포장해서 호텔로 그랩 타고 돌아오면 편리합니다.",
-    suggestedDay: "Day 5 (9/23 화)",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Lotte%20Mart%2058%20%C4%90%C6%B0%E1%BB%9Dng%2023%20Th%C3%A1ng%2010%20Ph%C6%B0%C6%A1ng%20S%C6%A1n%20Nha%20Trang"
   },
   {
@@ -1370,7 +1331,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["시내 중심 왕복 그랩 요금 (차량 15분, 편도 약 8~9만 동)"],
     whatToBring: ["머드용 어두운 수영복", "방수팩", "갈아입을 옷"],
     coupleTip: "거대한 달걀 껍데기 속에 둘이 쏙 들어가 머드를 바르고 찍는 사진이 아주 유쾌하고 귀엽습니다! 산속이라 공기가 맑고 조용해 색다른 숲속 힐링을 선사합니다.",
-    suggestedDay: "Day 4 (9/22 월) 낮",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Khu%20Du%20L%E1%BB%8Bch%20T%E1%BA%AFm%20B%C3%B9n%20Tr%C4%83m%20Tr%E1%BB%A9ng%20Nguy%E1%BB%85n%20T%E1%BA%A5t%20Th%C3%A0nh%20Ph%C6%B0%E1%BB%9Bc%20%C4%90%E1%BB%93ng%20Nha%20Trang"
   },
   {
@@ -1404,7 +1364,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["개인 마사지 추가 트리트먼트"],
     whatToBring: ["가벼운 옷차림 (수영복/타월 매장 내 무료 제공)"],
     coupleTip: "야시장이나 시내 카페에서 도보 5분 거리라 이동 시간을 절약하고 싶은 날 최고입니다. 한낮의 뙤약볕을 피해 시원하고 아늑한 동굴 속에서 둘만의 머드 스파를 즐겨보세요.",
-    suggestedDay: "Day 4 (9/22 월) 또는 Day 7 (9/25 목)",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Galina%20Hotel%20%26%20Spa%2031%20H%C3%B9ng%20V%C6%B0%C6%A1ng%20L%E1%BB%99c%20Th%E1%BB%8D%20Nha%20Trang"
   },
   {
@@ -1438,7 +1397,6 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["테라피스트 매너 팁"],
     whatToBring: ["편안한 복장"],
     coupleTip: "카카오톡(Charmspant)으로 미리 커플룸을 예약하고 가시는 것을 권장합니다. 마사지 전 아로마 오일 향을 직접 시향하고 선택할 수 있으며, 마사지 후 나오는 따뜻한 영양죽과 과일 디저트가 감동적입니다.",
-    suggestedDay: "Day 2 (9/20 토) 또는 Day 5 (9/23 화) 저녁",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Charm%20Spa%20Grand%20Nha%20Trang%2048C%20Nguy%E1%BB%85n%20Th%E1%BB%8B%20Minh%20Khai%20T%C3%A2n%20L%E1%BA%ADp%20Nha%20Trang"
   },
   {
@@ -1472,68 +1430,7 @@ const NHA_TRANG_ACTIVITIES = [
     notIncluded: ["테라피스트 팁"],
     whatToBring: ["편한 옷차림"],
     coupleTip: "일반적인 부드러운 오일 마사지보다 목, 어깨, 허리의 뭉친 근육을 시원하게 풀고 싶어 하는 많은 여행자들에게 압도적인 찬사를 받는 곳입니다. 함께 받으면 여행의 피로가 완벽히 풀립니다.",
-    suggestedDay: "Day 4 (9/22 월) 또는 Day 6 (9/24 수) 저녁",
     bookingUrl: "https://www.google.com/maps/search/?api=1&query=Pure%20Vietnam%20Beauty%20%26%20Spa%2044%20Ng%C3%B4%20Quy%E1%BB%81n%20V%E1%BA%A1n%20Th%E1%BA%A1nh%20Nha%20Trang"
-  }
-];
-
-// Trip Itinerary Overview (Day 1 - Day 7)
-const NHA_TRANG_SCHEDULE = [
-  {
-    day: "Day 1",
-    date: "9/19 (금)",
-    title: "나트랑 도착 & 시내 적응과 야시장",
-    theme: "설레는 첫 만남 & 밤거리 산책",
-    highlight: "깜란 공항 도착 → 호텔 체크인 → 망고네일 케어 & 담시장 구경 → 세일링클럽 비치 칵테일",
-    activities: ["act-11", "act-24", "act-21"]
-  },
-  {
-    day: "Day 2",
-    date: "9/20 (토)",
-    title: "빈원더스 종일 정복 & 타타쇼",
-    theme: "동화 같은 섬 속 어트랙션과 환상 야경",
-    highlight: "해상 케이블카 → 알파인 코스터 → 플라워 돔 & 사파리 → 워터파크 → 빈펄 하버 산책 & 밤 7:30 타타쇼",
-    activities: ["act-13", "act-14", "act-26"]
-  },
-  {
-    day: "Day 3",
-    date: "9/21 (일)",
-    title: "혼문섬 럭셔리 호핑 & 센스파 힐링",
-    theme: "에메랄드 바다 스노클링과 저녁 마사지",
-    highlight: "오전 혼문섬 스노클링 / 씨워커 & 미니비치 → 오후 호텔 휴식 → 저녁 센스파 커플 핫스톤 → 스카이라이트 야경",
-    activities: ["act-01", "act-02", "act-03", "act-08", "act-22"]
-  },
-  {
-    day: "Day 4",
-    date: "9/22 (월)",
-    title: "아이리조트 머드온천 & 로얄살롱 힐링",
-    theme: "매끄러운 천연 머드와 이발관 풀케어",
-    highlight: "늦잠 후 여유로운 브런치 → 아이리조트 프라이빗 머드욕 & 온천 수영장 → 로얄살롱 헤드스파 → 밤바다 오징어 낚시",
-    activities: ["act-07", "act-04", "act-10", "act-06", "act-23"]
-  },
-  {
-    day: "Day 5",
-    date: "9/23 (화)",
-    title: "포나가르 참탑 문화 투어 & 쿠킹 클래스",
-    theme: "이국적인 붉은 사원과 베트남 요리 체험",
-    highlight: "오전 포나가르 사원 & 롱선사 인생샷 투어 → 쿠킹클래스 반쎄오 요리 → 탑바 머드스파 또는 달랏 일일투어",
-    activities: ["act-16", "act-27", "act-09", "act-17", "act-15"]
-  },
-  {
-    day: "Day 6",
-    date: "9/24 (수)",
-    title: "로맨틱 선셋 디너 크루즈 & 롯데마트 쇼핑",
-    theme: "여행의 하이라이트, 황금빛 바다 위 낭만",
-    highlight: "리조트 수영 & 롯데마트 기념품 쇼핑 → 16:30 엠페러 5성급 선셋 크루즈 탑승 → 5코스 랍스터 & 와인 파티",
-    activities: ["act-20", "act-25", "act-18"]
-  },
-  {
-    day: "Day 7",
-    date: "9/25 (목)",
-    title: "마지막 선물 쇼핑 & 굿바이 스파 / 귀국",
-    theme: "알찬 마무리 & 피로 없는 편안한 귀국길",
-    highlight: "호텔 체크아웃 & 스파에 짐 보관 → 시내 감성 카페 투어 & 쇼핑 → 스완나 스파 90분 & 샤워 → 공항 샌딩",
-    activities: ["act-12", "act-26", "act-25"]
   }
 ];
 

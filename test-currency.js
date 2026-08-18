@@ -309,18 +309,37 @@ runner.test('Every spot contains all required fields with non-empty values', () 
   });
 });
 
+// 항목마다 있을 수도 없을 수도 있는 필드. 여기 없는 필드가 일부 항목에만 있으면
+// 조용한 스키마 드리프트로 간주해 실패시킨다.
+//   bestTiming: 방문 시점 안내. 실제 여행 날짜만 담고 있던 항목은 개인정보 노출
+//   때문에 값을 지웠고, 없는 정보를 지어내지 않으므로 4곳은 이 필드가 없다.
+const OPTIONAL_SPOT_FIELDS = ['bestTiming'];
+
 runner.test('All spots share an identical key set (uniform schema, no silent drift)', () => {
   runner.assertTruthy(NHA_TRANG_CURRENCY, 'NHA_TRANG_CURRENCY is not loaded');
-  const reference = Object.keys(NHA_TRANG_CURRENCY[0]).sort();
+  const reference = Object.keys(NHA_TRANG_CURRENCY[0])
+    .filter(k => !OPTIONAL_SPOT_FIELDS.includes(k)).sort();
 
   NHA_TRANG_CURRENCY.forEach(spot => {
-    const keys = Object.keys(spot).sort();
+    const keys = Object.keys(spot).filter(k => !OPTIONAL_SPOT_FIELDS.includes(k)).sort();
     const missing = reference.filter(k => !keys.includes(k));
     const extra = keys.filter(k => !reference.includes(k));
     runner.assertTruthy(
       missing.length === 0 && extra.length === 0,
       `Spot '${spot.id}' schema drift — missing: [${missing.join(', ')}], extra: [${extra.join(', ')}]`
     );
+  });
+
+  // 옵셔널 필드도 값이 있다면 비어 있지 않아야 한다 (빈 문자열로 남은 흔적 방지)
+  NHA_TRANG_CURRENCY.forEach(spot => {
+    OPTIONAL_SPOT_FIELDS.forEach(f => {
+      if (f in spot) {
+        runner.assertTruthy(
+          typeof spot[f] === 'string' && spot[f].trim().length > 0,
+          `Spot '${spot.id}' has an empty optional field '${f}'`
+        );
+      }
+    });
   });
 
   // REQUIRED_SPOT_FIELDS must not reference fields the data does not carry.

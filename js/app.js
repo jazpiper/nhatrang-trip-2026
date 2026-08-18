@@ -155,7 +155,9 @@
     // Global Toolbar State
     searchQuery: '',
     sortBy: 'recommended',
-    currentView: 'grid', // 'grid' | 'timeline'
+    currentView: loadFromStorage('nha_trang_view', 'list'),   // 'list' | 'grid'
+    density: loadFromStorage('nha_trang_density', 'tight'),   // 'tight' | 'comfy'
+    openNowOnly: false,
     wishlistOnly: false,
     
     // LocalStorage State
@@ -205,6 +207,7 @@
     state.searchQuery = '';
     state.sortBy = 'recommended';
     state.wishlistOnly = false;
+    state.openNowOnly = false;
   }
 
   // --- 3.5 Generic Filter Pipeline ---
@@ -245,6 +248,146 @@
     }).sort(cfg.compare);
   }
 
+
+  // --- 3.55 List Row Pipeline ---
+  // 다섯 도메인이 같은 행 컴포넌트를 공유한다. 사진이 실제 장소가 아닌 스톡이라
+  // 면적의 절반을 정보 없이 쓰던 카드 대신, 정보를 앞세운 84px 행을 기본 뷰로 둔다.
+  // 카드 템플릿(cardTemplate)은 그리드 뷰용으로 그대로 살려둔다.
+
+  /**
+   * "15:00 - 21:00", "18:00 - 22:30 (야간 영업)", "24시간" 표기에서 지금 영업 중인지 판정.
+   * 형식을 못 읽으면 null — 화면에 상태를 아예 띄우지 않는다.
+   */
+  function isOpenNow(openHours, now) {
+    if (!openHours || typeof openHours !== 'string') return null;
+    if (/24\s*시간|24h|24\/7/i.test(openHours)) return true;
+
+    const times = openHours.match(/(\d{1,2}):(\d{2})/g);
+    if (!times || times.length < 2) return null;
+
+    const toMin = (t) => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
+    const start = toMin(times[0]);
+    const end = toMin(times[1]);
+    const d = now || new Date();
+    const cur = d.getHours() * 60 + d.getMinutes();
+
+    if (end <= start) return cur >= start || cur < end;   // 자정 넘겨 영업
+    return cur >= start && cur < end;
+  }
+
+  /**
+   * "지금 영업중" 필터. 영업시간을 파싱하지 못한 항목은 남긴다 —
+   * 정보가 없다는 이유로 숨기면 목록에서 사라진 이유를 알 수 없다.
+   */
+  function filterOpenNow(list) {
+    if (!state.openNowOnly) return list;
+    return list.filter(item => isOpenNow(item.openHours) !== false);
+  }
+
+  /**
+   * "통오징어 반쎄오 (Bánh Xèo Mực Tôm - 45,000 VND)"처럼 이름과 가격이 한 문자열에
+   * 섞인 대표 항목을 둘로 나눈다.
+   */
+  function parseSignature(raw) {
+    if (!raw) return null;
+    const text = typeof raw === 'string' ? raw : (raw.name || '');
+    if (!text) return null;
+    const price = text.match(/([\d.,]+\s*(?:VND|₫|동))/i);
+    const name = text.replace(/\s*\(.*\)\s*$/, '').trim();
+    return { name: name || text, price: price ? price[1].trim() : '' };
+  }
+
+  /** 데이터에 지도 URL이 있으면 그대로, 없으면 정식 상호 + 주소로 검색 URL을 만든다. */
+  function buildMapUrl(item) {
+    if (item.googleMapUrl) return item.googleMapUrl;
+    const query = item.googleMapQuery
+      || [item.nameVi, item.addressVi].filter(Boolean).join(' ')
+      || `${item.nameKo || item.name || item.title || ''} Nha Trang`;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  }
+
+  /**
+   * 공용 리스트 행 마크업. 도메인마다 스키마가 달라 각 섹션의 xRowTemplate이
+   * 어댑터 역할로 v를 만들어 넘긴다. 여기서 필드를 늘리면 다섯 도메인 전부에
+   * 영향이 가고 test-render-snapshot.js가 잡는다.
+   */
+  function itemRowHTML(v) {
+    // 이미지가 깨져도 빈 박스가 남지 않게 이모지를 아래에 깔고 그 위에 사진을 올린다
+    const fallback = `<span class="row-thumb-fallback">${escapeHtml(v.emoji || '📍')}</span>`;
+    const thumb = v.imgUrl
+      ? `${fallback}<img class="row-img" src="${v.imgUrl}" alt="${escapeHtml(v.name)}" loading="lazy" onerror="this.remove();" />`
+      : fallback;
+
+    const tags = (v.tags || []).slice(0, 2).map(t =>
+      `<span class="row-tag${t.hot ? ' is-hot' : ''}">${escapeHtml(t.label)}</span>`
+    ).join('');
+
+    const ratingHtml = v.rating
+      ? `<span class="row-rating"><span class="star">★</span> ${v.rating}` +
+        (v.reviewCount ? ` <span class="cnt">(${Number(v.reviewCount).toLocaleString()})</span>` : '') +
+        `</span>`
+      : '';
+
+    let statusHtml = '';
+    if (v.openState === true) statusHtml = `<span class="row-open">영업중</span>`;
+    else if (v.openState === false) statusHtml = `<span class="row-closed">영업 종료</span>`;
+
+    const metaBits = [ratingHtml, statusHtml]
+      .concat((v.metaParts || []).filter(Boolean).map(m => `<span>${escapeHtml(m)}</span>`))
+      .filter(Boolean)
+      .join('<span class="row-dot">·</span>');
+
+    const line3Bits = [];
+    if (v.sigLabel) {
+      line3Bits.push(
+        `<span class="row-sig">${escapeHtml(v.sigLabel)}</span>` +
+        (v.sigValue ? ` <b>${escapeHtml(v.sigValue)}</b>` : '')
+      );
+    }
+    if (v.subText) line3Bits.push(`<span class="row-vi">${escapeHtml(v.subText)}</span>`);
+
+    return `
+      <article class="item-row" data-id="${v.id}" tabindex="0">
+        <div class="row-thumb">
+          ${thumb}
+          ${v.rank ? `<span class="row-rank">${v.rank}</span>` : ''}
+        </div>
+        <div class="row-main">
+          <div class="row-line1">
+            <span class="row-name">${escapeHtml(v.name)}</span>
+            ${tags}
+          </div>
+          <div class="row-line2">${metaBits}</div>
+          ${line3Bits.length ? `<div class="row-line3">${line3Bits.join('<span class="row-dot">·</span>')}</div>` : ''}
+          ${v.note ? `<div class="row-note">📝 ${escapeHtml(v.note)}</div>` : ''}
+        </div>
+        <div class="row-right">
+          <div class="row-price">
+            ${v.priceMain ? `<span class="row-price-v">${escapeHtml(v.priceMain)}</span>` : ''}
+            ${v.priceKrw ? `<span class="row-price-k">${escapeHtml(v.priceKrw)}</span>` : ''}
+            ${v.priceUnit ? `<span class="row-price-u">${escapeHtml(v.priceUnit)}</span>` : ''}
+          </div>
+          <div class="row-acts">
+            <button type="button" class="row-ico row-heart ${v.isWish ? 'is-wishlisted' : ''}" data-id="${v.id}" title="찜하기" aria-label="찜하기">♥</button>
+            <a class="row-ico" href="${v.mapUrl}" target="_blank" rel="noopener noreferrer" title="구글 지도에서 보기" aria-label="구글 지도에서 보기">↗</a>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  /** 컨테이너를 현재 뷰 모드의 레이아웃 클래스로 바꾸고 리스트 여부를 반환한다. */
+  function applyViewClass(container) {
+    const isList = state.currentView === 'list';
+    container.className = isList
+      ? 'items-list' + (state.density === 'comfy' ? ' is-comfy' : '')
+      : 'cards-grid';
+    return isList;
+  }
+
   // --- 3.6 Generic Render Pipeline ---
   // 5개 renderX가 공유하던 "컨테이너/카운트 엘리먼트 조회 -> getFilteredX 호출 ->
   // 카운트 갱신 -> 빈 상태 처리 -> 카드 HTML 생성 -> 클릭/찜 바인딩" 골격만 여기
@@ -256,12 +399,15 @@
     const countEl = document.getElementById(cfg.countTextId);
     if (!container) return;
 
-    const list = cfg.getFiltered();
+    // 영업중 필터는 openHours를 가진 도메인에만 실제로 작용한다
+    // (없는 도메인은 isOpenNow가 null이라 그대로 통과).
+    const list = filterOpenNow(cfg.getFiltered());
     if (countEl) {
       countEl.innerHTML = cfg.countHtml(list.length);
     }
 
     if (list.length === 0) {
+      container.className = 'empty-state-wrap';
       container.innerHTML = cfg.emptyHtml();
       const resetBtn = document.getElementById(cfg.resetBtnId);
       if (resetBtn) {
@@ -272,18 +418,32 @@
       return;
     }
 
-    container.innerHTML = list.map(cfg.cardTemplate).join('');
+    const isList = applyViewClass(container) && !!cfg.rowTemplate;
+    container.innerHTML = isList
+      ? list.map((item, idx) => cfg.rowTemplate(item, idx)).join('')
+      : list.map(cfg.cardTemplate).join('');
 
-    container.querySelectorAll(cfg.cardSelector).forEach(card => {
-      card.addEventListener('click', (e) => {
-        if ((cfg.ignoreSelectors || ['.card-heart-btn']).some(sel => e.target.closest(sel))) return;
-        const id = card.dataset.id;
-        const item = cfg.findItem(id);
+    const itemSelector = isList ? '.item-row' : cfg.cardSelector;
+    const ignore = (cfg.ignoreSelectors || ['.card-heart-btn']).concat(['.row-heart', 'a']);
+
+    container.querySelectorAll(itemSelector).forEach(card => {
+      const open = () => {
+        const item = cfg.findItem(card.dataset.id);
         if (item) cfg.openModal(item);
+      };
+      card.addEventListener('click', (e) => {
+        if (ignore.some(sel => e.target.closest(sel))) return;
+        open();
+      });
+      card.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        if (ignore.some(sel => e.target.closest(sel))) return;
+        e.preventDefault();
+        open();
       });
     });
 
-    container.querySelectorAll('.card-heart-btn').forEach(btn => {
+    container.querySelectorAll('.card-heart-btn, .row-heart').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         cfg.toggleWishlist(btn.dataset.id);
@@ -354,32 +514,29 @@
     });
   }
 
+  /** 액티비티 태그의 내부 코드값을 사람이 읽는 라벨로. 카드/행이 공유한다. */
+  function activityTagLabel(t) {
+    if (t === 'wife' || t === '와이프추천' || t === '와이프픽' || t === '인기추천') return '💖 인기 추천';
+    if (t === 'photo' || t === '인생샷') return '📸 인생샷';
+    if (t === 'spa' || t === '스파' || t === '힐링') return '💆 힐링 스파';
+    if (t === 'rain' || t === '비오는날') return '☔ 비오는날 추천';
+    return t;
+  }
+
   function activityCardTemplate(item) {
     const isWish = state.wishlist.includes(item.id);
     const userNote = state.notes[item.id];
-    const tagBadges = (item.tags || []).slice(0, 3).map(t => {
-      let label = t;
-      if (t === 'wife' || t === '와이프추천' || t === '와이프픽' || t === '인기추천') label = '💖 인기 추천';
-      if (t === 'photo' || t === '인생샷') label = '📸 인생샷';
-      if (t === 'spa' || t === '스파' || t === '힐링') label = '💆 힐링 스파';
-      if (t === 'rain' || t === '비오는날') label = '☔ 비오는날 추천';
-      return `<span class="card-tag-pill">${escapeHtml(label)}</span>`;
-    }).join('');
-
-    let dayBadge = '';
-    if (item.suggestedDay) {
-      dayBadge = item.suggestedDay.split(' ')[0] || '';
-    }
+    const tagBadges = (item.tags || []).slice(0, 3)
+      .map(t => `<span class="card-tag-pill">${escapeHtml(activityTagLabel(t))}</span>`).join('');
 
     return `
         <div class="activity-card" data-id="${item.id}">
           <div class="card-media-wrapper">
             <img class="card-img" src="${item.imageUrl || (item.images && item.images[0]) || ''}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=600&q=80'" />
             <span class="card-badge-top-left">${escapeHtml(item.badge || item.categoryLabel || '추천')}</span>
-            <button class="card-heart-btn ${isWish ? 'active' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
               ♥
             </button>
-            ${dayBadge ? `<span class="card-badge-day">${escapeHtml(dayBadge)}</span>` : ''}
           </div>
           <div class="card-body">
             <div class="card-header-line">
@@ -410,6 +567,32 @@
       `;
   }
 
+  function activityRowTemplate(item, idx) {
+    return itemRowHTML({
+      id: item.id,
+      rank: idx + 1,
+      imgUrl: item.imageUrl || (item.images && item.images[0]) || '',
+      emoji: '🏝',
+      name: item.title,
+      tags: [
+        item.badge ? { label: item.badge, hot: true } : null,
+        item.categoryLabel ? { label: item.categoryLabel } : null
+      ].filter(Boolean),
+      rating: item.rating || null,
+      reviewCount: item.reviewCount,
+      openState: null,
+      metaParts: [item.duration, item.location],
+      sigLabel: item.bestTime ? `☀️ ${item.bestTime}` : '',
+      subText: (item.tags || []).slice(0, 3).map(activityTagLabel).join(' · '),
+      priceMain: formatVND(item.priceVnd),
+      priceKrw: formatKRW(item.priceVnd),
+      priceUnit: item.pricePer || '1인',
+      isWish: state.wishlist.includes(item.id),
+      note: state.notes[item.id],
+      mapUrl: buildMapUrl(item)
+    });
+  }
+
   function renderCards() {
     renderDomainGrid({
       gridContainerId: 'cardsGridContainer',
@@ -426,6 +609,7 @@
       `,
       resetBtnId: 'btnResetFilters',
       cardTemplate: activityCardTemplate,
+      rowTemplate: activityRowTemplate,
       cardSelector: '.activity-card',
       ignoreSelectors: ['.card-heart-btn'],
       findItem: (id) => NHA_TRANG_ACTIVITIES.find(a => a.id === id),
@@ -435,57 +619,6 @@
     });
   }
 
-  function renderTimeline() {
-    const timelineContainer = document.getElementById('timelineContainer');
-    if (!timelineContainer || typeof NHA_TRANG_SCHEDULE === 'undefined') return;
-
-    timelineContainer.innerHTML = NHA_TRANG_SCHEDULE.map(day => {
-      const itemsHtml = (day.activities || day.activityIds || []).map(id => {
-        const act = NHA_TRANG_ACTIVITIES.find(a => a.id === id);
-        if (!act) return '';
-        return `
-          <div class="timeline-activity-item" data-id="${act.id}">
-            <div class="item-icon">${act.iconEmoji || '📍'}</div>
-            <div class="item-content">
-              <div class="item-title">${escapeHtml(act.title)}</div>
-              <div class="item-meta">
-                <span>★ ${act.rating || 4.8}</span>
-                <span>•</span>
-                <span>${escapeHtml(act.duration || '')}</span>
-                <span>•</span>
-                <span>${escapeHtml(act.location || '')}</span>
-              </div>
-            </div>
-            <div class="item-price">${formatVND(act.priceVnd)}</div>
-          </div>
-        `;
-      }).join('');
-
-      const dayNumberText = String(day.day).startsWith('Day') ? day.day : `Day ${day.day}`;
-      const dayDateText = day.dayOfWeek ? `${day.date} (${day.dayOfWeek})` : day.date;
-
-      return `
-        <div class="timeline-day-card">
-          <div class="day-header">
-            <span class="day-number">${escapeHtml(dayNumberText)}</span>
-            <span class="day-date">${escapeHtml(dayDateText || '')}</span>
-            <span class="day-theme">${escapeHtml(day.theme || '')}</span>
-          </div>
-          <div class="timeline-activities-list">
-            ${itemsHtml}
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    timelineContainer.querySelectorAll('.timeline-activity-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const id = item.dataset.id;
-        const act = NHA_TRANG_ACTIVITIES.find(a => a.id === id);
-        if (act) openActivityModal(act);
-      });
-    });
-  }
 
   function toggleWishlist(id) {
     if (!state.wishlist) state.wishlist = [];
@@ -504,7 +637,6 @@
   const ACTIVITY_MODAL_FIELDS = [
     { id: 'modalBadge', value: item => item.badge || item.categoryLabel || '추천' },
     { id: 'modalCategory', value: item => item.categoryLabel || item.category },
-    { id: 'modalDay', value: item => item.suggestedDay || '일정 추천' },
     { id: 'modalTitle', value: 'title' },
     { id: 'modalTitleEn', value: item => item.titleEn || '' },
     { id: 'modalRating', value: item => `★ ${item.rating || 4.8} (구글/트립어드바이저)` },
@@ -671,7 +803,7 @@
           <div class="card-media-wrapper" style="background: #1E293B; min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; padding: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; z-index: 2;">
               <span class="card-badge-top-left" style="background: rgba(255,255,255,0.95); color: #0F172A;">${escapeHtml(item.badge || item.categoryLabel || '맛집')}</span>
-              <button class="card-heart-btn ${isWish ? 'active' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장" style="position: static;">
+              <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장" style="position: static;">
                 ♥
               </button>
             </div>
@@ -715,6 +847,33 @@
       `;
   }
 
+  function gourmetRowTemplate(item, idx) {
+    const sig = parseSignature((item.signatureMenu || [])[0]);
+    return itemRowHTML({
+      id: item.id,
+      rank: idx + 1,
+      emoji: item.iconEmoji || '🍽️',
+      name: item.name,
+      tags: [
+        item.badge ? { label: item.badge, hot: true } : null,
+        item.categoryLabel ? { label: item.categoryLabel } : null
+      ].filter(Boolean),
+      rating: item.rating,
+      reviewCount: item.reviewCount,
+      openState: isOpenNow(item.openHours),
+      metaParts: [item.openHours, item.location],
+      sigLabel: sig ? `⭐ ${sig.name}` : '',
+      sigValue: sig ? sig.price : '',
+      subText: item.nameVi,
+      priceMain: formatVND(item.avgPriceVnd),
+      priceKrw: formatKRW(item.avgPriceVnd),
+      priceUnit: '1인 예상',
+      isWish: (state.gourmetWishlist || []).includes(item.id),
+      note: (state.gourmetNotes || {})[item.id],
+      mapUrl: buildMapUrl(item)
+    });
+  }
+
   function renderGourmets() {
     renderDomainGrid({
       gridContainerId: 'gourmetCardsGridContainer',
@@ -731,6 +890,7 @@
       `,
       resetBtnId: 'btnResetGourmetFilters',
       cardTemplate: gourmetCardTemplate,
+      rowTemplate: gourmetRowTemplate,
       cardSelector: '.gourmet-card',
       ignoreSelectors: ['.card-heart-btn'],
       findItem: (id) => NHA_TRANG_GOURMETS.find(g => g.id === id),
@@ -897,7 +1057,7 @@
             <img class="card-img" src="${mainImg}" alt="${escapeHtml(item.nameKo)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80'" />
             <span class="card-badge-top-left stay-badge-cat">${escapeHtml(item.category || '호텔')}</span>
             <span class="stay-badge-theme">${escapeHtml(themeLabel)}</span>
-            <button class="card-heart-btn ${isWish ? 'active' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
               ♥
             </button>
           </div>
@@ -933,6 +1093,33 @@
       `;
   }
 
+  function stayRowTemplate(item, idx) {
+    const checkInOut = [item.checkIn, item.checkOut].filter(Boolean).join(' / ');
+    return itemRowHTML({
+      id: item.id,
+      rank: idx + 1,
+      imgUrl: item.coverImage || (item.images && item.images[0]) || '',
+      emoji: '🏨',
+      name: item.nameKo,
+      tags: [
+        item.themeName ? { label: item.themeName, hot: true } : null,
+        item.category ? { label: item.category } : null
+      ].filter(Boolean),
+      rating: item.rating,
+      reviewCount: item.reviewCount,
+      openState: null,
+      metaParts: [item.area, checkInOut].filter(Boolean),
+      sigLabel: (item.amenities || []).length ? `🛎 ${item.amenities[0]}` : '',
+      subText: (item.amenities || []).slice(1, 3).join(' · '),
+      priceMain: formatVND(item.pricePerNightVnd),
+      priceKrw: formatKRW(item.pricePerNightVnd),
+      priceUnit: '1박 기준',
+      isWish: (state.stayWishlist || []).includes(item.id),
+      note: (state.stayNotes || {})[item.id],
+      mapUrl: buildMapUrl(item)
+    });
+  }
+
   function renderStays() {
     renderDomainGrid({
       gridContainerId: 'staysCardsGridContainer',
@@ -949,6 +1136,7 @@
       `,
       resetBtnId: 'btnResetStaysFilters',
       cardTemplate: stayCardTemplate,
+      rowTemplate: stayRowTemplate,
       cardSelector: '.stay-card',
       ignoreSelectors: ['.card-heart-btn'],
       findItem: (id) => NHA_TRANG_STAYS.find(s => s.id === id),
@@ -1159,7 +1347,7 @@
             <span class="card-badge-top-left" style="background: rgba(255, 56, 92, 0.95); color: white;">${escapeHtml(item.badge || item.categoryLabel || '쇼핑')}</span>
             ${qualityTierBadge}
             ${acBadge}
-            <button class="card-heart-btn ${isWish ? 'active' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
               ♥
             </button>
           </div>
@@ -1195,6 +1383,35 @@
       `;
   }
 
+  function shoppingRowTemplate(item, idx) {
+    const sig = parseSignature((item.signatureItems || [])[0]);
+    return itemRowHTML({
+      id: item.id,
+      rank: idx + 1,
+      imgUrl: item.coverImage || (item.images && item.images[0]) || '',
+      emoji: '🛍️',
+      name: item.nameKo || item.name,
+      tags: [
+        item.qualityTier ? { label: item.qualityTier, hot: true } : null,
+        item.hasAirConditioning ? { label: '❄️ 에어컨' } : null,
+        item.categoryLabel ? { label: item.categoryLabel } : null
+      ].filter(Boolean).slice(0, 2),
+      rating: item.rating,
+      reviewCount: item.reviewCount,
+      openState: isOpenNow(item.openHours),
+      metaParts: [item.openHours, item.location],
+      sigLabel: sig ? `🛍 ${sig.name}` : '',
+      sigValue: sig ? sig.price : '',
+      subText: item.bargainingRequired ? '흥정 필요' : '',
+      priceMain: formatVND(item.avgPriceVnd),
+      priceKrw: formatKRW(item.avgPriceVnd),
+      priceUnit: item.pricePer || '평균',
+      isWish: (state.shoppingWishlist || []).includes(item.id),
+      note: (state.shoppingNotes || {})[item.id],
+      mapUrl: buildMapUrl(item)
+    });
+  }
+
   function renderShopping() {
     renderDomainGrid({
       gridContainerId: 'shoppingCardsGridContainer',
@@ -1211,6 +1428,7 @@
       `,
       resetBtnId: 'btnResetShoppingFilters',
       cardTemplate: shoppingCardTemplate,
+      rowTemplate: shoppingRowTemplate,
       cardSelector: '.shopping-card',
       ignoreSelectors: ['.card-heart-btn'],
       findItem: (id) => NHA_TRANG_SHOPPING.find(s => s.id === id),
@@ -1593,7 +1811,7 @@
           <div class="card-media-wrapper">
             <img class="card-img" src="${escapeHtml(item.coverImage || (item.images || [])[0] || '')}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=800&q=80'" />
             <span class="card-badge-top-left ${item.feeFree ? 'badge-fee-zero' : ''}">${escapeHtml(item.badge || item.categoryLabel || '환전·ATM')}</span>
-            <button type="button" class="card-heart-btn ${isWish ? 'active' : ''}" data-id="${item.id}" aria-label="찜하기">
+            <button type="button" class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" aria-label="찜하기">
               ${isWish ? '♥' : '♡'}
             </button>
             ${userNote ? `<span class="card-user-note-badge" title="${escapeHtml(userNote)}">📝 메모</span>` : ''}
@@ -1634,6 +1852,32 @@
       `;
   }
 
+  function currencyRowTemplate(item, idx) {
+    return itemRowHTML({
+      id: item.id,
+      rank: idx + 1,
+      imgUrl: item.coverImage || (item.images && item.images[0]) || '',
+      emoji: '💱',
+      name: item.nameKo || item.name,
+      tags: [
+        { label: item.feeFree ? '수수료 0원' : '우대 환율', hot: !!item.feeFree },
+        item.categoryLabel ? { label: item.categoryLabel } : null
+      ].filter(Boolean),
+      rating: item.rating,
+      reviewCount: item.reviewCount,
+      openState: isOpenNow(item.openHours),
+      metaParts: [item.openHours, item.location],
+      sigLabel: (item.supportedCards || []).length ? `💳 ${item.supportedCards.slice(0, 3).join(', ')}` : '',
+      subText: item.bestTiming || item.nameVi,
+      priceMain: item.feeFree ? '수수료 0 VND' : '최우대 스프레드',
+      priceKrw: '',
+      priceUnit: item.feePolicy || '',
+      isWish: (state.currencyWishlist || []).includes(item.id),
+      note: (state.currencyNotes || {})[item.id],
+      mapUrl: buildMapUrl(item)
+    });
+  }
+
   function renderCurrency() {
     renderDomainGrid({
       gridContainerId: 'currencyCardsGridContainer',
@@ -1654,6 +1898,7 @@
       `,
       resetBtnId: 'btnResetCurrencyFilters',
       cardTemplate: currencyCardTemplate,
+      rowTemplate: currencyRowTemplate,
       cardSelector: '.currency-card',
       ignoreSelectors: ['.card-heart-btn', '.btn-currency-map', '.btn-currency-photos'],
       findItem: (id) => (typeof NHA_TRANG_CURRENCY !== 'undefined' ? NHA_TRANG_CURRENCY : []).find(s => s.id === id),
@@ -1947,7 +2192,7 @@
   const DOMAINS = [
     {
       key: 'activities',
-      render: () => (state.currentView === 'timeline' ? renderTimeline() : renderCards()),
+      render: () => renderCards(),
       categoryNavId: 'activityCategoryNav', tagChipsId: 'activityTagChips',
       catAttr: 'category', tagAttr: 'tag',
       catField: 'actCategory', tagField: 'actTag',
@@ -2069,8 +2314,7 @@
   function switchMainTab(tab) {
     state.currentTab = tab;
 
-    const navTabs = document.querySelectorAll('.nav-tab-btn');
-    navTabs.forEach(btn => {
+    document.querySelectorAll('.nav-tab-btn, .mobile-tab-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tab);
     });
 
@@ -2121,43 +2365,54 @@
     if (heroTagsArea) heroTagsArea.innerHTML = domain.heroPills;
 
     // Section display: 자기 탭의 gridSection만 block, 나머지는 전부 none.
-    // activities만 grid/timeline 두 뷰가 하나의 gridSectionId를 공유하므로 예외 처리한다.
-    const timelineSection = document.getElementById('timelineSection');
     DOMAINS.forEach(d => {
-      if (d.key === tab) return;
       const section = document.getElementById(d.gridSectionId);
-      if (section) section.style.display = 'none';
+      if (section) section.style.display = d.key === tab ? 'block' : 'none';
     });
 
-    if (isActivities) {
-      const activitiesSection = document.getElementById(domain.gridSectionId);
-      if (activitiesSection) activitiesSection.style.display = state.currentView === 'grid' ? 'block' : 'none';
-      if (timelineSection) timelineSection.style.display = state.currentView === 'timeline' ? 'block' : 'none';
-    } else {
-      if (timelineSection) timelineSection.style.display = 'none';
-      const section = document.getElementById(domain.gridSectionId);
-      if (section) section.style.display = 'block';
+    // 영업시간 데이터가 있는 도메인에서만 "지금 영업중" 칩을 노출한다
+    const openNowChip = document.getElementById('openNowChip');
+    const hasHours = tab === 'gourmet' || tab === 'shopping' || tab === 'currency';
+    if (openNowChip) {
+      openNowChip.style.display = hasHours ? 'inline-flex' : 'none';
+      if (!hasHours) {
+        state.openNowOnly = false;
+        openNowChip.classList.remove('active');
+      }
     }
+
+    const densityToggle = document.getElementById('densityToggleButtons');
+    if (densityToggle) densityToggle.style.display = state.currentView === 'list' ? 'flex' : 'none';
 
     domain.render();
   }
 
+  /** 뷰 모드는 다섯 탭 전체에 적용되고 다음 방문까지 유지된다. */
   function setViewMode(mode) {
     state.currentView = mode;
-    const viewGridBtn = document.getElementById('viewGridBtn');
-    const viewTimelineBtn = document.getElementById('viewTimelineBtn');
-    
-    if (viewGridBtn) viewGridBtn.classList.toggle('active', mode === 'grid');
-    if (viewTimelineBtn) viewTimelineBtn.classList.toggle('active', mode === 'timeline');
+    saveToStorage('nha_trang_view', mode);
 
-    if (state.currentTab === 'activities') {
-      const activitiesSection = document.getElementById('activitiesGridSection');
-      const timelineSection = document.getElementById('timelineSection');
-      if (activitiesSection) activitiesSection.style.display = mode === 'grid' ? 'block' : 'none';
-      if (timelineSection) timelineSection.style.display = mode === 'timeline' ? 'block' : 'none';
-      if (mode === 'timeline') renderTimeline();
-      else renderCards();
-    }
+    const listBtn = document.getElementById('viewListBtn');
+    const gridBtn = document.getElementById('viewGridBtn');
+    if (listBtn) listBtn.classList.toggle('active', mode === 'list');
+    if (gridBtn) gridBtn.classList.toggle('active', mode === 'grid');
+
+    const densityToggle = document.getElementById('densityToggleButtons');
+    if (densityToggle) densityToggle.style.display = mode === 'list' ? 'flex' : 'none';
+
+    renderCurrentTab();
+  }
+
+  function setDensity(mode) {
+    state.density = mode;
+    saveToStorage('nha_trang_density', mode);
+
+    const tightBtn = document.getElementById('densityTightBtn');
+    const comfyBtn = document.getElementById('densityComfyBtn');
+    if (tightBtn) tightBtn.classList.toggle('active', mode === 'tight');
+    if (comfyBtn) comfyBtn.classList.toggle('active', mode === 'comfy');
+
+    renderCurrentTab();
   }
 
   function resetFilters() {
@@ -2181,9 +2436,12 @@
 
   // --- 10. Event Listeners Initialization ---
   function initEvents() {
-    // Nav Tabs
-    document.querySelectorAll('.nav-tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => switchMainTab(btn.dataset.tab));
+    // Nav Tabs — 상단 탭과 모바일 하단 탭바가 같은 핸들러를 쓴다
+    document.querySelectorAll('.nav-tab-btn, .mobile-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchMainTab(btn.dataset.tab);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     });
 
     // Wishlist Toggle
@@ -2253,9 +2511,19 @@
 
     // View Toggles
     const viewGridBtn = document.getElementById('viewGridBtn');
-    const viewTimelineBtn = document.getElementById('viewTimelineBtn');
+    const viewListBtn = document.getElementById('viewListBtn');
     if (viewGridBtn) viewGridBtn.addEventListener('click', () => setViewMode('grid'));
-    if (viewTimelineBtn) viewTimelineBtn.addEventListener('click', () => setViewMode('timeline'));
+    if (viewListBtn) viewListBtn.addEventListener('click', () => setViewMode('list'));
+    document.getElementById('densityTightBtn')?.addEventListener('click', () => setDensity('tight'));
+    document.getElementById('densityComfyBtn')?.addEventListener('click', () => setDensity('comfy'));
+
+    // 지금 영업중 필터
+    document.getElementById('openNowChip')?.addEventListener('click', (e) => {
+      state.openNowOnly = !state.openNowOnly;
+      e.currentTarget.classList.toggle('active', state.openNowOnly);
+      e.currentTarget.setAttribute('aria-pressed', String(state.openNowOnly));
+      renderCurrentTab();
+    });
 
     // Global reset-filters event listener
     window.addEventListener('reset-filters', resetFilters);
@@ -2432,7 +2700,6 @@
       // They resolve `document` at call time, so the harness can install a stub
       // AFTER requiring this file, which keeps the bootstrap above from running.
       renderCards,
-      renderTimeline,
       renderGourmets,
       renderStays,
       renderShopping,

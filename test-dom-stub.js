@@ -123,6 +123,8 @@ function installDom() {
     doc,
     /** HTML currently held by an element id (''-safe). */
     html(id) { return doc.getElementById(id).innerHTML; },
+    // 뷰/밀도 전환은 컨테이너의 class만 바꾸므로 innerHTML만으로는 회귀를 못 잡는다.
+    cls(id) { return doc.getElementById(id).className; },
     /** textContent currently held by an element id. */
     text(id) { return doc.getElementById(id).textContent; },
     /** Every id the code has touched so far. */

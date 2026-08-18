@@ -7,8 +7,6 @@ modalCategory
     text="호핑 & 스노클링"
 modalCoupleTip
     text="아침 일찍 출발하는 보트일수록 혼문섬 시야가 투명하고 사람이 적어요. 패들보드에서 둘이 마주보고 찍는 사진이 인생샷 명당입니다!"
-modalDay
-    text="Day 3 (9/21 일)"
 modalDuration
     text="반일 (08:30 ~ 14:30, 약 6시간)"
 modalGallery

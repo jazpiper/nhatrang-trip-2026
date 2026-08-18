@@ -448,7 +448,7 @@ const indexHtmlContent = fs.readFileSync(indexHtmlPath, 'utf8');
 
 runner.test('index.html static gourmet badge count matches dataset length', () => {
   assert.ok(indexHtmlContent.includes('전체 맛집 (113곳)'), "index.html must contain '전체 맛집 (113곳)'");
-  assert.ok(indexHtmlContent.includes('Google 검증 113곳'), "index.html must contain 'Google 검증 113곳'");
+  assert.ok(/<span class="tab-badge">113<\/span>/.test(indexHtmlContent), "index.html tab badge must show 113");
 });
 
 runner.test('All critical gourmet DOM element IDs exist in index.html', () => {

@@ -48,7 +48,7 @@ const NHA_TRANG_CURRENCY = [
     highlight: "나트랑에서 한국인 여행객이 가장 많이 찾는 환전 1번지, 100달러 신권 최고 환율!",
     description: "나트랑 시내 쏨모이 시장 인근 응오지아뜨 거리에 위치한 가장 대표적인 금은방 환전소입니다. 100달러 신권 지폐를 가장 높은 환율로 쳐주며, 한국 5만원권 지폐도 즉시 베트남 동으로 바꿀 수 있습니다.",
     localTip: "지폐에 낙서나 찢어짐이 있으면 환율이 깎일 수 있으니 한국에서 깨끗한 100달러 신권을 준비하세요. 환전 후 즉시 카운터 앞에서 계수기 금액을 확인하세요.",
-    suggestedDay: "Day 1 (9/19 금) 시내 도착 직후",
+    bestTiming: "시내 도착 직후",
     coverImage: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80",
@@ -93,7 +93,6 @@ const NHA_TRANG_CURRENCY = [
     highlight: "김청 바로 맞은편! 저녁 9시까지 여유롭게 100달러 최고 우대 환율로 환전 가능한 대형 금은방",
     description: "김청 금은방 바로 건너편에 위치한 대형 금은방으로, 김청과 함께 나트랑 환전의 양대 산맥입니다. 대기 인원이 많을 때 김청과 김빈 중 줄이 짧거나 환율을 조금이라도 더 쳐주는 곳에서 빠르게 바꿀 수 있습니다.",
     localTip: "김청에 줄이 길다면 바로 맞은편 김빈으로 가보세요. 환율이 동일하거나 1,000~2,000동 차이로 대기 없이 쾌적하게 바꿀 수 있습니다.",
-    suggestedDay: "Day 1 (9/19 금) 저녁 식사 후",
     coverImage: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=80",
@@ -138,7 +137,7 @@ const NHA_TRANG_CURRENCY = [
     highlight: "담시장 쇼핑 상가 바로 앞! 라탄백·건어물 쇼핑 전 즉시 베트남 동 현금을 확보하는 거점",
     description: "담시장 원형 아파트 상가 1층에 자리한 김빈 금은방 담시장 지점입니다. 담시장은 카드 결제가 거의 불가능하고 현금 거래가 기본이므로, 쇼핑 전 100달러나 5만원권을 동으로 환전하기에 가장 편리합니다.",
     localTip: "담시장 노점 쇼핑 시 잔돈(1만~5만동)이 많이 필요하므로, 환전할 때 소액권을 일부 섞어달라고 요청하세요.",
-    suggestedDay: "Day 2 (9/20 토) 담시장 투어 직전",
+    bestTiming: "담시장 투어 직전",
     coverImage: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?auto=format&fit=crop&w=1200&q=80",
@@ -183,7 +182,6 @@ const NHA_TRANG_CURRENCY = [
     highlight: "김청·김빈과 같은 골목! 혼잡한 피크 시간대 대기 없이 빠른 환전이 가능한 공인 금은방",
     description: "응오지아뜨 금은방 거리 62번지에 위치한 정식 공인 귀금속 및 환전 매장입니다. 김청과 김빈 사이에 위치하여 두 곳에 줄이 길 때 합리적인 환율로 빠르게 환전할 수 있습니다.",
     localTip: "응오지아뜨 골목 3대 금은방(김청, 김빈, 김탄)의 거리는 불과 수십 미터이므로 가볍게 둘러보고 결정하세요.",
-    suggestedDay: "Day 1 (9/19 금) 또는 Day 2 (9/20 토)",
     coverImage: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=80",
@@ -232,7 +230,7 @@ const NHA_TRANG_CURRENCY = [
     highlight: "베트남 최대 국영 외환은행! 공식 영수증 발급 및 위조지폐 걱정 없는 100% 안전 환전 창구",
     description: "베트남을 대표하는 국영 외환은행 비엣콤뱅크의 칸화성 본점입니다. 출장 증빙이나 법적 영수증이 필요한 여행자에게 적합하며, 여권을 지참하면 공인 환율로 안전하게 바꿀 수 있습니다.",
     localTip: "은행 창구 환전 시 여권 원본이 반드시 필요합니다. 점심시간(11:30~13:00)과 주말에는 창구가 닫히므로 평일 오전에 방문하세요.",
-    suggestedDay: "평일 오전 (월~금 08:00~11:00)",
+    bestTiming: "평일 오전 (월~금 08:00~11:00)",
     coverImage: "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?auto=format&fit=crop&w=1200&q=80",
@@ -277,7 +275,7 @@ const NHA_TRANG_CURRENCY = [
     highlight: "광중 은행 거리에 위치한 대형 국영 상업은행, 여권 지참 시 확실한 합법 환전",
     description: "베트남 4대 국영 상업은행 중 하나인 BIDV 나트랑 지점으로, 광중 거리 중심부에 자리잡고 있습니다. 신뢰도 높은 공식 금융 서비스를 제공합니다.",
     localTip: "비엣콤뱅크 바로 옆(11 Quang Trung)에 위치해 있어 두 은행의 고시 환율을 비교해볼 수 있습니다.",
-    suggestedDay: "평일 업무 시간 (08:00~11:00)",
+    bestTiming: "평일 업무 시간 (08:00~11:00)",
     coverImage: "https://images.unsplash.com/photo-1541354329998-f4d9a9f9297f?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1541354329998-f4d9a9f9297f?auto=format&fit=crop&w=1200&q=80",
@@ -322,7 +320,7 @@ const NHA_TRANG_CURRENCY = [
     highlight: "토요일 오전에도 영업! 빈컴플라자 1층에 위치하여 쇼핑과 함께 안전하게 환전 가능한 프리미엄 은행",
     description: "나트랑 시내 빈컴플라자 레탄똔점 1층에 위치한 테크콤뱅크 지점입니다. 주말인 토요일 오전에도 창구가 열려 있어 평일 은행 방문을 놓친 여행자들에게 최고의 구원투수입니다.",
     localTip: "빈컴플라자 지하 마트에서 쇼핑하기 전 들러 환전하기 좋습니다. 토요일 오전 11시 전 방문을 권장합니다.",
-    suggestedDay: "토요일 오전 (08:30~11:30)",
+    bestTiming: "토요일 오전 (08:30~11:30)",
     coverImage: "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=1200&q=80",
@@ -367,7 +365,7 @@ const NHA_TRANG_CURRENCY = [
     highlight: "광중 거리 중심에 위치한 대형 민간 은행, 신속하고 깔끔한 외환 교환 서비스",
     description: "나트랑 록토 구역 광중 거리에 위치한 사콤뱅크 칸화 지점입니다. 국영 은행 대비 창구 대기 시간이 비교적 짧아 빠른 환전을 원하는 여행자에게 유리합니다.",
     localTip: "창구 환전 시 여권 원본을 제시해야 합니다.",
-    suggestedDay: "평일 오후 (13:30~16:00)",
+    bestTiming: "평일 오후 (13:30~16:00)",
     coverImage: "https://images.unsplash.com/photo-1559526324-593bc073d938?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1559526324-593bc073d938?auto=format&fit=crop&w=1200&q=80",
@@ -416,7 +414,7 @@ const NHA_TRANG_CURRENCY = [
     highlight: "공항 착륙 즉시 그랩 택시비와 비상금 $10~$20 소액 환전에 최적화된 24시간 부스",
     description: "깜란 국제공항 T2 1층 입국장에 위치한 환전 부스들입니다. 시내 금은방 대비 환율이 다소 낮으므로 전체 경비를 바꾸기보다는 시내 호텔까지 이동할 그랩/택시비 및 첫날 비상금(10~20달러 또는 3~5만원) 정도만 소액 환전하는 것을 추천합니다.",
     localTip: "공항 환전소는 시내 금은방보다 환율이 5% 내외 불리합니다. $20 정도만 바꿔서 시내로 이동한 뒤 김청/김빈이나 VPBank ATM에서 본 경비를 인출하세요.",
-    suggestedDay: "Day 1 (9/19 금) 깜란 공항 착륙 직후",
+    bestTiming: "깜란 공항 착륙 직후",
     coverImage: "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?auto=format&fit=crop&w=1200&q=80",
@@ -466,7 +464,6 @@ const NHA_TRANG_CURRENCY = [
     highlight: "트래블로그·트래블월렛·쏠트래블·토스·위비 전원 현지 수수료 0원! 나트랑 최고의 0원 ATM 성지",
     description: "나트랑 이어신 거리에 위치한 VPBank 대표 지점의 24시간 ATM입니다. 한국의 5대 여행 체크카드 모두 현지 수수료가 전혀 부과되지 않아 한국인 여행객들이 가장 신뢰하는 현금 인출 거점입니다.",
     localTip: "인출 시 화면에 'Conversion' 옵션이 나타나면 반드시 'Without Conversion(현지 통화 출금)'을 선택해야 DCC 이중 수수료가 붙지 않습니다. 카드가 먼저 배출되니 즉시 뽑으세요!",
-    suggestedDay: "Day 1 (9/19 금) 또는 필요 시 상시",
     coverImage: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=1200&q=80",
@@ -511,7 +508,7 @@ const NHA_TRANG_CURRENCY = [
     highlight: "푸억하이 신도심 위치! 서부 로컬 맛집 탐방 및 마트 방문 시 수수료 0원으로 인출 가능한 VPBank ATM",
     description: "나트랑 서부 VCN 푸억하이 신도심 틱꽝득 거리에 위치한 VPBank 24시간 ATM입니다. 시내 중심부 지점이 붐빌 때 여유롭게 인출할 수 있습니다.",
     localTip: "현지 수수료 0원으로 1회 500만 동까지 인출 가능합니다. 핀번호 6자리 요구 시 비밀번호 4자리 뒤에 00을 입력하세요.",
-    suggestedDay: "Day 3 (9/21 일) 서부 로컬 투어 시",
+    bestTiming: "서부 로컬 투어 시",
     coverImage: "https://images.unsplash.com/photo-1556742049-0a67e5572263?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1556742049-0a67e5572263?auto=format&fit=crop&w=1200&q=80",
@@ -556,7 +553,7 @@ const NHA_TRANG_CURRENCY = [
     highlight: "야시장 도보 3분! 쾌적한 24시 스마트 에어컨 부스에서 수수료 0원으로 고액 인출 가능한 최강 거점",
     description: "나트랑 여행자 거리 레탄똔 50번지에 위치한 TPBank의 최첨단 24시 무인 스마트 뱅킹 LiveBank 부스입니다. 강력한 에어컨과 내부 자동 잠금 도어가 갖춰져 있어 밤늦게도 쾌적하고 안전하게 현금을 인출할 수 있습니다.",
     localTip: "부스 안으로 들어가면 문 안쪽의 도어 잠금 버튼을 누를 수 있어 주변 시선 없이 안전하게 큰 금액을 인출할 수 있습니다.",
-    suggestedDay: "Day 1 (9/19 금) 저녁 야시장 방문 전",
+    bestTiming: "저녁 야시장 방문 전",
     coverImage: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1200&q=80",
@@ -601,7 +598,7 @@ const NHA_TRANG_CURRENCY = [
     highlight: "나트랑 대성당과 기차역 권역! 관광 중 급하게 현금이 필요할 때 수수료 0원으로 이용하는 스마트 뱅크",
     description: "통녓 거리 307번지에 위치한 TPBank 24시 스마트 무인 부스입니다. 나트랑 대성당과 롱선사, 현지 로컬 맛집들을 둘러보는 도중 시원한 에어컨 부스에서 수수료 없이 현금을 인출할 수 있습니다.",
     localTip: "대성당 관람 후 담시장으로 넘어가기 전 동(VND)을 미리 인출해두기 좋습니다.",
-    suggestedDay: "Day 2 (9/20 토) 시내 명소 투어 중",
+    bestTiming: "시내 명소 투어 중",
     coverImage: "https://images.unsplash.com/photo-1541354329998-f4d9a9f9297f?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1541354329998-f4d9a9f9297f?auto=format&fit=crop&w=1200&q=80",
@@ -646,7 +643,7 @@ const NHA_TRANG_CURRENCY = [
     highlight: "아미아나·보톤블루 투숙객 필수! 나트랑 북부 유일의 24시간 수수료 0원 스마트 LiveBank",
     description: "나트랑 북부 응우옌딘찌에우 거리 2번지에 위치한 TPBank LiveBank입니다. 아미아나 리조트나 보톤블루 등 북부 숙소에 머물거나 혼총 곶, 포나가르 사원을 관람할 때 시내까지 가지 않고 편리하게 0원 수수료로 인출할 수 있는 오아시스 같은 곳입니다.",
     localTip: "북부 해변 해산물 거리(동호관 등)에서 저녁 식사 전 현금을 인출할 때 최고의 위치입니다.",
-    suggestedDay: "Day 4 (9/22 월) 북부 투어 및 아미아나 이동일",
+    bestTiming: "북부 투어 및 아미아나 이동일",
     coverImage: "https://images.unsplash.com/photo-1559526324-593bc073d938?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1559526324-593bc073d938?auto=format&fit=crop&w=1200&q=80",
@@ -691,7 +688,6 @@ const NHA_TRANG_CURRENCY = [
     highlight: "광중 금융가 중심! 마스터카드 제휴 한국 여행카드 수수료 0원 인출 지원 MSB 24시 ATM",
     description: "나트랑 록토 광중 거리 76A번지에 위치한 베트남 해양은행(MSB) 지점 ATM입니다. 트래블로그를 비롯한 마스터카드 기반 여행카드 사용 시 현지 수수료 없이 깔끔하게 출금할 수 있습니다.",
     localTip: "VPBank나 TPBank에 줄이 있거나 현금이 소진되었을 때 가장 좋은 대체 0원 ATM입니다.",
-    suggestedDay: "상시 필요 시",
     coverImage: "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?auto=format&fit=crop&w=1200&q=80",
@@ -736,7 +732,7 @@ const NHA_TRANG_CURRENCY = [
     highlight: "해변가 주요 호텔 및 빈컴 인접! 트래블로그 마스터카드 수수료 0원 인출 지원 군대은행 ATM",
     description: "나트랑 해변 인근 레탄똔 09번지에 위치한 MBBank(베트남 군대은행)의 24시 ATM입니다. 해변 산책이나 인근 대형 호텔 투숙 중 손쉽게 방문하여 트래블로그 카드로 수수료 없이 현금을 인출할 수 있습니다.",
     localTip: "해변 카페나 세일링클럽, 야시장 가기 전 현금을 채우기에 최적의 위치입니다.",
-    suggestedDay: "Day 1~2 저녁 해변 산책 시",
+    bestTiming: "저녁 해변 산책 시",
     coverImage: "https://images.unsplash.com/photo-1556742049-0a67e5572263?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1556742049-0a67e5572263?auto=format&fit=crop&w=1200&q=80",
@@ -781,7 +777,7 @@ const NHA_TRANG_CURRENCY = [
     highlight: "공항 착륙 즉시 첫 현금 인출! 시내 이동용 그랩/택시비 및 팁을 해결하는 24시간 공항 ATM 허브",
     description: "깜란 국제공항 T2 입국장 게이트를 나오자마자 좌측에 위치한 24시간 ATM 존입니다. 여러 은행의 ATM이 모여 있어 한국에서 가져온 여행 체크카드로 시내 이동 전 필요한 소액 현금을 즉시 인출할 수 있습니다.",
     localTip: "공항 ATM은 1회 인출 한도가 200만~300만 동으로 제한되는 경우가 많으므로, 시내 이동에 필요한 금액만 뽑고 큰돈은 시내 VPBank나 TPBank LiveBank에서 인출하세요.",
-    suggestedDay: "Day 1 (9/19 금) 공항 착륙 직후",
+    bestTiming: "공항 착륙 직후",
     coverImage: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=1200&q=80",
     images: [
       "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=1200&q=80",

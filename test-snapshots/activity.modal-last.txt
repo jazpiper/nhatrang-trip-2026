@@ -7,8 +7,6 @@ modalCategory
     text="인터내셔널 스파"
 modalCoupleTip
     text="일반적인 부드러운 오일 마사지보다 목, 어깨, 허리의 뭉친 근육을 시원하게 풀고 싶어 하는 많은 여행자들에게 압도적인 찬사를 받는 곳입니다. 함께 받으면 여행의 피로가 완벽히 풀립니다."
-modalDay
-    text="Day 4 (9/22 월) 또는 Day 6 (9/24 수) 저녁"
 modalDuration
     text="90분 ~ 120분"
 modalGallery
