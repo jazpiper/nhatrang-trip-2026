@@ -1,6 +1,4 @@
 <!-- modal: currency | item: cam-ranh-airport-t2-atm -->
-currencyModal
-    style={display:flex}
 currencyModalAddress
     text="Tầng 1 Sảnh đến, Nhà ga Quốc tế T2, Sân bay Quốc tế Cam Ranh, Cam Ranh, Khánh Hòa"
 currencyModalAtmSteps

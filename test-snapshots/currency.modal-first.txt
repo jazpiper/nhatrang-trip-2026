@@ -1,6 +1,4 @@
 <!-- modal: currency | item: kim-chung-gold -->
-currencyModal
-    style={display:flex}
 currencyModalAddress
     text="51 Ngô Gia Tự, Phường Tân Lập, Nha Trang, Khánh Hòa 650000"
 currencyModalAtmSteps

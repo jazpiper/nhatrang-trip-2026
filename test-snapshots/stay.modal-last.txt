@@ -38,7 +38,7 @@ stayModalRating
 stayModalThemeBadge
     text="출국 전 0.5박"
 stayModalThumbs
-    html="\n        <div class=\"gallery-thumb active\" data-index=\"0\">\n          <img src=\"https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80\" alt=\"숙소 사진 1\" loading=\"lazy\" />\n        </div>\n      "
+    html="\n        <div class=\"gallery-thumb active\" data-idx=\"0\">\n          <img src=\"https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&amp;q=80\" alt=\"숙소 사진 1\" loading=\"lazy\" />\n        </div>\n      "
 stayModalTip
     text="체크인 시 고층이나 오션뷰 배정을 요청해보세요."
 stayModalTitle
