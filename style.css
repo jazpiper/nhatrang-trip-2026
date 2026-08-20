@@ -177,16 +177,6 @@ input, textarea, select {
   line-height: 1;
 }
 
-.brand-badge {
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: var(--color-bg-subtle);
-  color: var(--color-text-secondary);
-  padding: 4px 8px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--color-border-light);
-}
-
 .header-nav-tabs {
   display: flex;
   align-items: center;
@@ -340,10 +330,6 @@ input, textarea, select {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-}
-
-.hero-subtitle .dot-separator {
-  color: var(--color-border-medium);
 }
 
 .hero-tags {
@@ -701,20 +687,6 @@ input, textarea, select {
   pointer-events: none;
 }
 
-.card-badge-day {
-  position: absolute;
-  bottom: 12px;
-  left: 12px;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(4px);
-  color: white;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  pointer-events: none;
-}
-
 .card-heart-btn {
   position: absolute;
   top: 12px;
@@ -939,20 +911,6 @@ input, textarea, select {
   background: #000000;
 }
 
-/* 그리드 뷰의 맛집 카드 — 실제 사진이 없어 이모지를 크게 쓴다 */
-.gourmet-emoji-media {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 16 / 9;
-  background: linear-gradient(150deg, #CDEDEC 0%, var(--color-primary-light) 55%, #FFF3EE 100%);
-}
-
-.gourmet-emoji {
-  font-size: 2.9rem;
-  line-height: 1;
-  filter: drop-shadow(0 2px 4px rgba(30, 74, 78, 0.15));
-}
-
 .empty-state-wrap {
   display: block;
   width: 100%;
@@ -1113,10 +1071,6 @@ input, textarea, select {
 .row-closed {
   color: var(--color-closed);
   font-weight: 700;
-}
-
-.row-muted {
-  color: var(--color-text-tertiary);
 }
 
 .row-line3 {
@@ -1377,21 +1331,6 @@ input, textarea, select {
   object-fit: cover;
 }
 
-.modal-gallery-grid .sub-imgs {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  height: 100%;
-}
-
-.modal-gallery-grid .sub-imgs img {
-  width: 100%;
-  height: calc(50% - 4px);
-  object-fit: cover;
-}
-
-/* The activity modal renderer emits .sub-imgs-grid, not the .sub-imgs above —
-   another renderer/CSS drift that left the sub-image column unstyled. */
 .modal-gallery-grid .sub-imgs-grid {
   display: flex;
   flex-direction: column;
@@ -1424,8 +1363,7 @@ input, textarea, select {
   align-items: center;
 }
 
-.modal-badges-row .card-badge-top-left,
-.modal-badges-row .card-badge-day {
+.modal-badges-row .card-badge-top-left {
   position: static;
   display: inline-block;
 }
@@ -1845,25 +1783,6 @@ input, textarea, select {
   min-height: auto;
 }
 
-.stay-card .stay-name-vi {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--color-ocean);
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.stay-card .stay-location-meta {
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
 .stay-card .card-price-line {
   margin-top: 10px;
   padding-top: 10px;
@@ -1872,12 +1791,6 @@ input, textarea, select {
   align-items: baseline;
   gap: 6px;
   flex-wrap: wrap;
-}
-
-.stay-card-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
 }
 
 .btn-trip-dot-com {
@@ -1904,28 +1817,6 @@ input, textarea, select {
   transform: translateY(-1px);
   box-shadow: 0 5px 14px rgba(37, 99, 235, 0.4);
   color: white;
-}
-
-.btn-stay-map {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  height: 36px;
-  padding: 0 12px;
-  border-radius: var(--radius-pill);
-  background: #F5FBFA;
-  border: 1px solid var(--color-border-medium);
-  color: var(--color-text-primary);
-  font-size: 0.8rem;
-  font-weight: 700;
-  transition: var(--transition-fast);
-  text-decoration: none;
-}
-
-.btn-stay-map:hover {
-  background: var(--color-bg-hover);
-  border-color: var(--color-border-dark);
 }
 
 /* --------------------------------------------------------------------------
@@ -2056,12 +1947,6 @@ input, textarea, select {
   transform: translateY(-1px);
 }
 
-.btn-copy-address.copied {
-  background: #DFF4F4 !important;
-  border-color: #0284C7 !important;
-  color: #0B7F87 !important;
-}
-
 .modal-highlight-box {
   background: #EAF7F6;
   border-left: 4px solid #0B7F87;
@@ -2174,17 +2059,6 @@ input, textarea, select {
   min-height: auto;
 }
 
-.shopping-card .shopping-name-vi {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--color-ocean);
-  margin-top: 3px;
-  margin-bottom: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .shopping-card .card-meta-line {
   display: flex;
   align-items: center;
@@ -2205,57 +2079,6 @@ input, textarea, select {
 
 .shopping-card .card-meta-line .rating .star {
   color: #F59E0B;
-}
-
-.shopping-card-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.btn-shopping-map {
-  flex: 1;
-  padding: 9px 12px;
-  border: 1px solid var(--color-border-medium);
-  border-radius: var(--radius-pill);
-  background: white;
-  color: var(--color-text-primary);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-align: center;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  transition: var(--transition-fast);
-}
-
-.btn-shopping-map:hover {
-  background: var(--color-bg-hover);
-  border-color: var(--color-border-dark);
-}
-
-.btn-shopping-photos {
-  flex: 1;
-  padding: 9px 12px;
-  border-radius: var(--radius-pill);
-  background: #C9451F;
-  color: white;
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-align: center;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  transition: var(--transition-fast);
-}
-
-.btn-shopping-photos:hover {
-  background: var(--color-primary-hover);
-  transform: translateY(-1px);
 }
 
 /* Shopping Modal Facilities Box */
@@ -2326,44 +2149,12 @@ input, textarea, select {
   font-size: 0.9rem;
 }
 
-.price-badge-asking {
-  display: inline-block;
-  background: #FEF2F2;
-  color: #DC2626;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  margin-bottom: 2px;
-}
-
-.price-badge-target {
-  display: inline-block;
-  background: #EAF7F6;
-  color: #0B7F87;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.82rem;
-  font-weight: 800;
-}
-
 /* Sentiment & Community Review Box */
 .sentiment-panel-wrap {
   display: flex;
   flex-direction: column;
   gap: 14px;
   margin-top: 10px;
-}
-
-.sentiment-verdict-box {
-  background: #EFF6FF;
-  border-left: 4px solid #3B82F6;
-  padding: 12px 16px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  font-size: 0.88rem;
-  color: #1E40AF;
-  font-weight: 600;
-  line-height: 1.5;
 }
 
 .pros-cons-grid {
@@ -2410,84 +2201,6 @@ input, textarea, select {
   display: flex;
   align-items: center;
   gap: 5px;
-}
-
-.sentiment-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 0.82rem;
-  line-height: 1.5;
-}
-
-.sentiment-list li {
-  margin-bottom: 6px;
-  padding-left: 14px;
-  position: relative;
-}
-
-.sentiment-list li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  font-weight: 800;
-}
-
-.pros-box .sentiment-list li {
-  color: #15803D;
-}
-.pros-box .sentiment-list li::before {
-  color: #22C55E;
-}
-
-.cons-box .sentiment-list li {
-  color: #B91C1C;
-}
-.cons-box .sentiment-list li::before {
-  color: #EF4444;
-}
-
-.best-sellers-box {
-  background: #FFFBEB;
-  border: 1px solid #FEF3C7;
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
-}
-
-.best-sellers-box h4 {
-  color: #92400E;
-  font-size: 0.88rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.best-seller-pills-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.best-seller-pill {
-  background: white;
-  border: 1px solid #FDE68A;
-  color: #B45309;
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.scam-warning-box {
-  background: #FFF1F2;
-  border-left: 4px solid #F43F5E;
-  padding: 10px 14px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  font-size: 0.82rem;
-  color: #9F1239;
-  line-height: 1.45;
 }
 
 .customs-warning-box {
@@ -2673,8 +2386,7 @@ input, textarea, select {
   align-items: center;
 }
 
-.btn-currency-map,
-.btn-currency-photos {
+.btn-currency-map {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -2684,9 +2396,6 @@ input, textarea, select {
   font-weight: 700;
   text-decoration: none;
   transition: all var(--transition-fast);
-}
-
-.btn-currency-map {
   background: #EFF6FF;
   color: #2563EB;
   border: 1px solid #BFDBFE;
@@ -2698,6 +2407,15 @@ input, textarea, select {
 }
 
 .btn-currency-photos {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all var(--transition-fast);
   background: #FDF2F8;
   color: #DB2777;
   border: 1px solid #FBCFE8;
@@ -3026,10 +2744,6 @@ input, textarea, select {
     height: 220px;
   }
   
-  .modal-gallery-grid .sub-imgs {
-    display: none;
-  }
-
   .stay-gallery-container {
     padding: 12px 14px;
   }
@@ -3094,18 +2808,6 @@ input, textarea, select {
 .spa-badge-service.tip-included {
   background: #DFF4F4;
   color: #0B7F87;
-}
-
-.spa-facility-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-subtle);
-  color: var(--color-text-secondary);
 }
 
 .spa-terms-grid {
@@ -3226,7 +2928,24 @@ input, textarea, select {
   color: var(--color-text-primary);
 }
 
-.btn-spa-map,
+.btn-spa-map {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  transition: var(--transition-fast);
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-spa-map:hover {
+  background: var(--color-primary-ink);
+}
+
 .btn-spa-photos {
   display: inline-flex;
   align-items: center;
@@ -3237,18 +2956,6 @@ input, textarea, select {
   border-radius: var(--radius-pill);
   text-decoration: none;
   transition: var(--transition-fast);
-}
-
-.btn-spa-map {
-  background: var(--color-primary);
-  color: white;
-}
-
-.btn-spa-map:hover {
-  background: var(--color-primary-ink);
-}
-
-.btn-spa-photos {
   background: var(--color-bg-subtle);
   color: var(--color-text-primary);
   border: 1px solid var(--color-border-medium);
