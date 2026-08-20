@@ -193,19 +193,13 @@ if (missing > 0) {
   process.exit(1);
 }
 
-console.log('\n=== Suite 2: Script Inclusion Order in index.html ===');
-// Every dataset must be a classic script loaded BEFORE js/app.js, which reads them
-// as plain globals. One tag out of order silently breaks the whole tab.
-const dataScripts = [
-  './data.js',
-  './gourmet-data.js',
-  './stays-data.js',
-  './spa-data.js',
-  './shopping-data.js',
-  './currency-data.js',
-  './guide-data.js'
-];
-const hasAppScript = html.includes('<script src="./js/app.js"></script>') || html.includes('<script type="module" src="./js/app.js"></script>');
+console.log('\n=== Suite 2: Script Loading Structure (eager data.js + lazy 6종) ===');
+// 로딩 구조가 2계층에서 eager/lazy 하이브리드로 바뀌었다 (js/app.js 섹션 8.7).
+// - data.js(액티비티 + DEFAULT_EXCHANGE_RATE)만 index.html에서 정적 로드하고,
+//   반드시 js/app.js보다 앞에 있어야 한다.
+// - 나머지 6종은 정적 태그가 있으면 안 된다(있으면 이중 로드 + 초기 전송량 회귀).
+//   대신 js/app.js의 LAZY_DATA 매니페스트에 등록돼 있고 파일이 실존해야 한다.
+const hasAppScript = html.includes('<script src="./js/app.js"></script>');
 const appIdx = html.indexOf('src="./js/app.js"');
 
 if (!hasAppScript) {
@@ -214,18 +208,51 @@ if (!hasAppScript) {
 }
 
 let orderOk = true;
-for (const src of dataScripts) {
-  const tag = `<script src="${src}"></script>`;
-  const idx = html.indexOf(tag);
-  if (idx === -1) {
-    console.error(`  ❌ Missing dataset script tag: ${src}`);
+
+// 2a. data.js는 정적 로드 + app.js보다 앞
+const dataTagIdx = html.indexOf('<script src="./data.js"></script>');
+if (dataTagIdx === -1) {
+  console.error('  ❌ data.js 정적 script 태그가 없음 — 액티비티 탭과 환율 전체가 죽는다');
+  orderOk = false;
+} else if (dataTagIdx > appIdx) {
+  console.error('  ❌ data.js가 js/app.js보다 뒤에 로드됨 — 전역이 undefined가 된다');
+  orderOk = false;
+} else {
+  console.log('  ✔ data.js가 js/app.js보다 먼저 정적 로드됨');
+}
+
+// 2b. lazy 6종: 정적 태그 부재 + LAZY_DATA 등록 + 파일 실존
+const lazyFiles = [
+  'gourmet-data.js',
+  'stays-data.js',
+  'spa-data.js',
+  'shopping-data.js',
+  'currency-data.js',
+  'guide-data.js'
+];
+const appSrcForLazy = fs.readFileSync('js/app.js', 'utf8');
+const lazyBlockMatch = appSrcForLazy.match(/const LAZY_DATA = \{[\s\S]*?\n  \};/);
+if (!lazyBlockMatch) {
+  console.error('  ❌ js/app.js에서 LAZY_DATA 매니페스트를 찾지 못함');
+  orderOk = false;
+}
+for (const f of lazyFiles) {
+  if (html.includes(`<script src="./${f}"`)) {
+    console.error(`  ❌ ${f}에 정적 script 태그가 있음 — lazy 로딩과 이중 로드된다`);
     orderOk = false;
-  } else if (idx > appIdx) {
-    console.error(`  ❌ ${src} is loaded AFTER js/app.js — globals would be undefined`);
-    orderOk = false;
-  } else {
-    console.log(`  ✔ ${src} loaded before js/app.js`);
+    continue;
   }
+  if (lazyBlockMatch && !lazyBlockMatch[0].includes(`'./${f}'`)) {
+    console.error(`  ❌ ${f}가 LAZY_DATA 매니페스트에 없음 — 해당 탭이 영원히 로딩 상태에 머문다`);
+    orderOk = false;
+    continue;
+  }
+  if (!fs.existsSync(f)) {
+    console.error(`  ❌ ${f} 파일이 존재하지 않음`);
+    orderOk = false;
+    continue;
+  }
+  console.log(`  ✔ ${f}: 정적 태그 없음 + LAZY_DATA 등록 + 파일 실존`);
 }
 if (!orderOk) process.exit(1);
 

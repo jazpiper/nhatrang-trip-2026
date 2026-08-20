@@ -3095,6 +3095,72 @@
     getDomain(state.currentTab).render();
   }
 
+
+  // --- 8.7 Lazy Data Loading ---
+  // 데이터 7종 중 data.js(액티비티 + DEFAULT_EXCHANGE_RATE)만 index.html에서
+  // 정적으로 로드하고, 나머지 6종은 해당 탭 최초 진입 시 <script> 태그를 동적
+  // 삽입해 불러온다. fetch가 아니라 클래식 스크립트라 file://에서도 동작하고,
+  // 로드 완료 후에는 전역 const가 생겨 기존 코드가 그대로 동작한다.
+  // 초기 전송량이 데이터 전체(gzip 기준 약 232KB)에서 약 90KB로 줄어든다.
+  const LAZY_DATA = {
+    gourmet: { src: './gourmet-data.js', containerId: 'gourmetCardsGridContainer', ready: () => typeof NHA_TRANG_GOURMETS !== 'undefined' },
+    stays: { src: './stays-data.js', containerId: 'staysCardsGridContainer', ready: () => typeof NHA_TRANG_STAYS !== 'undefined' },
+    spa: { src: './spa-data.js', containerId: 'spaCardsGridContainer', ready: () => typeof NHA_TRANG_SPAS !== 'undefined' },
+    shopping: { src: './shopping-data.js', containerId: 'shoppingCardsGridContainer', ready: () => typeof NHA_TRANG_SHOPPING !== 'undefined' },
+    currency: { src: './currency-data.js', containerId: 'currencyCardsGridContainer', ready: () => typeof NHA_TRANG_CURRENCY !== 'undefined' },
+    guide: { src: './guide-data.js', containerId: 'guideCardsGridContainer', ready: () => typeof NHA_TRANG_GUIDE_HUB !== 'undefined' }
+  };
+
+  const lazyDataPromises = {};
+
+  function ensureDomainData(tab) {
+    const lazy = LAZY_DATA[tab];
+    if (!lazy || lazy.ready()) return Promise.resolve();
+    if (!lazyDataPromises[tab]) {
+      lazyDataPromises[tab] = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = lazy.src;
+        script.onload = resolve;
+        script.onerror = () => {
+          // 실패한 태그와 캐시를 걷어내야 "다시 불러오기"가 실제로 재시도된다
+          script.remove();
+          delete lazyDataPromises[tab];
+          reject(new Error('데이터 로드 실패: ' + lazy.src));
+        };
+        document.head.appendChild(script);
+      });
+    }
+    return lazyDataPromises[tab];
+  }
+
+  function showDataLoading(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.className = 'empty-state-wrap';
+    container.innerHTML = `
+        <div class="empty-state data-loading-state">
+          <div class="icon">🌊</div>
+          <p>데이터를 불러오는 중…</p>
+        </div>
+      `;
+  }
+
+  function showDataLoadError(tab, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.className = 'empty-state-wrap';
+    container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">⚠️</div>
+          <h3>데이터를 불러오지 못했습니다</h3>
+          <p>네트워크 상태를 확인한 뒤 다시 시도해 주세요.</p>
+          <button class="btn-reset-filters" id="dataRetryBtn">다시 불러오기</button>
+        </div>
+      `;
+    const retryBtn = document.getElementById('dataRetryBtn');
+    if (retryBtn) retryBtn.addEventListener('click', () => switchMainTab(tab));
+  }
+
   // --- 9. Tab Switching & UI Controller ---
   function switchMainTab(tab) {
     state.currentTab = tab;
@@ -3171,7 +3237,19 @@
     const showDensity = domain.showViewToggle && state.currentView === 'list';
     if (densityToggle) densityToggle.style.display = showDensity ? 'flex' : 'none';
 
-    domain.render();
+    // 지연 로딩 대상 탭은 데이터가 준비된 뒤에 렌더한다. 로드 중 다른 탭으로
+    // 이동했으면(레이스) 렌더하지 않는다 — 그 탭의 switchMainTab이 알아서 한다.
+    const lazy = LAZY_DATA[tab];
+    if (!lazy || lazy.ready()) {
+      domain.render();
+      return;
+    }
+    showDataLoading(lazy.containerId);
+    ensureDomainData(tab).then(() => {
+      if (state.currentTab === tab) domain.render();
+    }).catch(() => {
+      if (state.currentTab === tab) showDataLoadError(tab, lazy.containerId);
+    });
   }
 
   /** 뷰 모드는 다섯 탭 전체에 적용되고 다음 방문까지 유지된다. */

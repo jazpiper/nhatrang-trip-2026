@@ -1055,6 +1055,16 @@ input, textarea, select {
   width: 100%;
 }
 
+/* 지연 데이터 로딩 중 표시 — 정지 화면으로 보이지 않게 은은한 펄스만 준다 */
+.data-loading-state {
+  animation: dataLoadingPulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes dataLoadingPulse {
+  from { opacity: 1; }
+  to { opacity: 0.45; }
+}
+
 /* --------------------------------------------------------------------------
    List Row — 기본 뷰
    한 행 84px에 이름·원어명·평점·리뷰수·영업상태·위치·대표항목·가격·액션까지.

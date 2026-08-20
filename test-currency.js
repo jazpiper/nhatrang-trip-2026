@@ -578,14 +578,15 @@ runner.test('All canonical currency DOM element IDs exist in index.html', () => 
   }
 });
 
-runner.test('currency-data.js script tag is loaded before js/app.js in index.html', () => {
+runner.test('currency-data.js는 정적 태그 없이 LAZY_DATA 매니페스트로 지연 로드된다', () => {
   runner.assertTruthy(htmlExists, 'Cannot test index.html: file missing');
-  const currencyScriptIdx = htmlContent.indexOf('currency-data.js');
-  const appScriptIdx = htmlContent.indexOf('js/app.js');
-
-  runner.assertTruthy(currencyScriptIdx !== -1, "index.html missing '<script src=\"./currency-data.js\"></script>'");
-  runner.assertTruthy(appScriptIdx !== -1, "index.html missing '<script src=\"./js/app.js\"></script>'");
-  runner.assertTruthy(currencyScriptIdx < appScriptIdx, 'currency-data.js must be loaded BEFORE js/app.js');
+  // 로딩 구조가 eager/lazy 하이브리드로 바뀌었다 (js/app.js 섹션 8.7):
+  // 정적 태그가 있으면 이중 로드 회귀, LAZY_DATA에 없으면 탭이 영원히 로딩 상태다.
+  runner.assertTruthy(!htmlContent.includes('<script src="./currency-data.js"'),
+    'index.html에 currency-data.js 정적 태그가 있음 — lazy 로딩과 이중 로드된다');
+  const appSrc = fs.readFileSync(path.join(__dirname, 'js/app.js'), 'utf8');
+  runner.assertTruthy(/const LAZY_DATA = \{[\s\S]*?'\.\/currency-data\.js'[\s\S]*?\n  \};/.test(appSrc),
+    'js/app.js의 LAZY_DATA 매니페스트에 currency-data.js가 등록돼 있지 않음');
 });
 
 // ==========================================
