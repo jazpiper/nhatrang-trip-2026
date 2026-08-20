@@ -35,7 +35,7 @@ spaModalPickup
     text="시내 중심가 빈컴플라자 도보 3분 위치"
 spaModalPickupBadge
     text="픽드랍 별도"
-    style={background:#F5FBFA;color:#557C7E}
+    style={background:var(--color-bg-subtle);color:var(--color-text-secondary)}
 spaModalPricePer
     text="90분 키즈 아로마 & 부모 릴렉싱 콤보 기준"
 spaModalPriceRange
@@ -48,7 +48,7 @@ spaModalTip
     text="물놀이를 좋아하는 유아들에게 인기 만점이며, 빈컴플라자 쇼핑 후 지친 아이와 함께 휴식을 취하기에 안성맞춤입니다."
 spaModalTipBadge
     text="팁 별도"
-    style={background:#FEF3C7;color:#92400E}
+    style={background:var(--warn-surface);color:var(--warn-ink)}
 spaModalTipPolicy
     text="팁 자율 (선택 매너 팁)"
 spaModalTitle

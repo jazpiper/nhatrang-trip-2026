@@ -17,7 +17,7 @@ currencyModalFacilities
     html="\n        <span class=\"facility-chip\">✓ 에어컨 완비</span>\n      \n        <span class=\"facility-chip\">✓ 지폐 계수기 현장 확인</span>\n      \n        <span class=\"facility-chip\">✓ 한국어 간단 소통 가능</span>\n      \n        <span class=\"facility-chip\">✓ 원화 계좌이체 QR</span>\n      "
 currencyModalFeeBadge
     text="현지 수수료 0 VND"
-    style={background:#ECFDF5;color:#059669}
+    style={background:var(--success-surface);color:var(--success-mark)}
 currencyModalFeePolicy
     text="환전 수수료 없음 (시장 최고 우대 환율 적용)"
 currencyModalHeartBtn

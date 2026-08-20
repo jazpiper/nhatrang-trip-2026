@@ -797,4 +797,47 @@ if (deadClasses.length > 0) {
 }
 console.log(`  ✔ ${declaredClasses.size} declared classes, 0 unused`);
 
+
+// ===========================================================================
+// Suite 12: 디자인 토큰 — 정의 없는 var() 참조 / 하드코딩 hex
+// ---------------------------------------------------------------------------
+// var(--없는이름)은 무효값이 되어 색이 조용히 상속된다. 콘솔 에러도 안 난다.
+// 실제로 --color-sea가 9곳, --shadow-card가 1곳에서 정의 없이 참조되고 있었다.
+// 두 번째 검사는 :root 토큰 밖의 hex 리터럴을 막는다 (사진 배경용 #000000 예외).
+// ===========================================================================
+console.log('\n=== Suite 12: 디자인 토큰 무결성 ===');
+
+const cssTok = fs.readFileSync('style.css', 'utf8');
+const jsTok = fs.readFileSync('js/app.js', 'utf8');
+const htmlTok = fs.readFileSync('index.html', 'utf8');
+let tokenFailed = false;
+
+const definedVars = new Set([...cssTok.matchAll(/(--[a-z0-9-]+)\s*:/g)].map(m => m[1]));
+const usedVars = new Set([...(cssTok + jsTok + htmlTok).matchAll(/var\((--[a-z0-9-]+)/g)].map(m => m[1]));
+const undefinedVars = [...usedVars].filter(v => !definedVars.has(v)).sort();
+if (undefinedVars.length > 0) {
+  console.error(`  ❌ ${undefinedVars.length} var() reference(s) with no :root definition: ${undefinedVars.join(', ')}`);
+  tokenFailed = true;
+} else {
+  console.log(`  ✔ ${usedVars.size} var() references all resolve (${definedVars.size} tokens defined)`);
+}
+
+// :root 블록 안의 hex는 토큰 정의 그 자체이므로 제외한다.
+const rootBlock = cssTok.slice(cssTok.indexOf(':root'), cssTok.indexOf('\n}', cssTok.indexOf(':root')));
+// 순수 흑백은 브랜드색이 아닌 원색이라 토큰화 대상이 아니다. 그 외에는 늘리지 말 것.
+const HEX_ALLOWLIST = new Set(['#000000', '#FFFFFF']);
+const strayHex = [...(cssTok.replace(rootBlock, '') + jsTok).matchAll(/#[0-9A-Fa-f]{6}\b/g)]
+  .map(m => m[0].toUpperCase())
+  .filter(h => !HEX_ALLOWLIST.has(h));
+if (strayHex.length > 0) {
+  const uniq = [...new Set(strayHex)].sort();
+  console.error(`  ❌ ${strayHex.length} hardcoded hex literal(s) outside :root (${uniq.length} unique): ${uniq.join(', ')}`);
+  console.error('  → :root에 토큰을 추가하고 var()로 참조하라.');
+  tokenFailed = true;
+} else {
+  console.log('  ✔ 0 hardcoded hex outside :root (style.css + js/app.js)');
+}
+
+if (tokenFailed) process.exit(1);
+
 console.log('\n✨ All Frontend Integration Suites Passed Perfectly! ✨');

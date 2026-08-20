@@ -887,23 +887,23 @@
 
     return `
         <div class="activity-card gourmet-card" data-id="${item.id}">
-          <div class="card-media-wrapper" style="background: #1E293B; min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; padding: 14px;">
+          <div class="card-media-wrapper" style="background: var(--neutral-ink-darkest); min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; padding: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; z-index: 2;">
-              <span class="card-badge-top-left" style="background: rgba(255,255,255,0.95); color: #0F172A;">${escapeHtml(item.badge || item.categoryLabel || '맛집')}</span>
+              <span class="card-badge-top-left" style="background: rgba(255,255,255,0.95); color: var(--neutral-ink-darkest);">${escapeHtml(item.badge || item.categoryLabel || '맛집')}</span>
               <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장" style="position: static;">
                 ♥
               </button>
             </div>
             <div style="color: white; z-index: 2;">
-              <div style="font-size: 0.75rem; color: #94A3B8; font-weight: 600;">Google Maps 인증 맛집</div>
+              <div style="font-size: 0.75rem; color: var(--neutral-mark-soft); font-weight: 600;">Google Maps 인증 맛집</div>
               <div style="font-size: 1.15rem; font-weight: 800; line-height: 1.3; margin-top: 2px;">${escapeHtml(item.name)}</div>
-              <div style="font-size: 0.8rem; color: #CBD5E1; opacity: 0.9;">${escapeHtml(item.nameVi || '')}</div>
+              <div style="font-size: 0.8rem; color: var(--neutral-border); opacity: 0.9;">${escapeHtml(item.nameVi || '')}</div>
             </div>
           </div>
           <div class="card-body">
             <div class="card-header-line">
               <span class="card-title">${escapeHtml(item.name)}</span>
-              <span class="card-rating" style="color: #EA580C;"><span class="star">★</span> ${item.rating || 4.5} <span style="font-size: 0.75rem; color: var(--color-text-tertiary);">(${Number(item.reviewCount || 0).toLocaleString()})</span></span>
+              <span class="card-rating"><span class="star">★</span> ${item.rating || 4.5} <span style="font-size: 0.75rem; color: var(--color-text-tertiary);">(${Number(item.reviewCount || 0).toLocaleString()})</span></span>
             </div>
             <div class="card-meta-line">
               <span>⏰ ${escapeHtml(item.openHours || '영업시간 확인')}</span>
@@ -1114,7 +1114,7 @@
           <div class="card-body">
             <div class="card-header-line">
               <span class="card-title">${escapeHtml(item.nameKo)}</span>
-              <span class="card-rating" style="color: #2563EB;">
+              <span class="card-rating">
                 <span class="star">★</span> ${item.rating || 4.5} 
                 <span style="font-size: 0.75rem; color: var(--color-text-tertiary);">(${Number(item.reviewCount || 0).toLocaleString()})</span>
               </span>
@@ -1338,7 +1338,7 @@
           <div class="card-body">
             <div class="card-header-line">
               <span class="card-title">${escapeHtml(item.nameKo || item.name)}</span>
-              <span class="card-rating" style="color: #FF385C;">
+              <span class="card-rating">
                 <span class="star">★</span> ${item.rating || 4.7} 
                 <span style="font-size: 0.75rem; color: var(--color-text-tertiary);">(${Number(item.reviewCount || 0).toLocaleString()})</span>
               </span>
@@ -1528,12 +1528,12 @@
             </div>
           </div>
           ${sa.communityVerdict ? `
-            <div style="margin-top: 14px; padding: 12px 16px; background: #F8FAFC; border-radius: var(--radius-md); font-size: 0.88rem; color: var(--color-ocean); font-weight: 700;">
+            <div style="margin-top: 14px; padding: 12px 16px; background: var(--neutral-surface); border-radius: var(--radius-md); font-size: 0.88rem; color: var(--color-ocean); font-weight: 700;">
               📢 커뮤니티 총평: ${escapeHtml(sa.communityVerdict)}
             </div>
           ` : ''}
           ${sa.scamWarning ? `
-            <div style="margin-top: 8px; padding: 10px 14px; background: #FEF2F2; border-left: 4px solid #EF4444; border-radius: 4px; font-size: 0.85rem; color: #991B1B;">
+            <div style="margin-top: 8px; padding: 10px 14px; background: var(--danger-surface); border-left: 4px solid var(--danger-mark); border-radius: 4px; font-size: 0.85rem; color: var(--danger-ink);">
               🚨 호객/눈탱이 방지: ${escapeHtml(sa.scamWarning)}
             </div>
           ` : ''}
@@ -1818,7 +1818,7 @@
           <p style="color: var(--color-text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
             선택하신 카테고리 또는 태그를 변경하거나 검색어를 초기화해보세요.
           </p>
-          <button class="btn-primary-reserve" id="btnResetCurrencyFilters" style="padding: 10px 22px; background: #059669;">
+          <button class="btn-primary-reserve" id="btnResetCurrencyFilters" style="padding: 10px 22px; background: var(--success-mark);">
             전체 보기 및 필터 초기화
           </button>
         </div>
@@ -1872,8 +1872,8 @@
     const modalFeeBadge = document.getElementById('currencyModalFeeBadge');
     if (modalFeeBadge) {
       modalFeeBadge.textContent = item.feeFree ? '현지 수수료 0 VND' : '최고 우대 환전';
-      modalFeeBadge.style.background = item.feeFree ? '#ECFDF5' : '#FEF3C7';
-      modalFeeBadge.style.color = item.feeFree ? '#059669' : '#D97706';
+      modalFeeBadge.style.background = item.feeFree ? 'var(--success-surface)' : 'var(--warn-surface)';
+      modalFeeBadge.style.color = item.feeFree ? 'var(--success-mark)' : 'var(--warn-mark)';
     }
 
     // NOTE: copy handler is bound once in initEvents() via addEventListener.
@@ -2006,11 +2006,11 @@
           document.querySelectorAll('.calc-rate-btn').forEach(b => {
             b.classList.toggle('active', b === btn);
             if (b === btn) {
-              b.style.background = '#059669';
+              b.style.background = 'var(--success-mark)';
               b.style.color = 'white';
             } else {
               b.style.background = 'rgba(255,255,255,0.1)';
-              b.style.color = '#E2E8F0';
+              b.style.color = 'var(--neutral-border)';
             }
           });
 
@@ -2284,16 +2284,16 @@
     if (tipBadge) {
       const isTipInc = item.tipPolicy && item.tipPolicy.includes('포함') && !item.tipPolicy.includes('별도');
       tipBadge.textContent = isTipInc ? '팁 포함' : '팁 별도';
-      tipBadge.style.background = isTipInc ? '#DFF4F4' : '#FEF3C7';
-      tipBadge.style.color = isTipInc ? '#0B7F87' : '#92400E';
+      tipBadge.style.background = isTipInc ? 'var(--color-primary-light)' : 'var(--warn-surface)';
+      tipBadge.style.color = isTipInc ? 'var(--color-primary-ink)' : 'var(--warn-ink)';
     }
 
     const pickupBadge = document.getElementById('spaModalPickupBadge');
     if (pickupBadge) {
       const hasPickup = item.pickupDropoff && (item.pickupDropoff.includes('무료') || item.pickupDropoff.includes('셔틀') || item.pickupDropoff.includes('지원'));
       pickupBadge.textContent = hasPickup ? '픽드랍 지원' : '픽드랍 별도';
-      pickupBadge.style.background = hasPickup ? '#DFF4F4' : '#F5FBFA';
-      pickupBadge.style.color = hasPickup ? '#0B7F87' : '#557C7E';
+      pickupBadge.style.background = hasPickup ? 'var(--color-primary-light)' : 'var(--color-bg-subtle)';
+      pickupBadge.style.color = hasPickup ? 'var(--color-primary-ink)' : 'var(--color-text-secondary)';
     }
 
     const tbody = document.getElementById('spaModalCourseTableBody');
@@ -2414,7 +2414,7 @@
                     <td><strong class="souv-price-mart">${r.sedan4SeatVnd.toLocaleString()}동</strong><br><span class="label">약 ${r.sedan4SeatKrw.toLocaleString()}원</span></td>
                     <td><strong class="souv-price-mart">${r.suv7SeatVnd.toLocaleString()}동</strong><br><span class="label">약 ${r.suv7SeatKrw.toLocaleString()}원</span></td>
                     <td><strong>${r.van16SeatVnd.toLocaleString()}동</strong><br><span class="label">약 ${r.van16SeatKrw.toLocaleString()}원</span></td>
-                    <td><span class="label">${escapeHtml(r.busOption)}</span><br><span style="color: #D97706; font-size: 0.78rem;">💡 ${escapeHtml(r.nightSurcharge)}</span></td>
+                    <td><span class="label">${escapeHtml(r.busOption)}</span><br><span style="color: var(--warn-mark); font-size: 0.78rem;">💡 ${escapeHtml(r.nightSurcharge)}</span></td>
                   </tr>
                 `).join('')}
               </tbody>
@@ -2424,13 +2424,13 @@
           <!-- 3-Way Taxi Comparison Grid -->
           <div class="taxi-compare-grid">
             <!-- Xanh SM EV -->
-            <div class="taxi-compare-card" style="border-left: 4px solid #06B6D4;">
+            <div class="taxi-compare-card" style="border-left: 4px solid var(--color-primary);">
               <div class="taxi-card-header">
                 <div>
                   <h3 class="taxi-card-name">⚡ ${escapeHtml(transport.taxiComparison.xanhSM.nameKo)}</h3>
                   <div class="souv-name-vi">${escapeHtml(transport.taxiComparison.xanhSM.nameVi)}</div>
                 </div>
-                <span class="taxi-card-tag" style="background: #CFFAFE; color: #0891B2;">추천 1위</span>
+                <span class="taxi-card-tag" style="background: var(--color-primary-light); color: var(--color-primary-ink);">추천 1위</span>
               </div>
               <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(transport.taxiComparison.xanhSM.pros)}</div>
               <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(transport.taxiComparison.xanhSM.cons)}</div>
@@ -2438,13 +2438,13 @@
             </div>
 
             <!-- Grab -->
-            <div class="taxi-compare-card" style="border-left: 4px solid #10B981;">
+            <div class="taxi-compare-card" style="border-left: 4px solid var(--success-mark);">
               <div class="taxi-card-header">
                 <div>
                   <h3 class="taxi-card-name">📱 ${escapeHtml(transport.taxiComparison.grab.nameKo)}</h3>
                   <div class="souv-name-vi">${escapeHtml(transport.taxiComparison.grab.nameVi)}</div>
                 </div>
-                <span class="taxi-card-tag" style="background: #D1FAE5; color: #059669;">정찰제 앱</span>
+                <span class="taxi-card-tag" style="background: var(--success-border); color: var(--success-mark);">정찰제 앱</span>
               </div>
               <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(transport.taxiComparison.grab.pros)}</div>
               <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(transport.taxiComparison.grab.cons)}</div>
@@ -2452,7 +2452,7 @@
             </div>
 
             <!-- Traditional Taxis -->
-            <div class="taxi-compare-card" style="border-left: 4px solid #64748B;">
+            <div class="taxi-compare-card" style="border-left: 4px solid var(--neutral-mark);">
               <div class="taxi-card-header">
                 <div>
                   <h3 class="taxi-card-name">🚕 ${escapeHtml(transport.taxiComparison.traditionalTaxis.nameKo)}</h3>
@@ -2468,7 +2468,7 @@
 
           <!-- Scam Prevention 5 Rules -->
           <div style="margin-top: 24px;">
-            <h3 style="font-size: 1.1rem; font-weight: 800; color: #92400E; display: flex; align-items: center; gap: 8px;">
+            <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--warn-ink); display: flex; align-items: center; gap: 8px;">
               🛡️ 현지 택시·교통 사기 예방 5대 수칙
             </h3>
             <div class="scam-checklist-grid">
@@ -2503,7 +2503,7 @@
                       `).join('')}
                     </ul>
                   </div>
-                  <div style="font-size: 0.8rem; color: #166534; background: #F0FDF4; padding: 6px 10px; border-radius: var(--radius-sm);">
+                  <div style="font-size: 0.8rem; color: var(--success-ink); background: var(--success-surface); padding: 6px 10px; border-radius: var(--radius-sm);">
                     💡 ${escapeHtml(b.tips)}
                   </div>
                 </div>
@@ -2513,7 +2513,7 @@
 
           <!-- Motorbike Rental Guide -->
           <div class="motorbike-guide-box">
-            <h4 style="font-size: 0.98rem; font-weight: 800; color: #166534; margin: 0 0 8px 0; display: flex; align-items: center; gap: 6px;">
+            <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--success-ink); margin: 0 0 8px 0; display: flex; align-items: center; gap: 6px;">
               🛵 오토바이(스쿠터) 렌트 수칙 & 안전 가이드
             </h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; font-size: 0.83rem; color: var(--color-text-primary);">
@@ -2539,7 +2539,7 @@
                 <h2 class="guide-section-title">🛒 롯데마트 Top 30 쇼핑 시세표</h2>
                 <p class="guide-section-desc">정찰제 마트 공식가 vs 담시장·야시장 흥정 목표가 & 정품 구별법 (총 30개 품목)</p>
               </div>
-              <span class="mini-tag" style="background: #E0F2FE; color: #0284C7; font-weight: 700;">
+              <span class="mini-tag" style="background: var(--info-border-soft); color: var(--info-mark); font-weight: 700;">
                 검색 일치: ${souvenirs.length}개 품목
               </span>
             </div>
@@ -2567,21 +2567,21 @@
                   const marketKrw = formatKRW(item.marketBargainPriceVnd);
                   return `
                     <tr>
-                      <td style="font-weight: 700; color: #64748B;">${idx + 1}</td>
+                      <td style="font-weight: 700; color: var(--neutral-mark);">${idx + 1}</td>
                       <td>
                         <div class="souv-name-ko">${escapeHtml(item.nameKo)}</div>
                         <div class="souv-name-vi">${escapeHtml(item.nameVi)}</div>
-                        <div style="font-size: 0.75rem; color: #64748B; margin-top: 2px;">${escapeHtml(item.description)}</div>
+                        <div style="font-size: 0.75rem; color: var(--neutral-mark); margin-top: 2px;">${escapeHtml(item.description)}</div>
                       </td>
                       <td><span class="mini-tag">${escapeHtml(item.category)}</span></td>
                       <td><span class="label">${escapeHtml(item.unit)}</span></td>
                       <td>
                         <div class="souv-price-mart">${item.officialPriceVnd.toLocaleString()}동</div>
-                        <div style="font-size: 0.75rem; color: #64748B;">${martKrw}</div>
+                        <div style="font-size: 0.75rem; color: var(--neutral-mark);">${martKrw}</div>
                       </td>
                       <td>
                         <div class="souv-price-market">${item.marketBargainPriceVnd.toLocaleString()}동</div>
-                        <div style="font-size: 0.75rem; color: #64748B;">${marketKrw}</div>
+                        <div style="font-size: 0.75rem; color: var(--neutral-mark);">${marketKrw}</div>
                       </td>
                       <td>
                         <span class="souv-discount-badge">-${item.targetDiscountPercent}%</span>
@@ -2603,10 +2603,10 @@
 
           <!-- Bargaining Tips Callout Box -->
           <div class="bargaining-guide-box">
-            <h3 style="font-size: 1.05rem; font-weight: 800; color: #9A3412; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+            <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--warn-ink-strong); margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
               🏷️ ${escapeHtml(matrix.bargainingTips.marketName)} 실전 5단계 흥정 전략
             </h3>
-            <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: #7C2D12; display: flex; flex-direction: column; gap: 6px;">
+            <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: var(--warn-ink-strong); display: flex; flex-direction: column; gap: 6px;">
               ${matrix.bargainingTips.coreStrategy.map(st => `
                 <li>${escapeHtml(st)}</li>
               `).join('')}
@@ -2615,12 +2615,12 @@
 
           <!-- Customs Quarantine Guide Box -->
           <div class="customs-guide-box">
-            <h3 style="font-size: 1.05rem; font-weight: 800; color: #075985; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+            <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--info-ink-strong); margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
               ✈️ 대한민국 관세청 면세 한도 & 농림축산검역본부 반입 규정
             </h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; font-size: 0.83rem;">
-              <div style="background: white; padding: 12px; border-radius: var(--radius-sm); border: 1px solid #BAE6FD;">
-                <strong style="color: #0369A1;">💵 1인 면세 한도:</strong>
+              <div style="background: white; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--info-border);">
+                <strong style="color: var(--info-ink);">💵 1인 면세 한도:</strong>
                 <ul style="margin: 4px 0 0 0; padding-left: 16px;">
                   <li>기본 면세: 미화 <strong>${matrix.customsQuarantine.dutyFreeAllowance.basicAllowanceUsd}</strong></li>
                   <li>주류: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.alcoholLimit)}</li>
@@ -2628,17 +2628,17 @@
                   <li>향수: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.perfumeLimit)}</li>
                 </ul>
               </div>
-              <div style="background: white; padding: 12px; border-radius: var(--radius-sm); border: 1px solid #FECACA;">
-                <strong style="color: #DC2626;">🚫 반입 전면 금지 (검역 과태료):</strong>
-                <ul style="margin: 4px 0 0 0; padding-left: 16px; color: #991B1B;">
+              <div style="background: white; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--danger-border);">
+                <strong style="color: var(--danger-mark);">🚫 반입 전면 금지 (검역 과태료):</strong>
+                <ul style="margin: 4px 0 0 0; padding-left: 16px; color: var(--danger-ink);">
                   ${matrix.customsQuarantine.prohibitedItems.map(p => `
                     <li>${escapeHtml(p)}</li>
                   `).join('')}
                 </ul>
               </div>
-              <div style="background: white; padding: 12px; border-radius: var(--radius-sm); border: 1px solid #BBF7D0;">
-                <strong style="color: #16A34A;">✅ 반입 가능 품목:</strong>
-                <ul style="margin: 4px 0 0 0; padding-left: 16px; color: #166534;">
+              <div style="background: white; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--success-border);">
+                <strong style="color: var(--success-mark);">✅ 반입 가능 품목:</strong>
+                <ul style="margin: 4px 0 0 0; padding-left: 16px; color: var(--success-ink);">
                   ${matrix.customsQuarantine.permittedItems.map(p => `
                     <li>${escapeHtml(p)}</li>
                   `).join('')}
@@ -2674,7 +2674,7 @@
                     </div>
                     <span class="med-symptom-tag">${escapeHtml(m.category)}</span>
                   </div>
-                  <div style="font-size: 0.85rem; font-weight: 700; color: #0284C7;">
+                  <div style="font-size: 0.85rem; font-weight: 700; color: var(--info-mark);">
                     🎯 증상: ${escapeHtml(m.symptom)}
                   </div>
                   <div class="med-dosage">
@@ -2699,13 +2699,13 @@
                   <div>
                     <h4 class="hospital-name-ko">${escapeHtml(h.nameKo)}</h4>
                     <p class="hospital-name-vi">${escapeHtml(h.nameVi)}</p>
-                    <p style="font-size: 0.82rem; color: #475569; margin: 4px 0 0 0;">📍 ${escapeHtml(h.addressVi)}</p>
+                    <p style="font-size: 0.82rem; color: var(--neutral-ink); margin: 4px 0 0 0;">📍 ${escapeHtml(h.addressVi)}</p>
                   </div>
                   <div class="hospital-hotline-box">
                     <a href="tel:${h.hotline.replace(/\s+/g, '')}" class="hospital-hotline-btn">
                       <span>📞 진료 예약/문의: ${escapeHtml(h.hotline)}</span>
                     </a>
-                    <a href="tel:${h.emergency24h.replace(/\s+/g, '')}" class="hospital-hotline-btn" style="background: #991B1B;">
+                    <a href="tel:${h.emergency24h.replace(/\s+/g, '')}" class="hospital-hotline-btn" style="background: var(--danger-ink);">
                       <span>🚨 24시 응급실: ${escapeHtml(h.emergency24h)}</span>
                     </a>
                     <a href="${h.googleMapUrl}" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="font-size: 0.82rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 4px;">
@@ -2724,7 +2724,7 @@
 
           <!-- Insurance Claim 5-Step Guide -->
           <div class="insurance-guide-box">
-            <h3 style="font-size: 1.05rem; font-weight: 800; color: #6B21A8; margin: 0 0 14px 0;">
+            <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--violet-ink); margin: 0 0 14px 0;">
               📑 ${escapeHtml(emergency.insuranceGuide.title)}
             </h3>
             <div>
@@ -2753,7 +2753,7 @@
                 <h2 class="guide-section-title">🗣️ 원터치 생존 베트남어 (21종 소통 카드)</h2>
                 <p class="guide-section-desc">식당·카페, 택시·그랩, 쇼핑·시장, 응급·호텔 상황별 원클릭 대화 카드 (클릭 시 전면 확대 & 텍스트 복사)</p>
               </div>
-              <span class="mini-tag" style="background: #E6F4F2; color: var(--color-sea); font-weight: 700;">
+              <span class="mini-tag" style="background: var(--color-bg-hover); color: var(--color-sea); font-weight: 700;">
                 카드 ${flashcards.length}개 표시
               </span>
             </div>
