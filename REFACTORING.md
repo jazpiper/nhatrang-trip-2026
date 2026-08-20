@@ -1,176 +1,129 @@
-# 리팩토링 검토 (2026-08-20)
+# 리팩토링 기록 (2026-08-20)
 
-작업 전 기준선: `node test-*.js` 11개 파일 전부 PASS, 렌더 스냅샷 **73/73 일치**. 아래 작업은 모두 이 기준선을 깨지 않는 것이 조건이다.
+브랜치 `refactor/domain-plumbing`. 기준선 커밋 `4df1507`(spa/guide 기능 봉인 시점) → 리팩토링 7커밋.
 
-현재 규모: `js/app.js` 3,683행 / `style.css` 3,948행 / `index.html` 1,546행 / 도메인 **7개**(activities 32 · gourmet 113 · stays 24 · spa 24 · shopping 18 · currency 17 · guide 허브).
+**최종 상태: 테스트 11개 파일 전부 PASS, 렌더 스냅샷 81/81 일치.** 기준선 시점 73건이었고 가이드 허브 8건을 새로 덮었다.
 
-`DOMAINS` 레지스트리와 `applyDomainFilter` / `renderDomainGrid` / `applyModalFields` / `itemRowHTML` 4개 공통 파이프라인은 이미 잘 잡혀 있다. 남은 중복은 **그 파이프라인이 아직 흡수하지 못한 주변부**(찜 토글, 모달 열기/닫기, 갤러리)와 **guide 탭**에 몰려 있다.
-
----
-
-## 0. 먼저 고칠 것 — 리팩토링이 아니라 결함
-
-| # | 위치 | 문제 |
+| 지표 | 전 | 후 |
 |---|---|---|
-| A | `js/app.js:2795-2796` | 롯데마트 시세표가 환율을 `0.0545`로 **하드코딩**. `DEFAULT_EXCHANGE_RATE` 단일 출처 규칙 위반이고, `formatKRW()`의 100원 절사와도 결과가 어긋나 같은 화면 안에서 원화 표기가 두 방식으로 갈린다. → `formatKRW()` 호출로 교체 |
-| B | `js/app.js:3298` | `viewToggleButtons`가 `isActivities`일 때만 표시된다. 뷰 모드는 7개 탭 전부에 적용되고(`setViewMode` → `renderCurrentTab`) 밀도 토글은 모든 탭에서 보이므로, **맛집·숙소·스파·쇼핑·환전 탭에서는 리스트↔그리드 전환 수단이 아예 없다.** 스냅샷은 `state`를 직접 바꿔 테스트하므로 이 결함을 못 잡는다 |
-| C | `index.html:37,49,61` | `data-count-for="activity|spa|guide"` 속성이 `js/app.js`·테스트 어디에서도 읽히지 않는다. 카운트 자동 동기화를 붙이려던 반쪽 훅. → 완성(§4)하거나 제거 |
-| D | `js/app.js:2103-2110` | `closeCurrencyModal`만 `modal.style.display = 'none'`을 추가로 만진다. 나머지 6개는 `.active` 클래스만 쓴다. 인라인 display가 클래스 기반 전환을 덮어써 향후 애니메이션/트랜지션을 막는다 |
-| E | `js/app.js:2283,3654-3655` | `getFilteredSpa = getFilteredSpas` 별칭을 만들고 **둘 다** export한다. 어느 쪽이 정본인지 호출부에서 알 수 없다. → `getFilteredSpas` 하나로 통일 |
+| `js/app.js` | 3,683행 | 3,513행 |
+| `style.css` | 3,948행 | 4,120행 (인라인 스타일이 여기로 옮겨온 결과) |
+| 인라인 `style=` (js/app.js) | 75개 | **0개** |
+| `:root` 밖 hex 리터럴 | 203개 (고유 81색) | **1개** (`#000000`, 사진 배경) |
+| `:root` 토큰 | 39개 | 75개 |
+| `renderGuide()` | 453행 단일 함수 | 60행 + 섹션 4함수 |
+| 죽은 CSS 클래스 | 25개 | 0개 |
+| 미디어쿼리 밖 중복 룰 | 4건 | 0건 |
+| 테스트 보일러플레이트 중복 | 약 450행 | 0 (`test-harness.js` 146행) |
+| `test-frontend.js` 스위트 | 9개 | 12개 |
 
 ---
 
-## 1. 도메인 주변부 중복 (가장 큰 효과, 위험 낮음)
+## 커밋별 내역
 
-`DOMAINS` 테이블이 이미 배선을 모으고 있는데, 아래 3종은 아직 도메인마다 손으로 복제돼 있다. **테이블에 필드 3개(`wishField` / `wishKey` / `wishLabel`)를 더하면 전부 테이블 순회로 접힌다.**
+### 1. `refactor: 도메인 주변부 중복을 DOMAINS 레지스트리 위로 흡수`
 
-### 1-1. 찜 토글 6개 — 약 84행 → 20행
+`DOMAINS` 테이블이 배선을 모으고 있는데도 찜 토글(6개)·모달 닫기(7개)·모달 열기 마무리(6개)·갤러리(4개)는 도메인마다 손으로 복제돼 있었다. 테이블에 `wishField`/`wishKey`/`wishToast*`/`modalHeartBtnId`/`hasOpenHours`/`hasPriceSort`/`showViewToggle`를 더해 섹션 3.8의 공통 함수 5개로 접었다. 기존 함수 이름은 얇은 래퍼로 남겨 `renderDomainGrid` cfg와 export shim의 호출 계약을 유지했다.
 
-`toggleWishlist`(640) · `toggleGourmetWishlist`(920) · `toggleStayWishlist`(1166) · `toggleShoppingWishlist`(1458) · `toggleCurrencyWishlist`(1928) · `toggleSpaWishlist`(2395).
+렌더 출력 73건 중 67건이 바이트 단위로 동일. 나머지 6건은 아래 의도한 변경이다.
 
-6개 본문이 **state 필드명 · localStorage 키 · 토스트 문구**만 다르고 나머지 14행이 동일하다. `state`에 이미 `wishlist`/`gourmetWishlist`/… 6개가 평평하게 있으니, `DOMAINS`에 `wishField`·`wishKey`·`wishLabel`을 추가하고
+함께 고친 결함 7건:
 
-```js
-function toggleDomainWishlist(key, id) { … }   // DOMAINS에서 필드를 읽어 처리
-```
+- **리스트/그리드 토글이 activities 탭에서만 보였다.** 뷰 모드는 여섯 탭 전부에 적용되고 밀도 토글은 모든 탭에 보이는데도 나머지 다섯 탭에는 전환 수단이 아예 없었다. 스냅샷은 `state`를 직접 조작해 테스트하므로 이 결함을 구조적으로 못 잡는다 — 브라우저로 확인했다.
+- **모달 하트 버튼의 찜 상태 클래스가 어디에도 안 붙었다.** 스파만 `.active`를 붙이고 나머지 다섯은 아무것도 안 붙여, 여섯 모달 전부 CSS가 기다리는 `.is-wishlisted`를 받지 못했다.
+- 숙소·쇼핑 갤러리가 썸네일 `src`에 `escapeHtml`을 적용하지 않았다 (환전·스파는 하고 있었다).
+- 환전 모달만 `.active` 클래스 외에 인라인 `display`를 토글했다. `.modal-overlay.active {display:flex}`가 이미 담당한다.
+- 롯데마트 시세표가 환율 `0.0545`를 하드코딩해 `DEFAULT_EXCHANGE_RATE` 단일 출처를 우회하고, `formatKRW`의 100원 절사와도 표기가 어긋났다.
+- `getFilteredSpa`/`getFilteredSpas` 별칭을 둘 다 export해 정본이 불분명했다.
+- 섹션 주석 번호 `8.4`가 스파와 가이드에 중복.
 
-하나로 합친다. 기존 6개 이름은 `renderDomainGrid`의 `toggleWishlist` cfg와 export shim이 참조하므로 **얇은 래퍼로 남긴다** (호출 계약 불변).
+`CLAUDE.md`가 도메인 5개·액티비티 43개·스냅샷 61건으로 낡아 있어 실제 7개·32개·73건에 맞췄다.
 
-### 1-2. 모달 닫기 7개 — 약 48행 → 12행
+### 2. `refactor: renderGuide 453행을 섹션 4개 함수로 분리`
 
-`closeActivityModal`(738) · `closeGourmetModal`(1006) · `closeStayModal`(1276) · `closeShoppingModal`(1640) · `closeCurrencyModal`(2103) · `closeSpaModal`(2530) · `closeFlashcardModal`(3091).
+`guideTransportHTML` / `guideSouvenirMatrixHTML` / `guideEmergencyHTML` / `guideFlashcardsHTML`. `renderGuide`는 카테고리 필터에 따라 조립하고 플래시카드 이벤트를 바인딩하는 60행만 남았다.
 
-7개 모두 "id로 찾아 `.active` 제거 → `body.style.overflow` 복원 → `activeModalX = null`"이다. `DOMAINS`에 `modalId`·`activeModalField`가 **이미 있으므로** cfg 추가 없이 바로 접힌다. 결함 D도 여기서 함께 없앤다. `initEvents` 안의 지역 `closeModal`(3505)도 같은 함수로 흡수한다.
+당시 가이드 탭은 스냅샷 대상이 아니어서 분리 전/후 `js/app.js`로 5개 카테고리의 컨테이너 `innerHTML`을 뽑아 249,574바이트가 바이트 단위로 동일함을 직접 확인했다. (이 공백은 커밋 7에서 스냅샷으로 메웠다.)
 
-### 1-3. openXModal 공통 꼬리 6개 — 약 120행 → 25행
+### 3. `test: TestRunner 중복 제거 + 카운트 동기화·죽은 CSS 검사 추가`
 
-각 opener 마지막 ~20행이 동일하다: 노트 input 값 채우기 → 상태 텍스트 비우기 → 하트 버튼 문구/`onclick` → `.active` 추가 → `body.overflow='hidden'`.
+`TestRunner`가 7개 파일에, ANSI `colors`가 9개 파일에 복제돼 있었다 (약 450행). `test-harness.js`로 추출하고 요약 문구·`process.exit` 여부만 옵션으로 받는다. 6개 파일은 수정 전/후 콘솔 출력이 타이머 값을 빼면 바이트 단위로 동일하다.
 
-- activity `672-736` / gourmet `954-1004` / stay `1198-1274` / shopping `1493-1638` / currency `1959-2101` / spa `2431-2528`
+`test-guide.js`의 `TestRunner`는 합치지 않았다 — 에러를 `{suite, description, error}`로 모으고 요약 블록 모양도 달라 문구 차이가 아니라 집계 방식 차이다.
 
-`finishModalOpen(domainKey, item)` 하나로 뽑는다. 하트 버튼 문구(`♥ 찜 취소` / `♡ 찜하기`)가 6곳에 리터럴로 흩어져 있는 것도 여기서 한 곳으로 모인다.
+`test-activity.js`의 `data.js` 로딩을 `eval`에서 `require()`로 바꿨다. 이때 `typeof global.NHA_TRANG_SCHEDULE === 'undefined'` 단언이 무력해진다 — `eval`이 최상위 `const`를 `global`에 흘리던 것에 의존했기 때문이다. 소스 텍스트 정규식으로 교체하고, `data.js`에 `NHA_TRANG_SCHEDULE`을 되살려 실제로 FAIL하는지 확인했다.
 
-**주의:** 하트 버튼은 `.onclick` 직접 대입이다. 공통화할 때 `initEvents`의 `addEventListener`와 이중 바인딩되지 않도록 대입 방식을 유지할 것 (CLAUDE.md 「핸들러는 한 곳에서만 바인딩」).
+- **Suite 10 (카운트 동기화, 16건)** — 6개 도메인의 탭 뱃지·카테고리 소계·`heroPills` 숫자를 데이터셋 `length`에서 파생시켜 대조. 기존에는 환전·맛집·쇼핑만 검증돼 액티비티·숙소·스파는 조용히 어긋날 수 있었다.
+- **Suite 11 (죽은 CSS)** — Suite 4b의 역방향. 선언만 있고 아무도 쓰지 않는 클래스를 잡는다. 이 검사가 없던 동안 25개가 쌓였다.
 
-### 1-4. 모달 갤러리 5개 — 약 90행 → 25행
+Suite 4의 하드코딩 selector 목록에서 실제로 죽은 5개를 제거했다. 이 목록은 "문자열이 `style.css`에 있는가"만 보므로 실사용과 분리돼 낡는다 — 진짜 불변식은 4b와 11이 담당한다는 주석을 달았다.
 
-stay(`1204-1216`) · shopping(`1499-1511`) · currency(`1965-1978`) · spa(`2437-2450`)이 "메인 이미지 + 썸네일 행 + 썸네일 클릭 시 스왑"을 그대로 복제한다. 차이는 **엘리먼트 id 2개와 이미지 필드명(`photos` / `images`)뿐**이다. activity(`675-694`)만 `sub-imgs-grid` 구조라 별개로 남긴다.
+두 스위트 모두 일부러 깨뜨려 FAIL하는지 확인했다.
 
-```js
-function renderModalGallery({ mainImgId, thumbsId, images, alt })
-```
+### 4. `refactor: 죽은 CSS 25개 제거, 중복 정의 룰 4건 병합`
 
-### 1-5. 리스트 헬퍼 중복 2곳
+약 300행. `.card-badge-day`는 삭제된 `Day N` 일정 기능의 잔재, `.sentiment-list`는 렌더되지 않는 부모 클래스의 자손 룰 전체다. 접두어 함정(`.sub-imgs` vs 살아 있는 `.sub-imgs-grid`)은 개별 확인 후 처리했다.
 
-`setList`(activity 내부 700행대)와 stay 내부의 동일 함수가 각각 지역 정의돼 있다. `✔` 불릿 `<li>` + 없을 때 대체 문구까지 같다. 모듈 레벨 `setBulletList(id, list, fallbackText)`로 올린다.
+`.btn-currency-photos`/`.btn-spa-photos`는 레이아웃 속성을 담은 공통 그룹과 색만 담은 단독 블록으로 갈려 있었고, 그 둘을 합치자 그룹에 남은 `.btn-currency-map`/`.btn-spa-map`이 같은 형태로 중복돼 그것까지 병합했다. 속성 합집합은 그대로다.
 
-**1절 총합: `js/app.js`에서 약 340행 감소.** 렌더 출력이 바뀌지 않으므로 스냅샷 73건이 그대로 통과해야 한다 — **통과하지 않으면 되돌릴 신호**다.
+### 5. `refactor: 하드코딩 색상 203개를 의미색 토큰으로 통일`
 
----
+Tailwind 기본 팔레트에서 그때그때 집어온 색 81종이 흩어져 있어 같은 의미의 박스가 탭마다 다른 색을 쓰고 있었다. 의미 6계열(`warn`/`success`/`danger`/`info`/`violet`/`neutral`)을 `:root`에 추가했다. Sea Glass 본체와 같은 규율 — `-surface`/`-border`는 면, `-mark`는 아이콘·강조, `-ink`는 글자.
 
-## 2. guide 탭 — `renderGuide()` 453행 단일 함수
+토큰 값은 현재 값을 그대로 옮겼다. 다만 한 계열 안에서 한두 단계 차이인 색은 한 토큰으로 합쳤다 (`#EF4444`→`danger-mark`, `#F59E0B`/`#EA580C`→`warn-mark`, `#16A34A`/`#10B981`→`success-mark` 등). 합치지 않으면 토큰이 81개가 되어 단일 출처의 의미가 없다.
 
-`js/app.js:2594-3046`. 한 함수가 4개 독립 섹션(교통·그랩 / 롯데마트 시세표 / 응급·약국 / 베트남어 플래시카드)의 HTML을 통째로 만든다. 다른 6개 도메인이 `renderDomainGrid` + `xRowTemplate`로 쪼개져 있는 것과 대조적이다.
+함께 고친 결함 2건:
 
-1. **섹션 4개를 각각 함수로 분리** — `guideTransportHTML()` / `guideShoppingMatrixHTML()` / `guideEmergencyHTML()` / `guideFlashcardsHTML()`. `renderGuide`는 카테고리 필터에 따라 조립+바인딩만 담당(~40행).
-2. **인라인 스타일·하드코딩 색상 제거** — `js/app.js` 전체의 인라인 `style="` **78개**, 하드코딩 hex **60개**의 대부분이 이 함수에 있다. `#D97706`·`#06B6D4`·`#166534`·`#9A3412`·`#6B21A8` 등은 Sea Glass 토큰 체계에 없는 색이다. 클래스를 `style.css`에 **먼저** 선언하고 옮긴다 (Suite 4b가 순서를 강제).
-3. 결함 A(환율 하드코딩)를 이 단계에서 함께 처리.
+- **`--color-sea`가 9곳, `--shadow-card`가 1곳에서 정의 없이 `var()`로 참조되고 있었다.** 무효값이라 색이 조용히 상속되고 콘솔 에러도 안 난다.
+- 맛집·숙소·쇼핑 카드가 `.card-rating` 전체를 탭 색(`#EA580C`/`#2563EB`/`#FF385C`)으로 덮어쓰고 있었다. 디자인 시스템이 금지한 구버전 탭별 색이고, 평점은 별에 `--color-star`를 쓰는 게 규칙이다. 인라인 덮어쓰기 3곳을 제거해 액티비티 카드와 통일했다 (스냅샷 155건).
 
-**분리(1)와 스타일 이관(2)을 같은 커밋에 섞지 말 것.** 1은 출력 무변경(스냅샷으로 증명 가능), 2는 출력이 바뀌어 스냅샷 갱신이 필요하다. 섞으면 diff에서 의도한 변경과 사고를 구분할 수 없다.
+**Suite 12 추가** — 정의 없는 `var()` 참조와 `:root` 밖 hex 리터럴을 막는다. 흑백만 원색으로 허용.
 
----
+스냅샷 diff 614쌍을 전수 분류했다: hex→토큰 459건, 평점 인라인 색 제거 155건, 그 외 0건.
 
-## 3. 디자인 시스템 이탈
+### 6. `refactor: 인라인 style 75개를 CSS 클래스로 이관 (잔여 0)`
 
-- `gourmetCardTemplate`(809-865): 다크 카드 헤더 전체가 인라인 스타일이고, 평점에 **`#EA580C`** 를 쓴다. CLAUDE.md가 "탭마다 다른 색을 쓰지 않는다"며 명시적으로 금지한 구버전 색이다. `#059669`(4곳)도 같은 부류.
-- `style.css`: 미디어쿼리 밖에서 **진짜로 두 번 정의된 셀렉터는 2개** — `.btn-currency-photos`(2677, 2700), `.btn-spa-photos`(3230, 3251). 뒤 정의가 앞을 덮으므로 앞 블록은 죽은 코드다.
-- **죽은 CSS 클래스 약 25개** (330개 선언 중). 대표: `card-badge-day`(삭제된 `Day N` 기능 잔재), `scam-warning-box`, `best-seller*`(3), `sentiment-list`, `sentiment-verdict-box`, `stay-card-actions`, `shopping-card-actions`, `stay-name-vi`, `shopping-name-vi`, `gourmet-emoji*`(2), `price-badge-asking`, `price-badge-target`, `row-muted`, `spa-facility-badge`, `btn-stay-map`, `btn-shopping-map`, `btn-shopping-photos`, `brand-badge`, `copied`, `dot-separator`, `sub-imgs`.
-  - Suite 4b는 **JS→CSS 방향만** 검사한다(선언 없는 클래스 사용 탐지). 역방향(쓰이지 않는 선언)은 검사가 없어 계속 쌓인다.
-  - 제거 전 확인: `card-badge-day`는 개인 일정 제거의 잔재이므로 **지우는 게 맞다**. `copied`·`sub-imgs`는 향후 사용 의도가 있을 수 있어 커밋 메시지에 근거를 남길 것.
+의미 기반 클래스 63개로 옮겼다. 반복 선언은 하나로 합쳤다 — `.card-review-count`(카드 3곳), `.guide-header-flex-row`(헤더 2곳), `.souv-price-krw`, `.customs-info-card`(3변형의 공통 베이스). 도메인별 덮어쓰기는 새 클래스가 아니라 기존 `.stay-card .card-media-wrapper` 패턴을 따라 중첩 선택자로 넣었다.
 
----
+색은 전부 기존 `var(--토큰)`을 재사용했다 (새 hex 0개).
 
-## 4. 카운트 하드코딩 — 테스트 사각지대
+검증: 스냅샷 6개 파일의 태그 구조와 텍스트가 속성을 제외하면 완전히 동일. 맛집 그리드 HTML 278KB → 216KB (-22%). 가이드 허브는 이관 전/후 `renderGuide()` 출력을 5개 카테고리에 대해 직접 비교 — `style` 속성 436개가 0개가 되고 태그를 벗긴 텍스트는 전량 일치. 브라우저에서 새 클래스가 실제 계산값을 받는지 확인했다 (선언만 있고 적용되지 않으면 `initial`로 남아 조용히 무스타일이 된다).
 
-개수 리터럴이 `index.html`(탭 뱃지 7 + 카테고리 소계 10 + 결과 카운트 7)과 `js/app.js`(`DOMAINS`의 `heroPills` 문구)에 흩어져 있다.
+### 7. `test: 가이드 허브 렌더 스냅샷 8건 추가 (73 → 81)`
 
-현재 `NHA_TRANG_X.length`에서 기대값을 **파생시켜 검증하는 테스트는 currency·gourmet·shopping뿐**이다. activities·stays·spa·guide는 검증이 없어 데이터가 바뀌면 조용히 어긋난다. (CLAUDE.md가 "액티비티 43"이라 적고 실제 데이터가 32인 것이 그 증거 — 문서 쪽 드리프트지만 같은 원인이다.)
+가이드 탭은 리스트가 아니라 `DOMAINS` 루프에 안 들어가서 `renderGuide()`의 450행 HTML이 무방비였고, 커밋 2와 6에서 매번 임시 스크립트로 확인해야 했다. 카테고리 5종 + 검색 + 플래시카드 모달 2개를 골든으로 고정했다.
 
-두 방향 중 하나를 고른다:
+이빨 확인: 플래시카드 섹션 조립을 `if (false)`로 막았더니 `guide.all`(DIFF) / `guide.flashcards`(EMPTY) / `guide.search`(DIFF) 3건이 실패하고 무관한 transport·shopping·emergency는 통과했다.
 
-- **(권장) 검증 강화** — `test-frontend.js`에 도메인 7개 × (탭 뱃지 / 카테고리 첫 버튼 / 결과 카운트 / heroPills 숫자)를 `length`에서 파생시켜 대조하는 스위트를 추가. 마크업은 손대지 않으므로 위험이 없고, 하드코딩 자체가 정보로서 유용하다(JS 없이도 숫자가 보인다).
-- **(대안) 런타임 주입** — 결함 C의 `data-count-for` 훅을 완성해 `init()`에서 뱃지를 채운다. 단 JS 로드 전 첫 페인트에 숫자가 비어 레이아웃이 흔들린다.
-
-두 번째를 택하더라도 `heroPills`와 카테고리 소계는 문장 안에 박혀 있어 첫 번째 방식이 여전히 필요하다.
+`test-render-snapshot.js`가 `data.js`를 `eval`로 읽던 우회도 걷어냈다.
 
 ---
 
-## 5. 테스트 인프라 중복
+## 브라우저 확인
 
-- `class TestRunner`가 **7개 파일**에 각각 정의돼 있다 (activity·gourmet·stays·spa·shopping·currency·guide). 파일당 50~60행 × 7 ≈ **400행 중복**.
-- `const colors = {…}` ANSI 색상 객체는 **9개 파일**에 중복.
-- → `test-harness.js` 하나로 추출하고 `require('./test-harness.js')`. 스위트 내용은 건드리지 않는다.
-- `test-activity.js:104-105`가 `data.js`를 `readFileSync` + `const`→`global.` 치환 + `eval`로 읽는다. **`data.js`에는 이미 `module.exports`가 있다**(1404-1408행) — 그냥 `require('./data.js')`로 바꿀 수 있다. CLAUDE.md의 "data.js는 module.exports가 없어서" 설명은 낡았다.
-- `gourmet-data.js`·`stays-data.js`만 dual export의 `window.*` 절반이 빠져 있다. 클래식 스크립트에서 최상위 `const`는 식별자로는 보이지만 `window.X`로는 안 보이므로, 다른 5개와 표기를 맞춰두는 편이 안전하다.
+`python3 -m http.server`로 7개 탭 전부:
 
----
+- 렌더 개수 32/113/24/24/18/17 + 가이드 4섹션(플래시카드 21, 시세표 34행), 콘솔 에러 0
+- 리스트/그리드 토글이 여섯 리스트 탭 전부에서 노출 (결함 해소 확인), 가이드 탭에서만 숨김
+- `var()` 74개 전부 해소, DOM의 `[style]` 속성 잔여 0개
+- 환전 탭에서 가격 정렬 옵션 숨김, "지금 영업중" 칩은 맛집·스파·쇼핑·환전에서만 노출
+- 롯데마트 원화가 `formatKRW` 경유 "약 13,600원" (100원 절사)
 
-## 6. `DOMAINS` / 섹션 구조 정리 (저비용)
-
-- 섹션 주석 번호 **`8.4`가 두 번** 쓰였다 — spa(2204), guide(2537). guide를 `8.6`으로.
-- `DOMAINS` 머리 주석이 "6개 도메인"이라 적혀 있으나 실제 7개(3101행).
-- `switchMainTab`의 하드코딩 특수 케이스를 레지스트리 필드로 옮긴다:
-  - `hasHours = tab === 'gourmet' || 'shopping' || 'currency' || 'spa'` (3332) → `DOMAINS[].hasOpenHours`
-  - `isCurrency`로 가격 정렬 옵션 숨김 (3303-3313) → `DOMAINS[].hasPriceSort`
-  - `isActivities`로 뷰 토글 표시 (3298) → 결함 B 해결과 함께 제거하거나 `DOMAINS[].showViewToggle`
-  탭이 8개가 될 때 손댈 곳을 `DOMAINS` 한 곳으로 유지하는 것이 이 테이블의 존재 이유다.
-- `initEvents`의 ESC 핸들러(3577)가 7개 모달 닫기를 무조건 전부 호출한다. 1-2 공통화 후 `state.currentTab`의 모달만 닫도록.
+`≤900px` 모바일 브레이크포인트는 확장 프로그램의 리사이즈가 뷰포트에 적용되지 않아 브라우저 측정이 무효였다. `style.css`의 `.header-nav-tabs { display: none }` + `.mobile-tabbar { display: flex }` 블록이 온전한 것은 정적으로 확인했고, 레이아웃 속성은 이관 과정에서 값을 그대로 옮겼다. **실기기/디바이스 모드에서 한 번 눈으로 볼 것.**
 
 ---
 
-## 손대지 말 것 (의도된 중복)
+## 손대지 않은 것 (의도된 중복)
 
-CLAUDE.md에 명시돼 있고 실제로 통일하면 판정이 깨진다:
+`CLAUDE.md`에 명시돼 있고 실제로 통일하면 판정이 깨진다:
 
 - **정렬 comparator 7개** — activities는 rating 타이브레이크가 없고, gourmet은 `rating*10000 + reviewCount`, currency만 배수 100000. 가격 필드도 `priceVnd`/`avgPriceVnd`/`pricePerNightVnd`로 갈린다.
-- **카테고리/태그 매처** — `gourmetCategoryMatch`(746-763)의 한국어 키워드 분기는 데이터 태그 실측에 맞춰 손으로 튜닝된 결과다. 보기 흉하지만 정확하다.
-- **`xRowTemplate` 어댑터 7개** — 스키마가 도메인마다 달라 `itemRowHTML`의 `v`를 만드는 변환은 도메인별로 남아야 한다.
-- **`x_MODAL_FIELDS` 선언 7개** — 필드 구성이 실제로 다르다.
+- **카테고리/태그 매처** — `gourmetCategoryMatch`의 한국어 키워드 분기는 데이터 태그 실측에 맞춰 손으로 튜닝된 결과다. 보기 흉하지만 정확하다.
+- **`xRowTemplate` 어댑터 7개**, **`x_MODAL_FIELDS` 선언 7개** — 스키마가 실제로 다르다.
 
----
+## 남은 것
 
-## 실행 순서
-
-각 단계를 별도 커밋으로. **함수 이동(출력 불변)과 새 추상화 도입·스타일 이관(출력 변경)을 한 커밋에 섞지 않는다.**
-
-| 단계 | 내용 | 스냅샷 | 규모 |
-|---|---|---|---|
-| 1 | 결함 A·D·E + 섹션 번호/주석 정정 (§0, §6 앞부분) | 불변 | 소 |
-| 2 | 찜 토글 · 모달 닫기 공통화 (§1-1, §1-2) | 불변 | 중 |
-| 3 | 모달 꼬리 · 갤러리 · 리스트 헬퍼 공통화 (§1-3~1-5) | 불변 | 중 |
-| 4 | `test-harness.js` 추출 + `test-activity.js` eval 제거 (§5) | 불변 | 중 |
-| 5 | 카운트 검증 스위트 추가 (§4) | 불변 | 소 |
-| 6 | `renderGuide` 섹션 분리 (§2-1) | 불변 | 대 |
-| 7 | guide 인라인 스타일 → `style.css` 토큰 이관 (§2-2) | **갱신 필요** | 대 |
-| 8 | `gourmetCardTemplate` 인라인/`#EA580C` 정리 (§3) | **갱신 필요** | 중 |
-| 9 | 죽은 CSS 25개 · 중복 룰 2개 제거 (§3) | 불변 | 소 |
-| 10 | `switchMainTab` 특수 케이스 → `DOMAINS` 필드 + 결함 B (§6) | 불변 | 중 |
-
-7·8단계는 스냅샷 diff를 **한 줄씩** 확인하고 커밋한다. 원인을 모르는 diff가 나오면 `--update`를 쓰지 말고 코드를 고친다.
-
-10단계는 탭 전환 UI를 건드리므로 스냅샷이 커버하지 못한다 — `python3 -m http.server 8000`으로 7개 탭 × (리스트/그리드) × (데스크톱/390px)을 직접 확인하고 콘솔 에러가 없는지 볼 것.
-
-예상 결과: `js/app.js` 3,683행 → 약 3,150행, 인라인 스타일 78→10 미만, 하드코딩 hex 60→0, 테스트 중복 약 450행 제거.
-
----
-
-## 부수 작업: `CLAUDE.md` 갱신
-
-코드보다 문서가 먼저 낡았다. 리팩토링과 별개로 지금 고칠 것:
-
-- 도메인 **5개 → 7개** (spa, guide 누락). 데이터 파일 목록에 `spa-data.js`(`NHA_TRANG_SPAS` 24 + `NHA_TRANG_SPA_TIPS`), `guide-data.js`(`NHA_TRANG_GUIDE_HUB`) 추가
-- 액티비티 **43 → 32**
-- 테스트 실행 명령과 표에 `test-spa.js`·`test-guide.js` 추가, 스냅샷 **61 → 73**
-- localStorage 키 "현재 12개" → 실제 14개 (spa 2개 추가)
-- "`data.js`는 `module.exports`가 없어서 eval" → 지금은 있다 (§5)
-- "뷰 모드는 다섯 탭 전체" → 일곱 탭 (그리고 결함 B가 해결될 때까지는 실제로는 activities 탭에서만 전환 가능하다는 사실을 적어둘 것)
+1. **맛집 그리드 카드의 배지가 하트 버튼에 살짝 가려진다.** 인라인 스타일로 짜여 있던 카드의 기존 레이아웃 문제다. 이관 작업과 섞으면 검증이 흐려지므로 손대지 않았다 — 이제 `.gourmet-card .card-media-wrapper` 클래스가 생겼으니 고치기 쉽다.
+2. **가이드 시세표의 "550,000동 / 약 30,000원" 열이 좁아 줄바꿈이 어색하다.** 역시 기존 문제.
+3. **`openShoppingModal`(147행) / `openCurrencyModal`(144행)이 여전히 길다.** 흥정표·ATM 단계·감정 분석 패널처럼 도메인 고유 블록이라 공통화 대상이 아니지만, 섹션 함수로 갈라 볼 여지는 있다 (커밋 2와 같은 방식).
+4. **`GEMINI.md` / `PROJECT.md`가 낡았다.** `CLAUDE.md`는 이번에 맞췄지만 나머지 두 문서는 컴포넌트 파일 분리를 전제하고 있다. `CLAUDE.md`가 이미 "무시하라"고 적고 있으니 급하지는 않다.
