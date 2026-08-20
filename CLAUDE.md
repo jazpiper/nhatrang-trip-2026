@@ -18,16 +18,16 @@
 python3 -m http.server 8000
 ```
 
-테스트는 서버 없이 Node로 바로 실행한다.
+테스트는 서버 없이 Node로 바로 실행한다. 데이터 개수를 바꿨으면 `node build-counts.js`로 `index.html` 카운트를 재스탬프한다.
 
 ## 아키텍처
 
-**2계층 로딩 구조** — `index.html` 하단 스크립트 태그의 순서가 중요하다.
+**eager/lazy 하이브리드 로딩** — 전부 클래식 스크립트이고 전역 `const`로 통신한다. import 하지 않는다.
 
-1. 데이터 7종이 **클래식 스크립트**로 먼저 로드되어 전역 `const`(`NHA_TRANG_ACTIVITIES`, `NHA_TRANG_GOURMETS`, `NHA_TRANG_STAYS`, `NHA_TRANG_SPAS`, `NHA_TRANG_SHOPPING`, `NHA_TRANG_CURRENCY`, `NHA_TRANG_GUIDE_HUB`, `DEFAULT_EXCHANGE_RATE`)를 만든다.
-2. `js/app.js`가 마지막에 로드되어 위 전역을 직접 참조한다. import 하지 않는다.
+1. `index.html`은 `data.js`(`NHA_TRANG_ACTIVITIES` + `DEFAULT_EXCHANGE_RATE` — 환율은 전 탭이 쓴다)와 `js/app.js` **둘만** 정적 로드한다. `data.js`가 `js/app.js`보다 뒤로 가면 앱 전체가 죽는다.
+2. 나머지 데이터 6종은 `js/app.js` 섹션 8.7의 `LAZY_DATA` 매니페스트가 해당 탭 최초 진입 시 `<script>` 태그를 동적 삽입해 로드한다. fetch가 아니라 스크립트 태그라 `file://`에서도 동작한다. 로드 중에는 로딩 상태, 실패 시 "다시 불러오기" 버튼이 뜬다 (`showDataLoadError`).
 
-데이터 스크립트가 `js/app.js`보다 뒤로 가면 해당 탭이 통째로 죽는다 (`test-frontend.js` Suite 2가 7개 전부 순서를 검증).
+**나머지 6종에 정적 태그를 다시 넣지 말 것** — lazy와 이중 로드된다. `test-frontend.js` Suite 2가 (정적 태그 부재 + `LAZY_DATA` 등록 + 파일 실존)을 6종 전부 검증한다. `js/app.js`의 lazy 데이터 참조는 전부 `typeof` 가드 뒤에 있으므로, 새 코드가 lazy 전역을 만질 때도 같은 가드를 유지해야 한다.
 
 ```
 index.html         단일 진입점. 7개 탭 정적 마크업 + 모달 template + 하단 탭바 + 하드코딩 카운트
@@ -52,6 +52,7 @@ js/app.js          전체 앱 로직 단일 파일 (IIFE). 섹션 주석으로 �
                      4 액티비티 / 5 맛집 / 6 숙소 / 7 쇼핑 / 8 환전·ATM
                      8.4 스파 / 8.5 여행 꿀팁 허브 / 8.6 DOMAINS 레지스트리
                      9 탭 전환 / 10 이벤트 바인딩 / 11 부트스트랩 + Node export shim
+build-counts.js    index.html의 하드코딩 카운트를 데이터셋에서 파생시켜 재스탬프 (데이터 증감 후 실행)
 test-*.js          Node 검증 스위트 (루트)
 test-snapshots/    렌더 출력 골든 파일 (자동 생성, 직접 편집 금지)
 scratch/, .agents/ 과거 에이전트 작업 산출물. 프로덕션 코드 아님 — 수정/참조 불필요
@@ -176,11 +177,11 @@ https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}
 
 ## 카운트 동기화
 
-데이터셋 개수가 `index.html`과 `js/app.js`에 **하드코딩**되어 있다. 데이터를 추가/삭제하면 아래를 전부 함께 고쳐야 한다. (행 번호는 금방 낡으므로 `grep`으로 찾을 것.)
+데이터셋 개수가 `index.html`과 `js/app.js`에 **하드코딩**되어 있다. 데이터를 추가/삭제하면:
 
-- `index.html`: 헤더 탭 뱃지(`<span class="tab-badge">32</span>` — 숫자만 들어간다. guide 탭만 `4대 가이드`), 카테고리 첫 버튼 `전체 … (N곳)`, 카테고리별 소계 `(N곳)`, 결과 카운트 `id="…ResultCountText"`
-- `js/app.js`: `DOMAINS` 테이블 각 항목의 `heroPills` 문구 안 숫자 (`switchMainTab`이 `heroTagsArea.innerHTML`로 주입한다)
-- 테스트 파일의 기대 개수 상수
+1. `node build-counts.js` 실행 — `index.html`의 탭 뱃지, 카테고리 첫 버튼 `전체 … (N곳)`, 환전 탭 카테고리별 소계(실제 `getFilteredCurrency()`로 센다), 결과 카운트 초기값을 데이터셋에서 파생시켜 다시 찍는다. 멱등이라 언제 돌려도 안전하다.
+2. 수동으로 고칠 것: `js/app.js` `DOMAINS` 테이블의 `heroPills` 문구 안 숫자 (산문에 박혀 있어 자동 치환하지 않는다), 테스트 파일의 기대 개수 상수
+3. `index.html` 마크업 구조를 바꿨는데 build-counts가 "패턴 매치 실패"로 죽으면 스크립트의 정규식을 함께 갱신할 것 — 조용히 넘어가지 않고 실패하도록 설계돼 있다
 
 현재값: 액티비티 32 / 맛집 113 / 숙소 24 / 스파 24 / 쇼핑 18 / 환전·ATM 17.
 
@@ -224,7 +225,7 @@ https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}
 
 체크리스트:
 1. `<domain>-data.js`에 `module.exports` 이중 export를 넣었는가
-2. `index.html` 스크립트 태그를 `js/app.js` **앞**에 넣었는가
+2. `js/app.js` 섹션 8.7 `LAZY_DATA`에 `{src, containerId, ready}`를 등록했는가 (정적 script 태그를 넣으면 안 된다 — Suite 2가 잡는다)
 3. 새 클래스를 `style.css`에 **먼저** 선언했는가 (Suite 4b가 잡는다)
 4. `DOMAINS` 테이블에 항목을 추가했는가 — 이것만 하면 탭 전환·카테고리/태그 바인딩·검색·정렬·필터 초기화·모달 닫기·노트 저장이 전부 자동으로 붙는다
 5. `render<Domain>()`의 cfg에 `cardTemplate`(그리드)과 `rowTemplate`(리스트) **둘 다** 넘겼는가 — `rowTemplate`이 없으면 리스트 뷰에서 그리드 카드가 그려진다
