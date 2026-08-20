@@ -77,7 +77,7 @@ scratch/, .agents/ 과거 에이전트 작업 산출물. 프로덕션 코드 아
 
 **리스트가 기본 뷰다.** 사진이 실제 장소가 아닌 스톡 이미지라 카드 면적의 절반 이상을 정보 없이 쓰고 있었고(카드 1개 490px, 1440px 첫 화면에 0개), 여섯 도메인이 하나의 84px 행 컴포넌트를 공유하도록 바꿨다(guide 탭은 리스트가 아니라 허브라 예외). 그리드는 사진을 볼 때를 위한 두 번째 뷰로 남는다.
 
-- `itemRowHTML(v)` — 공용 행 마크업. 도메인마다 스키마가 달라 각 섹션의 `xRowTemplate`이 어댑터로 `v`를 만들어 넘긴다 (`id`, `rank`, `emoji`, `imgUrl`, `name`, `tags`, `rating`, `reviewCount`, `openState`, `metaParts`, `sigLabel`, `sigValue`, `subText`, `priceMain`, `priceKrw`, `priceUnit`, `isWish`, `note`, `mapUrl`). **필드를 늘리면 여섯 도메인 전부에 영향이 가고 스냅샷 73건이 잡는다.**
+- `itemRowHTML(v)` — 공용 행 마크업. 도메인마다 스키마가 달라 각 섹션의 `xRowTemplate`이 어댑터로 `v`를 만들어 넘긴다 (`id`, `rank`, `emoji`, `imgUrl`, `name`, `tags`, `rating`, `reviewCount`, `openState`, `metaParts`, `sigLabel`, `sigValue`, `subText`, `priceMain`, `priceKrw`, `priceUnit`, `isWish`, `note`, `mapUrl`). **필드를 늘리면 여섯 도메인 전부에 영향이 가고 스냅샷 81건이 잡는다.**
 - `applyViewClass(container)` — 컨테이너를 `items-list`(+`is-comfy`) 또는 `cards-grid`로 바꾸고 리스트 여부를 반환
 - `isOpenNow(openHours)` — `"15:00 - 21:00"`, `"18:00 - 22:30 (야간 영업)"`, `"24시간"`, 자정 넘김까지 파싱. **못 읽으면 `null`**이고 화면에 상태를 아예 띄우지 않는다
 - `filterOpenNow(list)` — `renderDomainGrid`가 `getFiltered()` 결과에 적용한다. **파싱 실패 항목은 남긴다** (정보가 없다는 이유로 숨기면 사라진 이유를 알 수 없다). 칩은 `openHours`가 있는 맛집·스파·쇼핑·환전 탭에서만 보인다 (`DOMAINS[].hasOpenHours`)
@@ -113,8 +113,9 @@ node test-challenger-2.js && node test-frontend.js && node test-render-snapshot.
 | `test-shopping.js` | `shopping-data.js` 18개 | 25/25 PASS |
 | `test-currency.js` | `currency-data.js` 17개, 스키마 균일성(+옵셔널 `bestTiming`), **실제 `getFilteredCurrency()` 구동** | PASS |
 | `test-challenger-2.js` | 링크/보안 어드버세리얼, 결과 카운트 XSS 불변식 | 18/18 PASS |
-| `test-frontend.js` | DOM ID, 스크립트 순서, CSS 클래스 불변식, 환전 탭 실제 필터 | 7 스위트 PASS |
-| `test-render-snapshot.js` | **6개 도메인 리스트·그리드 렌더 HTML + 모달 채움 골든 스냅샷** | 73/73 일치 |
+| `test-frontend.js` | DOM ID, 스크립트 순서, CSS 클래스 불변식, 환전 탭 실제 필터, **카운트 동기화(Suite 10)·죽은 CSS(11)·디자인 토큰(12)** | 12 스위트 PASS |
+| `test-render-snapshot.js` | **6개 도메인 리스트·그리드 렌더 HTML + 모달 채움 + 가이드 허브 골든 스냅샷** | 81/81 일치 |
+| `test-harness.js` | (테스트 아님) 6개 스위트가 공유하는 `TestRunner`·`colors` | — |
 
 ### 렌더 스냅샷 (`test-render-snapshot.js`)
 
@@ -123,8 +124,7 @@ node test-challenger-2.js && node test-frontend.js && node test-render-snapshot.
 - 54 케이스: 6도메인 × (기본/카테고리/태그/검색/평점정렬/가격오름/가격내림/찜만/빈결과) — 기본 뷰가 리스트라 전부 행 마크업
 - 7 케이스: 6도메인 × 그리드 뷰 + 맛집 넉넉 밀도. 각 스냅샷 머리에 `<!-- container class: ... -->`를 박아 뷰/밀도 전환 자체를 고정한다 (innerHTML만으로는 컨테이너 클래스 변화를 못 잡는다)
 - 12 케이스: 6도메인 × 모달 2개(첫/마지막 항목). 모달이 건드린 20~26개 엘리먼트의 `textContent`/`innerHTML`/`src`/`href`/`style`을 전부 덤프
-
-guide 탭은 리스트가 아니라 4개 섹션 허브라 스냅샷 대상이 아니다 — `test-guide.js`가 필터 함수를 직접 구동해 검증한다.
+- 8 케이스: 가이드 허브. 카테고리 5종(all/transport/shopping/emergency/flashcards) + 검색 + 플래시카드 모달 2개. guide 탭은 리스트가 아니라 `DOMAINS` 루프에 안 들어가서 `renderGuide()`의 450행 HTML이 오랫동안 무방비였다
 
 "지금 영업중" 필터는 실행 시각에 따라 결과가 달라지므로 스냅샷으로 고정하지 않는다.
 
@@ -200,7 +200,7 @@ https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}
 
 - 색 역할을 섞지 말 것. 탭마다 다른 색(구버전 `#EA580C`/`#2563EB`/`#059669`)을 쓰지 않는다
 - 서체: 본문·UI는 `Be Vietnam Pro`(베트남어 성조 ầ ộ ữ 를 위해 설계됨), 로고·타이틀은 `Fraunces`. 숫자는 `font-variant-numeric: tabular-nums`
-- 새 색이 필요하면 하드코딩하지 말고 `:root`에 토큰을 추가한다. 인라인 `style=` 속성은 늘리지 말 것
+- 새 색이 필요하면 하드코딩하지 말고 `:root`에 토큰을 추가한다. 인라인 `style=` 속성은 쓰지 않는다 (현재 0개, Suite 12가 hex를 막는다)
 - 모바일(≤900px)에서 상단 탭이 숨고 `.mobile-tabbar`가 유일한 전환 수단이다. 탭을 추가하면 양쪽 모두 갱신할 것
 
 ## 코드 컨벤션
@@ -208,6 +208,8 @@ https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}
 - **프레임워크 금지.** React, Tailwind, 번들러 도입하지 않는다.
 - **CSS 클래스 1:1 일치.** 템플릿 리터럴로 HTML을 만들 때 클래스명을 새로 지어내지 말고 `style.css`에 이미 선언된 것(`.card-media-wrapper`, `.card-img`, `.card-body` 등)만 쓴다. 신규 클래스가 필요하면 `style.css`에 **먼저** 추가한다. 어기면 요소가 조용히 무스타일로 렌더되고 콘솔 에러도 안 난다 — `test-frontend.js` Suite 4b가 이걸 잡는다.
 - **방어적 필드 바인딩.** 데이터 스키마가 도메인마다 다르므로 `(item.images || [item.imageUrl])`, `(item.tags || [])`, `(item.reviewCount || 0).toLocaleString()` 식 fallback 체이닝을 쓴다. **특히 `.toLocaleString()`·`.map()`·`.join()`을 원시 필드에 바로 붙이지 말 것** — `map()` 콜백 안에서 throw하면 `innerHTML` 대입 자체가 안 일어나 그리드가 통째로 이전 상태에 멈추고, 카운트 텍스트만 갱신돼 표시가 어긋난다.
+- **인라인 `style=` 금지.** 현재 `js/app.js`에 0개다. 새 스타일이 필요하면 `style.css`에 의미 기반 클래스를 만들어라 (`.mt-24` 같은 유틸리티 클래스 금지 — Tailwind를 쓰지 않는 이유와 같다).
+- **색은 `:root` 토큰만.** hex 리터럴을 코드에 박으면 `test-frontend.js` Suite 12가 잡는다 (흑백 `#000000`/`#FFFFFF`만 예외). 의미색은 `warn`/`success`/`danger`/`info`/`violet`/`neutral` 6계열 × `-surface`/`-border`/`-mark`/`-ink`가 이미 있다.
 - **핸들러는 한 곳에서만 바인딩.** `initEvents()`에서 `addEventListener`로 걸었으면 모달 열 때 `.onclick`을 또 할당하지 않는다. 둘 다 걸리면 클릭 한 번에 두 번 실행된다.
 - **환율은 `DEFAULT_EXCHANGE_RATE` 단일 출처.** `js/app.js`의 `currentBenchmarkRate`는 이 상수에서 파생되고, 헤더 계산기 모달도 같은 값을 실시간으로 읽는다. 별도 상수를 새로 만들지 말 것.
 - **localStorage 키는 `nha_trang_*` 접두어.** 현재 14개: 찜/노트를 쓰는 6개 도메인 × (`_wishlist`, `_notes`) + 뷰 설정 `nha_trang_view`·`nha_trang_density`. guide 탭은 찜·노트가 없다. 읽기/쓰기는 항상 `loadFromStorage` / `saveToStorage` 경유.

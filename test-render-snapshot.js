@@ -33,20 +33,17 @@ const colors = {
 };
 
 // --- 1. Seed data globals BEFORE requiring the app -------------------------
-// data.js has no module.exports, so it is evaluated the same way test-activity.js
-// does it: read the source and run it, then lift the consts onto globalThis.
-const dataSrc = fs.readFileSync(path.join(__dirname, 'data.js'), 'utf8');
-(0, eval)(
-  dataSrc +
-  '\n;globalThis.NHA_TRANG_ACTIVITIES = NHA_TRANG_ACTIVITIES;' +
-  '\n;globalThis.DEFAULT_EXCHANGE_RATE = DEFAULT_EXCHANGE_RATE;'
-);
+// 데이터 파일 7종 전부 module.exports가 있어 그냥 require()로 읽는다.
+const activityData = require('./data.js');
+globalThis.NHA_TRANG_ACTIVITIES = activityData.NHA_TRANG_ACTIVITIES;
+globalThis.DEFAULT_EXCHANGE_RATE = activityData.DEFAULT_EXCHANGE_RATE;
 
 globalThis.NHA_TRANG_GOURMETS = require('./gourmet-data.js').NHA_TRANG_GOURMETS;
 globalThis.NHA_TRANG_STAYS = require('./stays-data.js').NHA_TRANG_STAYS;
 globalThis.NHA_TRANG_SPAS = require('./spa-data.js').NHA_TRANG_SPAS;
 globalThis.NHA_TRANG_SHOPPING = require('./shopping-data.js').NHA_TRANG_SHOPPING;
 globalThis.NHA_TRANG_CURRENCY = require('./currency-data.js').NHA_TRANG_CURRENCY;
+globalThis.NHA_TRANG_GUIDE_HUB = require('./guide-data.js').NHA_TRANG_GUIDE_HUB;
 
 // --- 2. Require the app while `document` is still absent -------------------
 // (that is what keeps init() from firing — see test-dom-stub.js header)
@@ -197,6 +194,43 @@ cases.push({
 
 // "지금 영업중" 필터는 시각에 따라 결과가 달라지므로 스냅샷으로 고정하지 않는다.
 
+// 가이드 허브는 리스트가 아니라 4개 섹션의 조립이라 위 DOMAINS 루프에 안 들어간다.
+// 그 결과 renderGuide()가 뱉는 450행짜리 HTML이 오랫동안 무방비였다 —
+// 섹션 분리와 인라인 스타일 이관 때 임시 스크립트로 두 번 확인해야 했다.
+// 카테고리별로 켜지는 섹션 조합을 고정해 그 공백을 메운다.
+['all', 'transport', 'shopping', 'emergency', 'flashcards'].forEach(cat => {
+  cases.push({
+    file: `guide.${cat}.html`,
+    produce: () => {
+      app.resetStateFilters();
+      app.state.guideCategory = cat;
+      app.renderGuide();
+      const out = [
+        `<!-- domain: guide | category: ${cat} -->`,
+        dom.html('guideCardsGridContainer')
+      ].join('\n');
+      app.resetStateFilters();
+      return out;
+    }
+  });
+});
+
+// 검색어가 걸리면 시세표·상비약·플래시카드 세 목록이 동시에 좁혀진다.
+cases.push({
+  file: 'guide.search.html',
+  produce: () => {
+    app.resetStateFilters();
+    app.state.searchQuery = '그랩';
+    app.renderGuide();
+    const out = [
+      '<!-- domain: guide | search: 그랩 -->',
+      dom.html('guideCardsGridContainer')
+    ].join('\n');
+    app.resetStateFilters();
+    return out;
+  }
+});
+
 // --- Modal snapshots --------------------------------------------------------
 // openXModal writes into ~30 individual elements each. Dumping every element the
 // call touched pins the whole modal population, which is what Phase 4 (declarative
@@ -230,6 +264,29 @@ function captureModal(m, index) {
   dom.reset();
   return lines.join('\n');
 }
+
+// 플래시카드 모달은 도메인 아이템이 아니라 NHA_TRANG_GUIDE_HUB.flashcards를 받는다.
+[0, NHA_TRANG_GUIDE_HUB.flashcards.length - 1].forEach((idx, n) => {
+  cases.push({
+    file: `guide.modal-${n === 0 ? 'first' : 'last'}.txt`,
+    produce: () => {
+      dom.reset();
+      const fc = NHA_TRANG_GUIDE_HUB.flashcards[idx];
+      app.openFlashcardModal(fc);
+      const lines = [`<!-- modal: flashcard | item: ${fc.id} -->`];
+      dom.touchedIds().forEach(id => {
+        const el = dom.doc.getElementById(id);
+        const parts = [];
+        if (el.textContent) parts.push(`text=${JSON.stringify(el.textContent)}`);
+        if (el.innerHTML) parts.push(`html=${JSON.stringify(el.innerHTML)}`);
+        if (parts.length) lines.push(`${id}\n    ${parts.join('\n    ')}`);
+      });
+      dom.reset();
+      app.closeFlashcardModal();
+      return lines.join('\n');
+    }
+  });
+});
 
 MODAL_OPENERS.forEach(m => {
   // First and last entry: catches domain items with different optional-field shapes.
