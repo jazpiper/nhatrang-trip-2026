@@ -2380,31 +2380,13 @@
     return list;
   }
 
-  function renderGuide() {
-    const container = document.getElementById('guideCardsGridContainer');
-    if (!container) return;
-    if (typeof NHA_TRANG_GUIDE_HUB === 'undefined') {
-      container.innerHTML = '<div class="empty-state">가이드 데이터를 불러오는 중입니다...</div>';
-      return;
-    }
+  // 가이드 허브는 리스트가 아니라 4개 독립 섹션의 조립이다. 한 함수가 450행에
+  // 걸쳐 전부 만들던 것을 섹션별 함수로 갈랐다. renderGuide는 카테고리 필터에
+  // 따라 조립하고 이벤트를 바인딩하는 일만 한다.
 
-    const { transport, shoppingPriceMatrix, emergencyPharmacy } = NHA_TRANG_GUIDE_HUB;
-    const cat = state.guideCategory;
-    const showAll = cat === 'all';
-    const showTransport = showAll || cat === 'transport';
-    const showShopping = showAll || cat === 'shopping';
-    const showEmergency = showAll || cat === 'emergency';
-    const showFlashcards = showAll || cat === 'flashcards';
-
-    const filteredSouvenirs = getFilteredSouvenirs();
-    const filteredMeds = getFilteredPharmacyMeds();
-    const filteredFlashcards = getFilteredFlashcards();
-
-    let html = '';
-
-    // 1. Transport & Grab Guide Section
-    if (showTransport) {
-      html += `
+  /** 교통·그랩 가이드 섹션 (공항 이동, 택시 앱 비교, 근교 버스, 안전 수칙). */
+  function guideTransportHTML(transport) {
+    return `
         <section class="guide-section-block" id="transportGuidePanel">
           <div class="guide-section-header">
             <h2 class="guide-section-title">🚗 깜란공항 & 나트랑 시내 교통 완벽 가이드</h2>
@@ -2545,11 +2527,11 @@
           </div>
         </section>
       `;
-    }
+  }
 
-    // 2. Lotte Mart Top 30 Souvenir Price Matrix Section
-    if (showShopping) {
-      html += `
+  /** 롯데마트 기념품 시세표 섹션. 정찰가/시장 흥정가와 원화 환산을 나란히 둔다. */
+  function guideSouvenirMatrixHTML(matrix, souvenirs) {
+    return `
         <section class="guide-section-block" id="souvenirsGuidePanel">
           <div class="guide-section-header">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -2558,7 +2540,7 @@
                 <p class="guide-section-desc">정찰제 마트 공식가 vs 담시장·야시장 흥정 목표가 & 정품 구별법 (총 30개 품목)</p>
               </div>
               <span class="mini-tag" style="background: #E0F2FE; color: #0284C7; font-weight: 700;">
-                검색 일치: ${filteredSouvenirs.length}개 품목
+                검색 일치: ${souvenirs.length}개 품목
               </span>
             </div>
           </div>
@@ -2580,7 +2562,7 @@
                 </tr>
               </thead>
               <tbody>
-                ${filteredSouvenirs.map((item, idx) => {
+                ${souvenirs.map((item, idx) => {
                   const martKrw = formatKRW(item.officialPriceVnd);
                   const marketKrw = formatKRW(item.marketBargainPriceVnd);
                   return `
@@ -2622,10 +2604,10 @@
           <!-- Bargaining Tips Callout Box -->
           <div class="bargaining-guide-box">
             <h3 style="font-size: 1.05rem; font-weight: 800; color: #9A3412; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
-              🏷️ ${escapeHtml(shoppingPriceMatrix.bargainingTips.marketName)} 실전 5단계 흥정 전략
+              🏷️ ${escapeHtml(matrix.bargainingTips.marketName)} 실전 5단계 흥정 전략
             </h3>
             <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: #7C2D12; display: flex; flex-direction: column; gap: 6px;">
-              ${shoppingPriceMatrix.bargainingTips.coreStrategy.map(st => `
+              ${matrix.bargainingTips.coreStrategy.map(st => `
                 <li>${escapeHtml(st)}</li>
               `).join('')}
             </ul>
@@ -2640,16 +2622,16 @@
               <div style="background: white; padding: 12px; border-radius: var(--radius-sm); border: 1px solid #BAE6FD;">
                 <strong style="color: #0369A1;">💵 1인 면세 한도:</strong>
                 <ul style="margin: 4px 0 0 0; padding-left: 16px;">
-                  <li>기본 면세: 미화 <strong>${shoppingPriceMatrix.customsQuarantine.dutyFreeAllowance.basicAllowanceUsd}</strong></li>
-                  <li>주류: ${escapeHtml(shoppingPriceMatrix.customsQuarantine.dutyFreeAllowance.alcoholLimit)}</li>
-                  <li>담배: ${escapeHtml(shoppingPriceMatrix.customsQuarantine.dutyFreeAllowance.tobaccoLimit)}</li>
-                  <li>향수: ${escapeHtml(shoppingPriceMatrix.customsQuarantine.dutyFreeAllowance.perfumeLimit)}</li>
+                  <li>기본 면세: 미화 <strong>${matrix.customsQuarantine.dutyFreeAllowance.basicAllowanceUsd}</strong></li>
+                  <li>주류: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.alcoholLimit)}</li>
+                  <li>담배: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.tobaccoLimit)}</li>
+                  <li>향수: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.perfumeLimit)}</li>
                 </ul>
               </div>
               <div style="background: white; padding: 12px; border-radius: var(--radius-sm); border: 1px solid #FECACA;">
                 <strong style="color: #DC2626;">🚫 반입 전면 금지 (검역 과태료):</strong>
                 <ul style="margin: 4px 0 0 0; padding-left: 16px; color: #991B1B;">
-                  ${shoppingPriceMatrix.customsQuarantine.prohibitedItems.map(p => `
+                  ${matrix.customsQuarantine.prohibitedItems.map(p => `
                     <li>${escapeHtml(p)}</li>
                   `).join('')}
                 </ul>
@@ -2657,7 +2639,7 @@
               <div style="background: white; padding: 12px; border-radius: var(--radius-sm); border: 1px solid #BBF7D0;">
                 <strong style="color: #16A34A;">✅ 반입 가능 품목:</strong>
                 <ul style="margin: 4px 0 0 0; padding-left: 16px; color: #166534;">
-                  ${shoppingPriceMatrix.customsQuarantine.permittedItems.map(p => `
+                  ${matrix.customsQuarantine.permittedItems.map(p => `
                     <li>${escapeHtml(p)}</li>
                   `).join('')}
                 </ul>
@@ -2666,11 +2648,11 @@
           </div>
         </section>
       `;
-    }
+  }
 
-    // 3. Emergency & 24h Pharmacy Guide Section
-    if (showEmergency) {
-      html += `
+  /** 응급·24시 약국 섹션 (상비약, 24시 병원, 보험 청구). */
+  function guideEmergencyHTML(emergency, meds) {
+    return `
         <section class="guide-section-block" id="emergencyGuidePanel">
           <div class="guide-section-header">
             <h2 class="guide-section-title">💊 응급 상비약 & 24시 국제병원 가이드</h2>
@@ -2683,7 +2665,7 @@
               🏥 현지 약국 즉시 구매 가능 10대 핵심 상비약
             </h3>
             <div class="meds-grid">
-              ${filteredMeds.map(m => `
+              ${meds.map(m => `
                 <div class="med-card">
                   <div class="med-header">
                     <div>
@@ -2712,7 +2694,7 @@
               🚨 나트랑 24시 국제 응급 종합병원
             </h3>
             <div class="hospitals-grid">
-              ${emergencyPharmacy.hospitals.map(h => `
+              ${emergency.hospitals.map(h => `
                 <div class="hospital-card">
                   <div>
                     <h4 class="hospital-name-ko">${escapeHtml(h.nameKo)}</h4>
@@ -2743,10 +2725,10 @@
           <!-- Insurance Claim 5-Step Guide -->
           <div class="insurance-guide-box">
             <h3 style="font-size: 1.05rem; font-weight: 800; color: #6B21A8; margin: 0 0 14px 0;">
-              📑 ${escapeHtml(emergencyPharmacy.insuranceGuide.title)}
+              📑 ${escapeHtml(emergency.insuranceGuide.title)}
             </h3>
             <div>
-              ${emergencyPharmacy.insuranceGuide.steps.map(st => `
+              ${emergency.insuranceGuide.steps.map(st => `
                 <div class="insurance-step-item">
                   <div class="insurance-step-no">${st.stepNo}</div>
                   <div>
@@ -2759,11 +2741,11 @@
           </div>
         </section>
       `;
-    }
+  }
 
-    // 4. One-Touch Vietnamese Flashcards Section
-    if (showFlashcards) {
-      html += `
+  /** 원터치 생존 베트남어 플래시카드 섹션. */
+  function guideFlashcardsHTML(flashcards, cat) {
+    return `
         <section class="guide-section-block" id="flashcardsGuidePanel">
           <div class="guide-section-header">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -2772,14 +2754,14 @@
                 <p class="guide-section-desc">식당·카페, 택시·그랩, 쇼핑·시장, 응급·호텔 상황별 원클릭 대화 카드 (클릭 시 전면 확대 & 텍스트 복사)</p>
               </div>
               <span class="mini-tag" style="background: #E6F4F2; color: var(--color-sea); font-weight: 700;">
-                카드 ${filteredFlashcards.length}개 표시
+                카드 ${flashcards.length}개 표시
               </span>
             </div>
           </div>
 
           <!-- Flashcards Responsive Grid -->
           <div class="flashcards-grid">
-            ${filteredFlashcards.map(fc => `
+            ${flashcards.map(fc => `
               <div class="flashcard-card" data-fc-id="${fc.id}">
                 <div class="flashcard-card-top">
                   <span class="flashcard-card-icon">${fc.icon}</span>
@@ -2802,7 +2784,41 @@
           </div>
         </section>
       `;
+  }
+
+  function renderGuide() {
+    const container = document.getElementById('guideCardsGridContainer');
+    if (!container) return;
+    if (typeof NHA_TRANG_GUIDE_HUB === 'undefined') {
+      container.innerHTML = '<div class="empty-state">가이드 데이터를 불러오는 중입니다...</div>';
+      return;
     }
+
+    const { transport, shoppingPriceMatrix, emergencyPharmacy } = NHA_TRANG_GUIDE_HUB;
+    const cat = state.guideCategory;
+    const showAll = cat === 'all';
+    const showTransport = showAll || cat === 'transport';
+    const showShopping = showAll || cat === 'shopping';
+    const showEmergency = showAll || cat === 'emergency';
+    const showFlashcards = showAll || cat === 'flashcards';
+
+    const filteredSouvenirs = getFilteredSouvenirs();
+    const filteredMeds = getFilteredPharmacyMeds();
+    const filteredFlashcards = getFilteredFlashcards();
+
+    let html = '';
+
+    // Transport & Grab Guide Section
+    if (showTransport) html += guideTransportHTML(transport);
+
+    // Lotte Mart Top 30 Souvenir Price Matrix Section
+    if (showShopping) html += guideSouvenirMatrixHTML(shoppingPriceMatrix, filteredSouvenirs);
+
+    // Emergency & 24h Pharmacy Guide Section
+    if (showEmergency) html += guideEmergencyHTML(emergencyPharmacy, filteredMeds);
+
+    // One-Touch Vietnamese Flashcards Section
+    if (showFlashcards) html += guideFlashcardsHTML(filteredFlashcards, cat);
 
     container.innerHTML = html;
 
