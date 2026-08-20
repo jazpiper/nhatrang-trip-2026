@@ -924,6 +924,71 @@ input, textarea, select {
   min-width: 0;
 }
 
+/* Gourmet cards have no real photos — a solid dark placeholder replaces the
+   image and layers badge + name text directly on top of it. */
+.gourmet-card .card-media-wrapper {
+  background: var(--neutral-ink-darkest);
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px;
+}
+
+.gourmet-card .card-badge-top-left {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--neutral-ink-darkest);
+}
+
+.card-heart-btn-static {
+  position: static;
+}
+
+.gourmet-media-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  z-index: 2;
+}
+
+.gourmet-media-info {
+  color: white;
+  z-index: 2;
+}
+
+.gourmet-media-eyebrow {
+  font-size: 0.75rem;
+  color: var(--neutral-mark-soft);
+  font-weight: 600;
+}
+
+.gourmet-media-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.gourmet-media-name-vi {
+  font-size: 0.8rem;
+  color: var(--neutral-border);
+  opacity: 0.9;
+}
+
+/* Review count in parens next to the star rating — shared by gourmet,
+   stays and shopping cards. */
+.card-review-count {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+}
+
+.gourmet-signature-preview {
+  font-size: 0.82rem;
+  color: var(--color-ocean);
+  font-weight: 600;
+  margin: 4px 0 2px 0;
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;
@@ -945,6 +1010,26 @@ input, textarea, select {
   color: var(--color-text-secondary);
   font-size: 0.92rem;
   margin-bottom: 20px;
+}
+
+/* Currency's empty state trims the base padding and swaps the reset button
+   for a success-colored variant of .btn-primary-reserve. */
+.empty-state-compact {
+  padding: 48px 24px;
+}
+
+.empty-state-compact h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.empty-state-compact p {
+  font-size: 0.9rem;
+}
+
+.empty-state-compact .btn-primary-reserve {
+  padding: 10px 22px;
+  background: var(--success-mark);
 }
 
 .btn-reset-filters {
@@ -1529,6 +1614,18 @@ input, textarea, select {
 .checklist-ul li .bullet {
   color: var(--color-ocean);
   font-weight: bold;
+}
+
+.gourmet-menu-price {
+  color: var(--color-sea);
+  font-weight: 700;
+  margin-left: 8px;
+}
+
+.gourmet-menu-desc {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
 }
 
 .couple-notes-container {
@@ -2135,6 +2232,11 @@ input, textarea, select {
   color: var(--warn-mark);
 }
 
+.shopping-card .card-badge-top-left {
+  background: rgba(255, 56, 92, 0.95);
+  color: white;
+}
+
 /* Shopping Modal Facilities Box */
 .shopping-facilities-box {
   display: flex;
@@ -2154,6 +2256,13 @@ input, textarea, select {
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--neutral-ink-strong);
+}
+
+/* Shared "no data yet" fallback text inside modal panels (bargaining table,
+   sentiment analysis). */
+.modal-empty-note {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
 }
 
 /* Bargaining Table */
@@ -2201,6 +2310,11 @@ input, textarea, select {
   color: var(--color-primary-ink);
   font-weight: 800;
   font-size: 0.9rem;
+}
+
+.price-tip {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
 }
 
 /* Sentiment & Community Review Box */
@@ -2255,6 +2369,26 @@ input, textarea, select {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+.community-verdict-box {
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: var(--neutral-surface);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  color: var(--color-ocean);
+  font-weight: 700;
+}
+
+.scam-warning-box {
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: var(--danger-surface);
+  border-left: 4px solid var(--danger-mark);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: var(--danger-ink);
 }
 
 .customs-warning-box {
@@ -3081,6 +3215,70 @@ input, textarea, select {
   margin: 0;
 }
 
+/* Generic spacing/heading helpers reused across the guide hub sub-blocks. */
+.guide-block-spacer {
+  margin-top: 24px;
+}
+
+.guide-block-spacer-lg {
+  margin-top: 28px;
+}
+
+.guide-subsection-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.guide-subsection-title-warn {
+  color: var(--warn-ink);
+}
+
+.guide-block-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin: 0 0 12px 0;
+}
+
+.guide-callout-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin: 0 0 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.guide-callout-title-warn {
+  color: var(--warn-ink-strong);
+}
+
+.guide-callout-title-info {
+  color: var(--info-ink-strong);
+}
+
+.guide-header-flex-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mini-tag-info {
+  background: var(--info-border-soft);
+  color: var(--info-mark);
+  font-weight: 700;
+}
+
+.mini-tag-primary {
+  background: var(--color-bg-hover);
+  color: var(--color-sea);
+  font-weight: 700;
+}
+
 .airport-table-wrap {
   overflow-x: auto;
   margin-top: 16px;
@@ -3106,6 +3304,11 @@ input, textarea, select {
   font-weight: 700;
   color: var(--color-text-primary);
   white-space: nowrap;
+}
+
+.airport-note-warn {
+  color: var(--warn-mark);
+  font-size: 0.78rem;
 }
 
 .taxi-compare-grid {
@@ -3176,6 +3379,28 @@ input, textarea, select {
   gap: 6px;
 }
 
+.taxi-card-accent-primary {
+  border-left: 4px solid var(--color-primary);
+}
+
+.taxi-card-accent-success {
+  border-left: 4px solid var(--success-mark);
+}
+
+.taxi-card-accent-neutral {
+  border-left: 4px solid var(--neutral-mark);
+}
+
+.taxi-card-tag-primary {
+  background: var(--color-primary-light);
+  color: var(--color-primary-ink);
+}
+
+.taxi-card-tag-success {
+  background: var(--success-border);
+  color: var(--success-mark);
+}
+
 .scam-checklist-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -3238,12 +3463,74 @@ input, textarea, select {
   gap: 10px;
 }
 
+.intercity-bus-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.intercity-bus-destination {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.intercity-bus-route-feature {
+  font-size: 0.83rem;
+  color: var(--color-text-secondary);
+  margin: 6px 0;
+}
+
+.intercity-bus-operators-box {
+  background: white;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  margin: 8px 0;
+}
+
+.intercity-bus-operators-label {
+  font-size: 0.8rem;
+  color: var(--color-sea);
+}
+
+.intercity-bus-operators-list {
+  margin: 4px 0 0 0;
+  padding-left: 16px;
+  font-size: 0.8rem;
+}
+
+.intercity-bus-tip {
+  font-size: 0.8rem;
+  color: var(--success-ink);
+  background: var(--success-surface);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+}
+
 .motorbike-guide-box {
   background: var(--success-surface);
   border: 1px solid var(--success-border);
   border-radius: var(--radius-md);
   padding: 18px;
   margin-top: 16px;
+}
+
+.motorbike-guide-title {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--success-ink);
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.motorbike-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  font-size: 0.83rem;
+  color: var(--color-text-primary);
 }
 
 .souvenirs-matrix-wrap {
@@ -3284,6 +3571,17 @@ input, textarea, select {
   margin-top: 2px;
 }
 
+.souv-index-cell {
+  font-weight: 700;
+  color: var(--neutral-mark);
+}
+
+.souv-description {
+  font-size: 0.75rem;
+  color: var(--neutral-mark);
+  margin-top: 2px;
+}
+
 .souv-price-mart {
   font-weight: 700;
   color: var(--info-mark);
@@ -3294,6 +3592,11 @@ input, textarea, select {
   font-weight: 700;
   color: var(--warn-mark);
   white-space: nowrap;
+}
+
+.souv-price-krw {
+  font-size: 0.75rem;
+  color: var(--neutral-mark);
 }
 
 .souv-discount-badge {
@@ -3324,6 +3627,13 @@ input, textarea, select {
   color: var(--danger-ink);
 }
 
+.souv-tip-cell {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--color-text-primary);
+  max-width: 260px;
+}
+
 .bargaining-guide-box {
   background: var(--warn-surface-soft);
   border: 1px solid var(--warn-border);
@@ -3332,12 +3642,72 @@ input, textarea, select {
   margin-top: 18px;
 }
 
+.bargaining-tips-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.85rem;
+  color: var(--warn-ink-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .customs-guide-box {
   background: var(--info-surface);
   border: 1px solid var(--info-border-soft);
   border-radius: var(--radius-md);
   padding: 18px;
   margin-top: 18px;
+}
+
+.customs-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  font-size: 0.83rem;
+}
+
+.customs-info-card {
+  background: white;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+}
+
+.customs-info-card-info {
+  border: 1px solid var(--info-border);
+}
+
+.customs-info-card-danger {
+  border: 1px solid var(--danger-border);
+}
+
+.customs-info-card-success {
+  border: 1px solid var(--success-border);
+}
+
+.customs-info-label-info {
+  color: var(--info-ink);
+}
+
+.customs-info-label-danger {
+  color: var(--danger-mark);
+}
+
+.customs-info-label-success {
+  color: var(--success-mark);
+}
+
+.customs-info-list {
+  margin: 4px 0 0 0;
+  padding-left: 16px;
+}
+
+.customs-info-list-danger {
+  color: var(--danger-ink);
+}
+
+.customs-info-list-success {
+  color: var(--success-ink);
 }
 
 .meds-grid {
@@ -3394,6 +3764,12 @@ input, textarea, select {
   font-weight: 700;
 }
 
+.med-symptom-line {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--info-mark);
+}
+
 .med-dosage {
   font-size: 0.83rem;
   color: var(--color-text-primary);
@@ -3438,6 +3814,12 @@ input, textarea, select {
   margin: 0;
 }
 
+.hospital-address {
+  font-size: 0.82rem;
+  color: var(--neutral-ink);
+  margin: 4px 0 0 0;
+}
+
 .hospital-hotline-box {
   display: flex;
   gap: 10px;
@@ -3463,12 +3845,41 @@ input, textarea, select {
   background: var(--danger-ink);
 }
 
+.hospital-hotline-btn-emergency {
+  background: var(--danger-ink);
+}
+
+.hospital-directions-link {
+  font-size: 0.82rem;
+  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hospital-features-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.82rem;
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .insurance-guide-box {
   background: var(--violet-surface);
   border: 1px solid var(--violet-surface);
   border-radius: var(--radius-md);
   padding: 20px;
   margin-top: 18px;
+}
+
+.insurance-guide-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--violet-ink);
+  margin: 0 0 14px 0;
 }
 
 .insurance-step-item {
