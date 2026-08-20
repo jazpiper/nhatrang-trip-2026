@@ -19,19 +19,13 @@
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
-
-// Terminal ANSI styling
-const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  dim: '\x1b[2m',
-  green: '\x1b[32m',
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  cyan: '\x1b[36m',
-  magenta: '\x1b[35m'
-};
+// NOTE: this file's TestRunner is intentionally NOT extracted into
+// test-harness.js — it accumulates errors as `{ suite, description, error }`
+// (not `{ description, message, stack }`), renders a differently-shaped
+// summary block, and always calls process.exit() with no boolean return.
+// That's a real difference in aggregation/reporting, not just wording, so
+// only the shared `colors` table is reused here; the class stays local.
+const { colors } = require('./test-harness.js');
 
 class TestRunner {
   constructor() {

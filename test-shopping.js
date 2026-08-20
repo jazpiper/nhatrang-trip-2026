@@ -23,74 +23,15 @@
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
+const { TestRunner, colors } = require('./test-harness.js');
 
-// Terminal ANSI styling
-const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  dim: '\x1b[2m',
-  green: '\x1b[32m',
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  cyan: '\x1b[36m',
-  magenta: '\x1b[35m'
-};
-
-class TestRunner {
-  constructor() {
-    this.totalSuites = 0;
-    this.totalTests = 0;
-    this.passedTests = 0;
-    this.failedTests = 0;
-    this.errors = [];
-    this.startTime = Date.now();
-  }
-
-  suite(name) {
-    this.totalSuites++;
-    console.log(`\n${colors.bright}${colors.cyan}=== Suite ${this.totalSuites}: ${name} ===${colors.reset}`);
-  }
-
-  test(description, fn) {
-    this.totalTests++;
-    try {
-      fn();
-      this.passedTests++;
-      console.log(`  ${colors.green}✔ PASS:${colors.reset} ${description}`);
-    } catch (err) {
-      this.failedTests++;
-      console.log(`  ${colors.red}✖ FAIL:${colors.reset} ${description}`);
-      console.log(`    ${colors.yellow}Error: ${err.message}${colors.reset}`);
-      this.errors.push({ description, message: err.message, stack: err.stack });
-    }
-  }
-
-  summary() {
-    const duration = ((Date.now() - this.startTime) / 1000).toFixed(3);
-    console.log(`\n${colors.bright}====================================================${colors.reset}`);
-    console.log(`${colors.bright}Shopping Test Execution Summary (${duration}s)${colors.reset}`);
-    console.log(`====================================================`);
-    console.log(`Suites Run:    ${this.totalSuites}`);
-    console.log(`Total Tests:   ${this.totalTests}`);
-    console.log(`Passed Tests:  ${colors.green}${this.passedTests}${colors.reset}`);
-    console.log(`Failed Tests:  ${this.failedTests > 0 ? colors.red : colors.green}${this.failedTests}${colors.reset}`);
-
-    if (this.failedTests > 0) {
-      console.log(`\n${colors.red}${colors.bright}Failures & Discrepancies Detected:${colors.reset}`);
-      this.errors.forEach((err, idx) => {
-        console.log(`\n  ${idx + 1}) ${colors.red}${err.description}${colors.reset}`);
-        console.log(`     ${err.message}`);
-      });
-      console.log(`\n${colors.red}❌ Test Suite Failed.${colors.reset}\n`);
-      process.exit(1);
-    } else {
-      console.log(`\n${colors.green}${colors.bright}✨ All ${this.totalSuites} Shopping Test Suites Passed Successfully! Ground-Truth 18 Verified.${colors.reset}\n`);
-    }
-  }
-}
-
-const runner = new TestRunner();
+const runner = new TestRunner({
+  summaryTitle: 'Shopping Test Execution Summary',
+  failureHeader: 'Failures & Discrepancies Detected:',
+  failureFooter: 'Test Suite Failed.',
+  successMessage: (totalSuites) => `✨ All ${totalSuites} Shopping Test Suites Passed Successfully! Ground-Truth 18 Verified.`,
+  exitOnFailure: true
+});
 
 // ==========================================
 // 1. File Loading & Module Export Verification

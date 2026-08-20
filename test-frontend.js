@@ -241,13 +241,14 @@ try {
 
 console.log('\n=== Suite 4: CSS Selectors in style.css ===');
 const css = fs.readFileSync('style.css', 'utf8');
+// 이 목록은 "선택자 문자열이 style.css에 존재하는가"만 보므로 실제 사용과 분리돼
+// 낡는다. 실제 불변식(js/app.js가 뱉는 클래스 == style.css 선언)은 Suite 4b가,
+// 역방향(선언만 있고 아무도 안 쓰는 죽은 CSS)은 Suite 11이 검사한다.
 const requiredSelectors = [
   '.stay-card',
   '.stay-badge-theme',
   '.stay-badge-cat',
-  '.stay-card-actions',
   '.btn-trip-dot-com',
-  '.btn-stay-map',
   '.stay-gallery-container',
   '.gallery-main-img-wrap',
   '.gallery-thumbs-row',
@@ -258,9 +259,6 @@ const requiredSelectors = [
   '.shopping-card',
   '.shopping-badge-tier',
   '.shopping-badge-ac',
-  '.shopping-card-actions',
-  '.btn-shopping-map',
-  '.btn-shopping-photos',
   '.bargain-table-wrap',
   '.bargain-table',
   '.price-asking',
@@ -645,5 +643,158 @@ if (!/const getRate = \(\) => currentBenchmarkRate \/ 100/.test(appCode)) {
   process.exit(1);
 }
 console.log(`  ✔ Single exchange-rate source: DEFAULT_EXCHANGE_RATE = ${rateMatch[1]}`);
+
+console.log('\n=== Suite 10: Dataset Count Synchronization (index.html + js/app.js) ===');
+// index.html and js/app.js both hard-code dataset sizes in several places.
+// Every expected value here is derived from the dataset's own .length, never
+// a literal, so a data addition/removal that isn't propagated everywhere
+// actually fails this suite instead of silently drifting.
+const { NHA_TRANG_ACTIVITIES } = require('./data.js');
+const { NHA_TRANG_GOURMETS } = require('./gourmet-data.js');
+
+const domainCounts = {
+  activities: NHA_TRANG_ACTIVITIES.length,
+  gourmet: NHA_TRANG_GOURMETS.length,
+  stays: NHA_TRANG_STAYS.length,
+  spa: NHA_TRANG_SPAS.length,
+  shopping: NHA_TRANG_SHOPPING.length,
+  currency: NHA_TRANG_CURRENCY.length
+};
+
+let countSyncFailed = false;
+
+// --- 10a. Header tab-badge counts ---
+// Each nav-tab-btn carries the domain in data-tab, followed by one
+// <span class="tab-badge">N</span>. The guide tab's badge reads "4대 가이드"
+// (not a count of guide-data.js entries), so it is excluded here by design.
+for (const domain of Object.keys(domainCounts)) {
+  const re = new RegExp(`data-tab="${domain}"[\\s\\S]*?<span class="tab-badge"[^>]*>([^<]+)<\\/span>`);
+  const m = html.match(re);
+  const expected = String(domainCounts[domain]);
+  if (!m) {
+    console.error(`  ❌ Tab badge not found for domain '${domain}' (data-tab="${domain}")`);
+    countSyncFailed = true;
+  } else if (m[1] !== expected) {
+    console.error(`  ❌ Tab badge for '${domain}' reads '${m[1]}', expected '${expected}' (dataset length)`);
+    countSyncFailed = true;
+  } else {
+    console.log(`  ✔ Tab badge '${domain}': ${m[1]} matches dataset length`);
+  }
+}
+
+// --- 10b. Category nav "전체 ... (N곳/개)" subtotal ---
+const categoryNavIds = {
+  activities: 'activityCategoryNav',
+  gourmet: 'gourmetCategoryNav',
+  stays: 'stayCategoryNav',
+  spa: 'spaCategoryNav',
+  shopping: 'shoppingCategoryNav',
+  currency: 'currencyCategoryNav'
+};
+
+for (const [domain, navId] of Object.entries(categoryNavIds)) {
+  const navStart = html.indexOf(`id="${navId}"`);
+  const navEnd = navStart === -1 ? -1 : html.indexOf('</nav>', navStart);
+  const expected = domainCounts[domain];
+  if (navStart === -1 || navEnd === -1) {
+    console.error(`  ❌ Category nav not found: ${navId}`);
+    countSyncFailed = true;
+    continue;
+  }
+  const navBlock = html.slice(navStart, navEnd);
+  const m = navBlock.match(/\((\d+)(?:곳|개)\)/);
+  if (!m) {
+    console.error(`  ❌ '${navId}' has no "(N곳/개)" subtotal on its first category button`);
+    countSyncFailed = true;
+  } else if (parseInt(m[1], 10) !== expected) {
+    console.error(`  ❌ '${navId}' subtotal reads '(${m[1]})', expected '(${expected})'`);
+    countSyncFailed = true;
+  } else {
+    console.log(`  ✔ '${navId}' subtotal: (${m[1]}) matches dataset length`);
+  }
+}
+
+// --- 10c. js/app.js DOMAINS heroPills phrasing ---
+// Phrasing differs per domain, so each domain gets its own regex tuned to its
+// exact wording. Domains whose heroPills text doesn't embed a total dataset
+// count (shopping, currency — their pills only mention subset counts like
+// "ATM 8곳") are skipped: there is nothing meaningful to compare.
+const heroPillPatterns = {
+  activities: /엄선된 (\d+)개 리얼 액티비티/,
+  gourmet: /현지인 & 스페셜티 (\d+)곳/,
+  stays: /엄선 (\d+)선/,
+  spa: /엄선된 (\d+)선 힐링 스파/
+};
+
+function extractDomainBlock(src, key) {
+  const marker = `key: '${key}'`;
+  const start = src.indexOf(marker);
+  if (start === -1) return null;
+  const nextStart = src.indexOf(`key: '`, start + marker.length);
+  return src.slice(start, nextStart === -1 ? src.length : nextStart);
+}
+
+for (const [domain, pattern] of Object.entries(heroPillPatterns)) {
+  const block = extractDomainBlock(appCode, domain);
+  const expected = domainCounts[domain];
+  if (!block) {
+    console.error(`  ❌ DOMAINS entry not found for key '${domain}' in js/app.js`);
+    countSyncFailed = true;
+    continue;
+  }
+  const m = block.match(pattern);
+  if (!m) {
+    console.error(`  ❌ heroPills for '${domain}' does not match its expected phrasing`);
+    countSyncFailed = true;
+  } else if (parseInt(m[1], 10) !== expected) {
+    console.error(`  ❌ heroPills for '${domain}' embeds count '${m[1]}', expected '${expected}'`);
+    countSyncFailed = true;
+  } else {
+    console.log(`  ✔ heroPills for '${domain}': embedded count ${m[1]} matches dataset length`);
+  }
+}
+
+if (countSyncFailed) {
+  console.error('Total count synchronization failures detected above.');
+  process.exit(1);
+}
+
+
+// ===========================================================================
+// Suite 11: Dead CSS — style.css에 선언만 있고 아무도 쓰지 않는 클래스
+// ---------------------------------------------------------------------------
+// Suite 4b가 검사하는 방향(js/app.js가 뱉는 클래스 -> style.css 선언)의 역방향이다.
+// 이 검사가 없던 동안 25개가 쌓였다 (삭제된 Day N 기능의 .card-badge-day 등).
+// 예외 목록을 늘려 통과시키지 말 것 — 안 쓰는 선언은 지우는 것이 정답이다.
+// ===========================================================================
+console.log('\n=== Suite 11: Dead CSS (style.css 선언 vs 실제 사용) ===');
+
+const cssForDead = fs.readFileSync('style.css', 'utf8');
+const srcForDead = fs.readFileSync('index.html', 'utf8') + fs.readFileSync('js/app.js', 'utf8');
+
+// 룰 프렐류드(`{` 앞)에서만 클래스를 걷는다. 주석 안의 URL(`www.w3.org` 등)이
+// `.org` 같은 가짜 클래스로 잡히지 않게 하려는 것이다.
+const cssNoComments = cssForDead.replace(/\/\*[\s\S]*?\*\//g, '');
+const declaredClasses = new Set();
+for (const m of cssNoComments.matchAll(/(^|\}|\{)([^{}]+)\{/g)) {
+  const prelude = m[2];
+  if (prelude.trim().startsWith('@')) continue;
+  for (const cm of prelude.matchAll(/\.([A-Za-z_][A-Za-z0-9_-]*)/g)) declaredClasses.add(cm[1]);
+}
+
+// 사용 판정: class 속성 / classList / 셀렉터 문자열 / 템플릿 리터럴 어디든
+// 클래스명이 토큰 경계와 함께 등장하면 살아 있는 것으로 본다.
+const deadClasses = [...declaredClasses].filter(cls => {
+  const esc = cls.replace(/[-]/g, '\\-');
+  return !new RegExp(`[\'"\`\\s>.]${esc}[\'"\`\\s.:,\\$]`).test(srcForDead);
+}).sort();
+
+if (deadClasses.length > 0) {
+  console.error(`  ❌ ${deadClasses.length} dead class(es) declared in style.css but never used:`);
+  deadClasses.forEach(c => console.error(`     .${c}`));
+  console.error('  → 사용처를 만들거나 선언을 지워라. 예외 목록을 만들지 말 것.');
+  process.exit(1);
+}
+console.log(`  ✔ ${declaredClasses.size} declared classes, 0 unused`);
 
 console.log('\n✨ All Frontend Integration Suites Passed Perfectly! ✨');
