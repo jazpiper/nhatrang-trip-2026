@@ -151,6 +151,14 @@
     // Currency Filter State
     currencyCategory: 'all',
     currencyTag: 'all',
+
+    // Spa Filter State
+    spaCategory: 'all',
+    spaTag: 'all',
+
+    // Guide Hub Filter State
+    guideCategory: 'all',
+    guideTag: 'all',
     
     // Global Toolbar State
     searchQuery: '',
@@ -164,11 +172,13 @@
     wishlist: loadFromStorage('nha_trang_wishlist', []),
     gourmetWishlist: loadFromStorage('nha_trang_gourmet_wishlist', []),
     stayWishlist: loadFromStorage('nha_trang_stay_wishlist', []),
+    spaWishlist: loadFromStorage('nha_trang_spa_wishlist', []),
     shoppingWishlist: loadFromStorage('nha_trang_shopping_wishlist', []),
     currencyWishlist: loadFromStorage('nha_trang_currency_wishlist', []),
     notes: loadFromStorage('nha_trang_notes', {}),
     gourmetNotes: loadFromStorage('nha_trang_gourmet_notes', {}),
     stayNotes: loadFromStorage('nha_trang_stay_notes', {}),
+    spaNotes: loadFromStorage('nha_trang_spa_notes', {}),
     shoppingNotes: loadFromStorage('nha_trang_shopping_notes', {}),
     currencyNotes: loadFromStorage('nha_trang_currency_notes', {}),
     
@@ -176,14 +186,17 @@
     activeModalActivity: null,
     activeModalGourmet: null,
     activeModalStay: null,
+    activeModalSpa: null,
     activeModalShopping: null,
-    activeModalCurrency: null
+    activeModalCurrency: null,
+    activeModalFlashcard: null
   };
 
   function updateWishlistBadge() {
     const total = (state.wishlist ? state.wishlist.length : 0) +
                   (state.gourmetWishlist ? state.gourmetWishlist.length : 0) +
                   (state.stayWishlist ? state.stayWishlist.length : 0) +
+                  (state.spaWishlist ? state.spaWishlist.length : 0) +
                   (state.shoppingWishlist ? state.shoppingWishlist.length : 0) +
                   (state.currencyWishlist ? state.currencyWishlist.length : 0);
     const wishlistCount = document.getElementById('wishlistCount');
@@ -200,10 +213,14 @@
     state.gourmetTag = 'all';
     state.stayCategory = 'all';
     state.stayTag = 'all';
+    state.spaCategory = 'all';
+    state.spaTag = 'all';
     state.shoppingCategory = 'all';
     state.shoppingTag = 'all';
     state.currencyCategory = 'all';
     state.currencyTag = 'all';
+    state.guideCategory = 'all';
+    state.guideTag = 'all';
     state.searchQuery = '';
     state.sortBy = 'recommended';
     state.wishlistOnly = false;
@@ -2184,8 +2201,904 @@
     }
   }
 
+  // --- 8.4 Spa & Massage Domain ---
+  const SPA_SEARCH_SPEC = {
+    strings: ['name', 'nameKo', 'nameVi', 'nameEn', 'location', 'districtLabel', 'addressVi', 'highlight', 'description', 'localTip', 'pickupDropoff', 'tipPolicy'],
+    arrays: ['tags', 'facilities', 'features'],
+    extra: (item, q) => (item.courses || []).some(c => textIncludes(c.name, q) || textIncludes(c.description, q))
+  };
+
+  function spaCategoryMatch(item, cat) {
+    if (cat === 'all') return true;
+    return item.category === cat;
+  }
+
+  function spaTagMatch(item, tag) {
+    if (tag === 'all') return true;
+    const allText = [
+      ...(item.tags || []),
+      ...(item.facilities || []),
+      item.pickupDropoff || '',
+      item.tipPolicy || '',
+      item.luggageShower?.details || '',
+      item.highlight || '',
+      item.openHours || '',
+      item.description || ''
+    ].join(' ').toLowerCase();
+
+    if (tag === 'pickup') {
+      return (item.pickupDropoff && (item.pickupDropoff.includes('무료') || item.pickupDropoff.includes('셔틀') || item.pickupDropoff.includes('지원'))) ||
+             allText.includes('픽업') || allText.includes('셔틀');
+    }
+    if (tag === 'shower') {
+      return (item.luggageShower && (item.luggageShower.shower || item.luggageShower.luggage)) ||
+             allText.includes('샤워') || allText.includes('짐보관');
+    }
+    if (tag === 'tip_included') {
+      return (item.tipPolicy && item.tipPolicy.includes('포함') && !item.tipPolicy.includes('별도')) ||
+             (item.tags || []).some(t => t.includes('팁포함'));
+    }
+    if (tag === 'hot_stone') {
+      return allText.includes('핫스톤') || allText.includes('아로마') || allText.includes('대나무') || allText.includes('허브');
+    }
+    if (tag === 'mud_bath') {
+      return allText.includes('머드') || allText.includes('온천') || (item.category === 'family_maternity' && item.name.includes('머드'));
+    }
+    if (tag === 'couple_room') {
+      return allText.includes('커플') || allText.includes('프라이빗') || allText.includes('vip') || allText.includes('개별');
+    }
+    if (tag === 'late_night') {
+      return allText.includes('심야') || allText.includes('0.5박') ||
+             (item.openHours && (item.openHours.includes('22:') || item.openHours.includes('23:') || item.openHours.includes('24:')));
+    }
+    return false;
+  }
+
+  function spaCompare(a, b) {
+    if (state.sortBy === 'rating') {
+      return (b.rating || 0) - (a.rating || 0) || (b.reviewCount || 0) - (a.reviewCount || 0);
+    }
+    if (state.sortBy === 'price-asc') {
+      return (a.avgPriceVnd || a.price90minVnd || a.price60minVnd || 0) - (b.avgPriceVnd || b.price90minVnd || b.price60minVnd || 0);
+    }
+    if (state.sortBy === 'price-desc') {
+      return (b.avgPriceVnd || b.price90minVnd || b.price60minVnd || 0) - (a.avgPriceVnd || a.price90minVnd || a.price60minVnd || 0);
+    }
+    return 0;
+  }
+
+  function getFilteredSpas() {
+    return applyDomainFilter({
+      source: typeof NHA_TRANG_SPAS !== 'undefined' ? NHA_TRANG_SPAS : [],
+      catField: 'spaCategory',
+      tagField: 'spaTag',
+      wishField: 'spaWishlist',
+      categoryMatch: spaCategoryMatch,
+      tagMatch: spaTagMatch,
+      searchMatch: (item, q) => matchTextFields(item, q, SPA_SEARCH_SPEC),
+      compare: spaCompare
+    });
+  }
+
+  const getFilteredSpa = getFilteredSpas;
+
+  function spaCardTemplate(item) {
+    const isWishlisted = (state.spaWishlist || []).includes(item.id);
+    const userNote = (state.spaNotes || {})[item.id];
+    const isTipIncluded = item.tipPolicy && item.tipPolicy.includes('포함') && !item.tipPolicy.includes('별도');
+    const tipBadgeClass = isTipIncluded ? 'spa-badge-service tip-included' : 'spa-badge-service';
+    const tipBadgeText = isTipIncluded ? '팁 포함' : '팁 별도';
+
+    const tagsHtml = (item.tags || []).slice(0, 3).map(tag =>
+      `<span class="card-tag-pill">${escapeHtml(tag)}</span>`
+    ).join('');
+
+    return `
+      <div class="spa-card" data-id="${item.id}" tabindex="0" role="button" aria-label="${escapeHtml(item.nameKo || item.name)}">
+        <div class="card-media-wrapper">
+          <img class="card-img" src="${escapeHtml(item.coverImage || (item.images && item.images[0]) || '')}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" />
+          <button class="card-heart-btn ${isWishlisted ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 토글" aria-label="위시리스트">
+            ${isWishlisted ? '♥' : '♡'}
+          </button>
+          <span class="card-badge-top-left">${escapeHtml(item.badge || '추천 스파')}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-category-row">
+            <span class="card-cat-pill">${escapeHtml(item.categoryLabel || '스파')}</span>
+            <span class="${tipBadgeClass}">${tipBadgeText}</span>
+          </div>
+          <h3 class="card-title">${escapeHtml(item.nameKo || item.name)}</h3>
+          <p class="card-name-vi">🇻🇳 ${escapeHtml(item.nameVi || '')}</p>
+          <div class="card-meta-line">
+            <span class="rating">★ ${item.rating || '-'}</span>
+            <span class="reviews">(${(item.reviewCount || 0).toLocaleString()})</span>
+            <span class="dot">·</span>
+            <span class="hours">⏰ ${escapeHtml(item.openHours || '영업시간 미확인')}</span>
+          </div>
+          <p class="card-location-line">📍 ${escapeHtml(item.location || '나트랑')}</p>
+
+          <div class="card-tag-pill-list">
+            ${tagsHtml}
+          </div>
+
+          <p class="card-highlight-text">✨ ${escapeHtml(item.highlight || '')}</p>
+
+          <div class="card-price-line">
+            <span class="price-main">${item.avgPriceVnd ? formatVND(item.avgPriceVnd) : (item.priceRangeVnd || '')}</span>
+            <span class="price-krw">(${item.avgPriceVnd ? formatKRW(item.avgPriceVnd) : ''})</span>
+            <span class="price-sub">${escapeHtml(item.pricePer || '/ 90분 기준')}</span>
+          </div>
+          ${userNote ? `
+            <div class="card-note-badge">
+              <span>📝</span>
+              <span>${escapeHtml(userNote)}</span>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  function spaRowTemplate(item, idx) {
+    const isTipIncluded = item.tipPolicy && item.tipPolicy.includes('포함') && !item.tipPolicy.includes('별도');
+    return itemRowHTML({
+      id: item.id,
+      rank: idx + 1,
+      imgUrl: item.coverImage || (item.images && item.images[0]) || '',
+      emoji: '💆',
+      name: item.nameKo || item.name,
+      tags: [
+        { label: isTipIncluded ? '팁 포함' : '팁 별도', hot: isTipIncluded },
+        item.categoryLabel ? { label: item.categoryLabel } : null
+      ].filter(Boolean),
+      rating: item.rating,
+      reviewCount: item.reviewCount,
+      openState: isOpenNow(item.openHours),
+      metaParts: [item.openHours, item.districtLabel || item.location],
+      sigLabel: item.highlight ? `✨ ${item.highlight}` : '',
+      subText: item.nameVi,
+      priceMain: item.avgPriceVnd ? `${(item.avgPriceVnd / 10000).toLocaleString()}만 동` : (item.priceRangeVnd || '시세 확인'),
+      priceKrw: item.avgPriceVnd ? `약 ${Math.round(item.avgPriceVnd * currentBenchmarkRate / 100).toLocaleString()}원` : '',
+      priceUnit: item.pricePer || '/ 90분 기준',
+      isWish: (state.spaWishlist || []).includes(item.id),
+      note: (state.spaNotes || {})[item.id],
+      mapUrl: buildMapUrl(item)
+    });
+  }
+
+  function renderSpa() {
+    renderDomainGrid({
+      gridContainerId: 'spaCardsGridContainer',
+      countTextId: 'spaResultCountText',
+      getFiltered: getFilteredSpas,
+      countHtml: (n) => `총 <strong>${n}</strong>개의 힐링 스파 & 마사지`,
+      emptyHtml: () => `
+        <div class="empty-state">
+          <div class="icon">💆</div>
+          <h3>조건에 맞는 스파나 마사지 샵이 없습니다</h3>
+          <p>선택하신 카테고리 또는 태그를 변경하거나 검색어를 초기화해보세요.</p>
+          <button class="btn-reset-filters" id="btnResetSpaFilters">필터 전체 초기화</button>
+        </div>
+      `,
+      resetBtnId: 'btnResetSpaFilters',
+      cardTemplate: spaCardTemplate,
+      rowTemplate: spaRowTemplate,
+      cardSelector: '.spa-card',
+      ignoreSelectors: ['.card-heart-btn', '.btn-spa-map', '.btn-spa-photos'],
+      findItem: (id) => (typeof NHA_TRANG_SPAS !== 'undefined' ? NHA_TRANG_SPAS : []).find(s => s.id === id),
+      openModal: openSpaModal,
+      toggleWishlist: toggleSpaWishlist,
+      rerender: renderSpa
+    });
+  }
+
+  function toggleSpaWishlist(id) {
+    if (!state.spaWishlist) state.spaWishlist = [];
+    const idx = state.spaWishlist.indexOf(id);
+    if (idx > -1) {
+      state.spaWishlist.splice(idx, 1);
+      showToast('🤍 스파 위시리스트에서 제외되었습니다.');
+    } else {
+      state.spaWishlist.push(id);
+      showToast('❤️ 스파 위시리스트에 담겼습니다!');
+    }
+    saveToStorage('nha_trang_spa_wishlist', state.spaWishlist);
+    updateWishlistBadge();
+  }
+
+  const SPA_MODAL_FIELDS = [
+    { id: 'spaModalBadge', value: item => item.badge || item.categoryLabel || '추천 스파' },
+    { id: 'spaModalCategory', value: 'categoryLabel' },
+    { id: 'spaModalTitle', value: item => item.nameKo || item.name },
+    { id: 'spaModalNameVi', value: item => `🇻🇳 ${item.nameVi || ''}` },
+    { id: 'spaModalRating', value: item => `★ ${item.rating || '-'} (${(item.reviewCount || 0).toLocaleString()}개 리뷰)` },
+    { id: 'spaModalHours', value: item => item.openHours || '영업시간 문의' },
+    { id: 'spaModalPriceRange', value: item => item.priceRangeVnd || item.priceRange || '' },
+    { id: 'spaModalLocation', value: item => item.location || '나트랑' },
+    { id: 'spaModalAddress', value: 'addressVi' },
+    { id: 'spaModalPickup', value: item => item.pickupDropoff || '픽업/샌딩 문의' },
+    { id: 'spaModalTipPolicy', value: item => item.tipPolicy || '팁 정책 확인' },
+    { id: 'spaModalLuggage', value: item => item.luggageShower?.details || '짐보관/샤워 시설 문의' },
+    { id: 'spaModalDesc', value: item => item.description || '' },
+    { id: 'spaModalTip', value: item => item.localTip || '' },
+    { id: 'spaModalAvgPrice', value: item => item.avgPriceVnd ? formatVND(item.avgPriceVnd) : '' },
+    { id: 'spaModalAvgKrw', value: item => item.avgPriceVnd ? `(${formatKRW(item.avgPriceVnd)})` : '' },
+    { id: 'spaModalPricePer', value: item => item.pricePer || '/ 90분 기준' },
+    { id: 'spaModalPhotosBtn', as: 'href', value: item => item.googlePhotosUrl || item.googleMapUrl },
+    { id: 'spaModalMapBtn', as: 'href', value: 'googleMapUrl' },
+  ];
+
+  function openSpaModal(item) {
+    const modal = document.getElementById('spaModal');
+    if (!modal || !item) return;
+
+    state.activeModalSpa = item;
+
+    const mainImgEl = document.getElementById('spaModalMainImg');
+    const thumbsRow = document.getElementById('spaModalThumbs');
+    const images = (item.images && item.images.length > 0) ? item.images : [item.coverImage].filter(Boolean);
+
+    if (mainImgEl) {
+      mainImgEl.src = images[0] || item.coverImage || '';
+      mainImgEl.alt = item.nameKo || item.name || '스파 사진';
+    }
+
+    if (thumbsRow) {
+      thumbsRow.innerHTML = images.map((img, idx) => `
+        <div class="gallery-thumb ${idx === 0 ? 'active' : ''}" data-idx="${idx}">
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(item.nameKo || item.name)} 사진 ${idx + 1}" loading="lazy" />
+        </div>
+      `).join('');
+
+      thumbsRow.querySelectorAll('.gallery-thumb').forEach(th => {
+        th.addEventListener('click', () => {
+          const idx = parseInt(th.dataset.idx, 10);
+          if (mainImgEl) mainImgEl.src = images[idx];
+          thumbsRow.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+          th.classList.add('active');
+        });
+      });
+    }
+
+    applyModalFields(item, SPA_MODAL_FIELDS);
+
+    const tipBadge = document.getElementById('spaModalTipBadge');
+    if (tipBadge) {
+      const isTipInc = item.tipPolicy && item.tipPolicy.includes('포함') && !item.tipPolicy.includes('별도');
+      tipBadge.textContent = isTipInc ? '팁 포함' : '팁 별도';
+      tipBadge.style.background = isTipInc ? '#DFF4F4' : '#FEF3C7';
+      tipBadge.style.color = isTipInc ? '#0B7F87' : '#92400E';
+    }
+
+    const pickupBadge = document.getElementById('spaModalPickupBadge');
+    if (pickupBadge) {
+      const hasPickup = item.pickupDropoff && (item.pickupDropoff.includes('무료') || item.pickupDropoff.includes('셔틀') || item.pickupDropoff.includes('지원'));
+      pickupBadge.textContent = hasPickup ? '픽드랍 지원' : '픽드랍 별도';
+      pickupBadge.style.background = hasPickup ? '#DFF4F4' : '#F5FBFA';
+      pickupBadge.style.color = hasPickup ? '#0B7F87' : '#557C7E';
+    }
+
+    const tbody = document.getElementById('spaModalCourseTableBody');
+    if (tbody) {
+      const courses = item.courses || [];
+      tbody.innerHTML = courses.map(c => `
+        <tr>
+          <td class="course-name">
+            <strong>${escapeHtml(c.name || '')}</strong>
+            ${c.description ? `<p class="course-desc">${escapeHtml(c.description)}</p>` : ''}
+          </td>
+          <td class="course-time">${c.durationMin || '-'}분</td>
+          <td class="course-vnd">${(c.priceVnd || 0).toLocaleString()} VND</td>
+          <td class="course-krw">약 ${(c.priceKrw || Math.round((c.priceVnd || 0) * currentBenchmarkRate / 100)).toLocaleString()}원</td>
+        </tr>
+      `).join('');
+    }
+
+    const amenEl = document.getElementById('spaModalAmenities');
+    if (amenEl) {
+      const list = item.amenities || item.facilities || [];
+      amenEl.innerHTML = list.map(a => `<span class="spa-amenity-pill">✨ ${escapeHtml(a)}</span>`).join('');
+    }
+
+    // Heart Button
+    const heartBtn = document.getElementById('spaModalHeartBtn');
+    if (heartBtn) {
+      const isWish = (state.spaWishlist || []).includes(item.id);
+      heartBtn.textContent = isWish ? '♥ 찜 취소' : '♡ 찜하기';
+      heartBtn.classList.toggle('active', isWish);
+      heartBtn.onclick = () => {
+        toggleSpaWishlist(item.id);
+        const updatedWish = (state.spaWishlist || []).includes(item.id);
+        heartBtn.textContent = updatedWish ? '♥ 찜 취소' : '♡ 찜하기';
+        heartBtn.classList.toggle('active', updatedWish);
+        renderSpa();
+      };
+    }
+
+    // Notes
+    const noteInput = document.getElementById('spaNoteInput');
+    const noteStatus = document.getElementById('spaNoteStatus');
+    if (noteInput) {
+      noteInput.value = (state.spaNotes || {})[item.id] || '';
+      if (noteStatus) noteStatus.textContent = '';
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSpaModal() {
+    const modal = document.getElementById('spaModal');
+    if (modal) modal.classList.remove('active');
+    document.body.style.overflow = '';
+    state.activeModalSpa = null;
+  }
+
+  // --- 8.4 Guide Hub & Survival Kit Domain Logic ---
+  function getFilteredFlashcards() {
+    if (typeof NHA_TRANG_GUIDE_HUB === 'undefined' || !NHA_TRANG_GUIDE_HUB.flashcards) return [];
+    let list = [...NHA_TRANG_GUIDE_HUB.flashcards];
+
+    const cat = state.guideCategory;
+    const tag = state.guideTag;
+    const targetCat = (cat !== 'all') ? cat : (tag !== 'all' ? tag : null);
+
+    if (targetCat && targetCat !== 'all' && targetCat !== 'flashcards') {
+      list = list.filter(fc => fc.category === targetCat);
+    }
+
+    const q = (state.searchQuery || '').trim().toLowerCase();
+    if (q) {
+      const tokens = q.split(/\s+/).filter(Boolean);
+      list = list.filter(fc => {
+        const text = `${fc.ko} ${fc.vi} ${fc.pronunciation} ${fc.purpose} ${fc.categoryLabel || ''} ${fc.category}`.toLowerCase();
+        return tokens.every(t => text.includes(t));
+      });
+    }
+
+    return list;
+  }
+
+  function getFilteredSouvenirs() {
+    if (typeof NHA_TRANG_GUIDE_HUB === 'undefined' || !NHA_TRANG_GUIDE_HUB.shoppingPriceMatrix || !NHA_TRANG_GUIDE_HUB.shoppingPriceMatrix.items) return [];
+    let list = [...NHA_TRANG_GUIDE_HUB.shoppingPriceMatrix.items];
+
+    const q = (state.searchQuery || '').trim().toLowerCase();
+    if (q) {
+      const tokens = q.split(/\s+/).filter(Boolean);
+      list = list.filter(item => {
+        const text = `${item.nameKo} ${item.nameVi} ${item.category} ${item.unit} ${item.description} ${item.originalVsFakeTip}`.toLowerCase();
+        return tokens.every(t => text.includes(t));
+      });
+    }
+
+    return list;
+  }
+
+  function getFilteredPharmacyMeds() {
+    if (typeof NHA_TRANG_GUIDE_HUB === 'undefined' || !NHA_TRANG_GUIDE_HUB.emergencyPharmacy || !NHA_TRANG_GUIDE_HUB.emergencyPharmacy.pharmacyMeds) return [];
+    let list = [...NHA_TRANG_GUIDE_HUB.emergencyPharmacy.pharmacyMeds];
+
+    const q = (state.searchQuery || '').trim().toLowerCase();
+    if (q) {
+      const tokens = q.split(/\s+/).filter(Boolean);
+      list = list.filter(med => {
+        const text = `${med.brandName} ${med.activeIngredient} ${med.category} ${med.symptom} ${med.dosageKo} ${med.boxPhotoTip}`.toLowerCase();
+        return tokens.every(t => text.includes(t));
+      });
+    }
+
+    return list;
+  }
+
+  function renderGuide() {
+    const container = document.getElementById('guideCardsGridContainer');
+    if (!container) return;
+    if (typeof NHA_TRANG_GUIDE_HUB === 'undefined') {
+      container.innerHTML = '<div class="empty-state">가이드 데이터를 불러오는 중입니다...</div>';
+      return;
+    }
+
+    const { transport, shoppingPriceMatrix, emergencyPharmacy } = NHA_TRANG_GUIDE_HUB;
+    const cat = state.guideCategory;
+    const showAll = cat === 'all';
+    const showTransport = showAll || cat === 'transport';
+    const showShopping = showAll || cat === 'shopping';
+    const showEmergency = showAll || cat === 'emergency';
+    const showFlashcards = showAll || cat === 'flashcards';
+
+    const filteredSouvenirs = getFilteredSouvenirs();
+    const filteredMeds = getFilteredPharmacyMeds();
+    const filteredFlashcards = getFilteredFlashcards();
+
+    let html = '';
+
+    // 1. Transport & Grab Guide Section
+    if (showTransport) {
+      html += `
+        <section class="guide-section-block" id="transportGuidePanel">
+          <div class="guide-section-header">
+            <h2 class="guide-section-title">🚗 깜란공항 & 나트랑 시내 교통 완벽 가이드</h2>
+            <p class="guide-section-desc">공항 이동 요금표, 전기차 Xanh SM vs 그랩 vs 일반 택시 비교, 5대 사기 예방법</p>
+          </div>
+
+          <!-- Airport Matrix Table -->
+          <div class="airport-table-wrap">
+            <table class="airport-table">
+              <thead>
+                <tr>
+                  <th>이동 구간</th>
+                  <th>거리/시간</th>
+                  <th>4인승 세단</th>
+                  <th>7인승 SUV</th>
+                  <th>16인승 밴</th>
+                  <th>대중교통 / 특이사항</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${transport.airportMatrix.map(r => `
+                  <tr>
+                    <td><strong>${escapeHtml(r.routeKo)}</strong><div class="souv-name-vi">${escapeHtml(r.routeVi)}</div></td>
+                    <td>${r.distanceKm}km<br><span class="label">(${escapeHtml(r.durationMins)})</span></td>
+                    <td><strong class="souv-price-mart">${r.sedan4SeatVnd.toLocaleString()}동</strong><br><span class="label">약 ${r.sedan4SeatKrw.toLocaleString()}원</span></td>
+                    <td><strong class="souv-price-mart">${r.suv7SeatVnd.toLocaleString()}동</strong><br><span class="label">약 ${r.suv7SeatKrw.toLocaleString()}원</span></td>
+                    <td><strong>${r.van16SeatVnd.toLocaleString()}동</strong><br><span class="label">약 ${r.van16SeatKrw.toLocaleString()}원</span></td>
+                    <td><span class="label">${escapeHtml(r.busOption)}</span><br><span style="color: #D97706; font-size: 0.78rem;">💡 ${escapeHtml(r.nightSurcharge)}</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 3-Way Taxi Comparison Grid -->
+          <div class="taxi-compare-grid">
+            <!-- Xanh SM EV -->
+            <div class="taxi-compare-card" style="border-left: 4px solid #06B6D4;">
+              <div class="taxi-card-header">
+                <div>
+                  <h3 class="taxi-card-name">⚡ ${escapeHtml(transport.taxiComparison.xanhSM.nameKo)}</h3>
+                  <div class="souv-name-vi">${escapeHtml(transport.taxiComparison.xanhSM.nameVi)}</div>
+                </div>
+                <span class="taxi-card-tag" style="background: #CFFAFE; color: #0891B2;">추천 1위</span>
+              </div>
+              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(transport.taxiComparison.xanhSM.pros)}</div>
+              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(transport.taxiComparison.xanhSM.cons)}</div>
+              <div class="taxi-hotline">📞 콜센터: ${escapeHtml(transport.taxiComparison.xanhSM.hotline)}</div>
+            </div>
+
+            <!-- Grab -->
+            <div class="taxi-compare-card" style="border-left: 4px solid #10B981;">
+              <div class="taxi-card-header">
+                <div>
+                  <h3 class="taxi-card-name">📱 ${escapeHtml(transport.taxiComparison.grab.nameKo)}</h3>
+                  <div class="souv-name-vi">${escapeHtml(transport.taxiComparison.grab.nameVi)}</div>
+                </div>
+                <span class="taxi-card-tag" style="background: #D1FAE5; color: #059669;">정찰제 앱</span>
+              </div>
+              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(transport.taxiComparison.grab.pros)}</div>
+              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(transport.taxiComparison.grab.cons)}</div>
+              <div class="taxi-hotline">📲 예약: ${escapeHtml(transport.taxiComparison.grab.bookingMethod)}</div>
+            </div>
+
+            <!-- Traditional Taxis -->
+            <div class="taxi-compare-card" style="border-left: 4px solid #64748B;">
+              <div class="taxi-card-header">
+                <div>
+                  <h3 class="taxi-card-name">🚕 ${escapeHtml(transport.taxiComparison.traditionalTaxis.nameKo)}</h3>
+                  <div class="souv-name-vi">${escapeHtml(transport.taxiComparison.traditionalTaxis.nameVi)}</div>
+                </div>
+                <span class="taxi-card-tag">호텔 대기</span>
+              </div>
+              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(transport.taxiComparison.traditionalTaxis.pros)}</div>
+              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(transport.taxiComparison.traditionalTaxis.cons)}</div>
+              <div class="taxi-hotline">📞 ${escapeHtml(transport.taxiComparison.traditionalTaxis.hotline)}</div>
+            </div>
+          </div>
+
+          <!-- Scam Prevention 5 Rules -->
+          <div style="margin-top: 24px;">
+            <h3 style="font-size: 1.1rem; font-weight: 800; color: #92400E; display: flex; align-items: center; gap: 8px;">
+              🛡️ 현지 택시·교통 사기 예방 5대 수칙
+            </h3>
+            <div class="scam-checklist-grid">
+              ${transport.scamPrevention.map(s => `
+                <div class="scam-card">
+                  <h4 class="scam-title">⚠️ ${escapeHtml(s.titleKo)}</h4>
+                  <p class="scam-warning">${escapeHtml(s.warningText)}</p>
+                  <p class="scam-action">💡 <strong>대처법:</strong> ${escapeHtml(s.actionRule)}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Intercity Bus Guide (Dalat & Mui Ne) -->
+          <div style="margin-top: 24px;">
+            <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--color-text-primary); display: flex; align-items: center; gap: 8px;">
+              🚌 근교 도시 시외버스 & 리무진 가이드 (달랏 & 무이네)
+            </h3>
+            <div class="intercity-bus-grid">
+              ${transport.intercityBuses.map(b => `
+                <div class="intercity-bus-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--color-text-primary); margin: 0;">📍 ${escapeHtml(b.destination)}</h4>
+                    <span class="label">${b.distanceKm}km (${escapeHtml(b.duration)})</span>
+                  </div>
+                  <p style="font-size: 0.83rem; color: var(--color-text-secondary); margin: 6px 0;">${escapeHtml(b.routeFeature)}</p>
+                  <div style="background: white; border: 1px solid var(--color-border-light); border-radius: var(--radius-sm); padding: 10px; margin: 8px 0;">
+                    <strong style="font-size: 0.8rem; color: var(--color-sea);">주요 운행사 & 요금:</strong>
+                    <ul style="margin: 4px 0 0 0; padding-left: 16px; font-size: 0.8rem;">
+                      ${b.majorOperators.map(op => `
+                        <li><strong>${escapeHtml(op.name)}:</strong> ${escapeHtml(op.type)} — <span class="souv-price-mart">${op.fareVnd.toLocaleString()}동</span> (약 ${op.fareKrw.toLocaleString()}원)</li>
+                      `).join('')}
+                    </ul>
+                  </div>
+                  <div style="font-size: 0.8rem; color: #166534; background: #F0FDF4; padding: 6px 10px; border-radius: var(--radius-sm);">
+                    💡 ${escapeHtml(b.tips)}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Motorbike Rental Guide -->
+          <div class="motorbike-guide-box">
+            <h4 style="font-size: 0.98rem; font-weight: 800; color: #166534; margin: 0 0 8px 0; display: flex; align-items: center; gap: 6px;">
+              🛵 오토바이(스쿠터) 렌트 수칙 & 안전 가이드
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; font-size: 0.83rem; color: var(--color-text-primary);">
+              <div><strong>💰 1일 렌트비:</strong> ${escapeHtml(transport.motorbikeRental.pricePerDayVnd)}</div>
+              <div><strong>🛵 인기 기종:</strong> ${escapeHtml(transport.motorbikeRental.popularModels)}</div>
+              <div><strong>📑 보증금 원칙:</strong> ${escapeHtml(transport.motorbikeRental.depositRules)}</div>
+              <div><strong>🪖 면허 및 법규:</strong> ${escapeHtml(transport.motorbikeRental.legalRequirements)}</div>
+              <div><strong>⛽ 주유 팁:</strong> ${escapeHtml(transport.motorbikeRental.fuelType)}</div>
+              <div><strong>🛡️ 안전 수칙:</strong> ${escapeHtml(transport.motorbikeRental.safetyTip)}</div>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    // 2. Lotte Mart Top 30 Souvenir Price Matrix Section
+    if (showShopping) {
+      html += `
+        <section class="guide-section-block" id="souvenirsGuidePanel">
+          <div class="guide-section-header">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h2 class="guide-section-title">🛒 롯데마트 Top 30 쇼핑 시세표</h2>
+                <p class="guide-section-desc">정찰제 마트 공식가 vs 담시장·야시장 흥정 목표가 & 정품 구별법 (총 30개 품목)</p>
+              </div>
+              <span class="mini-tag" style="background: #E0F2FE; color: #0284C7; font-weight: 700;">
+                검색 일치: ${filteredSouvenirs.length}개 품목
+              </span>
+            </div>
+          </div>
+
+          <!-- 30 Souvenir Items Comparison Table -->
+          <div class="souvenirs-matrix-wrap">
+            <table class="souvenirs-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>품목명 (한국어 / 베트남어)</th>
+                  <th>분류</th>
+                  <th>규격/용량</th>
+                  <th>롯데마트 정찰가</th>
+                  <th>시장 목표 흥정가</th>
+                  <th>흥정 할인율</th>
+                  <th>정품 vs 짝퉁 구별 팁</th>
+                  <th>세관 통관</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredSouvenirs.map((item, idx) => {
+                  const martKrw = Math.round(item.officialPriceVnd * 0.0545);
+                  const marketKrw = Math.round(item.marketBargainPriceVnd * 0.0545);
+                  return `
+                    <tr>
+                      <td style="font-weight: 700; color: #64748B;">${idx + 1}</td>
+                      <td>
+                        <div class="souv-name-ko">${escapeHtml(item.nameKo)}</div>
+                        <div class="souv-name-vi">${escapeHtml(item.nameVi)}</div>
+                        <div style="font-size: 0.75rem; color: #64748B; margin-top: 2px;">${escapeHtml(item.description)}</div>
+                      </td>
+                      <td><span class="mini-tag">${escapeHtml(item.category)}</span></td>
+                      <td><span class="label">${escapeHtml(item.unit)}</span></td>
+                      <td>
+                        <div class="souv-price-mart">${item.officialPriceVnd.toLocaleString()}동</div>
+                        <div style="font-size: 0.75rem; color: #64748B;">약 ${martKrw.toLocaleString()}원</div>
+                      </td>
+                      <td>
+                        <div class="souv-price-market">${item.marketBargainPriceVnd.toLocaleString()}동</div>
+                        <div style="font-size: 0.75rem; color: #64748B;">약 ${marketKrw.toLocaleString()}원</div>
+                      </td>
+                      <td>
+                        <span class="souv-discount-badge">-${item.targetDiscountPercent}%</span>
+                      </td>
+                      <td style="font-size: 0.8rem; line-height: 1.4; color: var(--color-text-primary); max-width: 260px;">
+                        💡 ${escapeHtml(item.originalVsFakeTip)}
+                      </td>
+                      <td>
+                        <span class="souv-customs-badge ${item.customsAllowed ? 'customs-allowed' : 'customs-restricted'}">
+                          ${item.customsAllowed ? '✓ 반입가능' : '⚠️ 검역주의'}
+                        </span>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Bargaining Tips Callout Box -->
+          <div class="bargaining-guide-box">
+            <h3 style="font-size: 1.05rem; font-weight: 800; color: #9A3412; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+              🏷️ ${escapeHtml(shoppingPriceMatrix.bargainingTips.marketName)} 실전 5단계 흥정 전략
+            </h3>
+            <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: #7C2D12; display: flex; flex-direction: column; gap: 6px;">
+              ${shoppingPriceMatrix.bargainingTips.coreStrategy.map(st => `
+                <li>${escapeHtml(st)}</li>
+              `).join('')}
+            </ul>
+          </div>
+
+          <!-- Customs Quarantine Guide Box -->
+          <div class="customs-guide-box">
+            <h3 style="font-size: 1.05rem; font-weight: 800; color: #075985; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+              ✈️ 대한민국 관세청 면세 한도 & 농림축산검역본부 반입 규정
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; font-size: 0.83rem;">
+              <div style="background: white; padding: 12px; border-radius: var(--radius-sm); border: 1px solid #BAE6FD;">
+                <strong style="color: #0369A1;">💵 1인 면세 한도:</strong>
+                <ul style="margin: 4px 0 0 0; padding-left: 16px;">
+                  <li>기본 면세: 미화 <strong>${shoppingPriceMatrix.customsQuarantine.dutyFreeAllowance.basicAllowanceUsd}</strong></li>
+                  <li>주류: ${escapeHtml(shoppingPriceMatrix.customsQuarantine.dutyFreeAllowance.alcoholLimit)}</li>
+                  <li>담배: ${escapeHtml(shoppingPriceMatrix.customsQuarantine.dutyFreeAllowance.tobaccoLimit)}</li>
+                  <li>향수: ${escapeHtml(shoppingPriceMatrix.customsQuarantine.dutyFreeAllowance.perfumeLimit)}</li>
+                </ul>
+              </div>
+              <div style="background: white; padding: 12px; border-radius: var(--radius-sm); border: 1px solid #FECACA;">
+                <strong style="color: #DC2626;">🚫 반입 전면 금지 (검역 과태료):</strong>
+                <ul style="margin: 4px 0 0 0; padding-left: 16px; color: #991B1B;">
+                  ${shoppingPriceMatrix.customsQuarantine.prohibitedItems.map(p => `
+                    <li>${escapeHtml(p)}</li>
+                  `).join('')}
+                </ul>
+              </div>
+              <div style="background: white; padding: 12px; border-radius: var(--radius-sm); border: 1px solid #BBF7D0;">
+                <strong style="color: #16A34A;">✅ 반입 가능 품목:</strong>
+                <ul style="margin: 4px 0 0 0; padding-left: 16px; color: #166534;">
+                  ${shoppingPriceMatrix.customsQuarantine.permittedItems.map(p => `
+                    <li>${escapeHtml(p)}</li>
+                  `).join('')}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    // 3. Emergency & 24h Pharmacy Guide Section
+    if (showEmergency) {
+      html += `
+        <section class="guide-section-block" id="emergencyGuidePanel">
+          <div class="guide-section-header">
+            <h2 class="guide-section-title">💊 응급 상비약 & 24시 국제병원 가이드</h2>
+            <p class="guide-section-desc">베트남 약국 핵심 10대 상비약, 빈멕·VK 국제병원 24시 핫라인, 해외 여행자보험 5대 청구 서류</p>
+          </div>
+
+          <!-- 10 Key Travel Remedies Grid -->
+          <div>
+            <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--color-text-primary); margin: 0 0 12px 0;">
+              🏥 현지 약국 즉시 구매 가능 10대 핵심 상비약
+            </h3>
+            <div class="meds-grid">
+              ${filteredMeds.map(m => `
+                <div class="med-card">
+                  <div class="med-header">
+                    <div>
+                      <h4 class="med-name">${escapeHtml(m.brandName)}</h4>
+                      <div class="med-ingredient">${escapeHtml(m.activeIngredient)}</div>
+                    </div>
+                    <span class="med-symptom-tag">${escapeHtml(m.category)}</span>
+                  </div>
+                  <div style="font-size: 0.85rem; font-weight: 700; color: #0284C7;">
+                    🎯 증상: ${escapeHtml(m.symptom)}
+                  </div>
+                  <div class="med-dosage">
+                    <strong>복용법:</strong> ${escapeHtml(m.dosageKo)}
+                  </div>
+                  <div class="med-box-tip">
+                    📦 ${escapeHtml(m.boxPhotoTip)}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- 24h International Hospitals -->
+          <div style="margin-top: 28px;">
+            <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--color-text-primary); margin: 0 0 12px 0;">
+              🚨 나트랑 24시 국제 응급 종합병원
+            </h3>
+            <div class="hospitals-grid">
+              ${emergencyPharmacy.hospitals.map(h => `
+                <div class="hospital-card">
+                  <div>
+                    <h4 class="hospital-name-ko">${escapeHtml(h.nameKo)}</h4>
+                    <p class="hospital-name-vi">${escapeHtml(h.nameVi)}</p>
+                    <p style="font-size: 0.82rem; color: #475569; margin: 4px 0 0 0;">📍 ${escapeHtml(h.addressVi)}</p>
+                  </div>
+                  <div class="hospital-hotline-box">
+                    <a href="tel:${h.hotline.replace(/\s+/g, '')}" class="hospital-hotline-btn">
+                      <span>📞 진료 예약/문의: ${escapeHtml(h.hotline)}</span>
+                    </a>
+                    <a href="tel:${h.emergency24h.replace(/\s+/g, '')}" class="hospital-hotline-btn" style="background: #991B1B;">
+                      <span>🚨 24시 응급실: ${escapeHtml(h.emergency24h)}</span>
+                    </a>
+                    <a href="${h.googleMapUrl}" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="font-size: 0.82rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 4px;">
+                      <span>🗺️ 구글 지도 길찾기</span>
+                    </a>
+                  </div>
+                  <ul style="margin: 0; padding-left: 18px; font-size: 0.82rem; color: var(--color-text-primary); display: flex; flex-direction: column; gap: 4px;">
+                    ${h.features.map(f => `
+                      <li>${escapeHtml(f)}</li>
+                    `).join('')}
+                  </ul>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Insurance Claim 5-Step Guide -->
+          <div class="insurance-guide-box">
+            <h3 style="font-size: 1.05rem; font-weight: 800; color: #6B21A8; margin: 0 0 14px 0;">
+              📑 ${escapeHtml(emergencyPharmacy.insuranceGuide.title)}
+            </h3>
+            <div>
+              ${emergencyPharmacy.insuranceGuide.steps.map(st => `
+                <div class="insurance-step-item">
+                  <div class="insurance-step-no">${st.stepNo}</div>
+                  <div>
+                    <div class="insurance-step-title">${escapeHtml(st.nameKo)}</div>
+                    <div class="insurance-step-desc">${escapeHtml(st.desc)}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    // 4. One-Touch Vietnamese Flashcards Section
+    if (showFlashcards) {
+      html += `
+        <section class="guide-section-block" id="flashcardsGuidePanel">
+          <div class="guide-section-header">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h2 class="guide-section-title">🗣️ 원터치 생존 베트남어 (21종 소통 카드)</h2>
+                <p class="guide-section-desc">식당·카페, 택시·그랩, 쇼핑·시장, 응급·호텔 상황별 원클릭 대화 카드 (클릭 시 전면 확대 & 텍스트 복사)</p>
+              </div>
+              <span class="mini-tag" style="background: #E6F4F2; color: var(--color-sea); font-weight: 700;">
+                카드 ${filteredFlashcards.length}개 표시
+              </span>
+            </div>
+          </div>
+
+          <!-- Flashcards Responsive Grid -->
+          <div class="flashcards-grid">
+            ${filteredFlashcards.map(fc => `
+              <div class="flashcard-card" data-fc-id="${fc.id}">
+                <div class="flashcard-card-top">
+                  <span class="flashcard-card-icon">${fc.icon}</span>
+                  <span class="flashcard-card-cat">${escapeHtml(fc.categoryLabel)}</span>
+                </div>
+                <h3 class="flashcard-card-ko">${escapeHtml(fc.ko)}</h3>
+                <div class="flashcard-card-vi">${escapeHtml(fc.vi)}</div>
+                <div class="flashcard-card-pron">${escapeHtml(fc.pronunciation)}</div>
+                <div class="flashcard-card-purpose">🎯 ${escapeHtml(fc.purpose)}</div>
+                <div class="flashcard-card-actions">
+                  <button type="button" class="btn-flashcard-zoom" data-fc-zoom="${fc.id}">
+                    <span>🔍 크게 보기</span>
+                  </button>
+                  <button type="button" class="btn-flashcard-card-copy" data-fc-copy="${escapeHtml(fc.vi)}">
+                    <span>📋 복사</span>
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    container.innerHTML = html;
+
+    // Bind flashcard click & zoom events
+    container.querySelectorAll('[data-fc-id]').forEach(cardEl => {
+      cardEl.addEventListener('click', (e) => {
+        if (e.target.closest('[data-fc-copy]')) return;
+        const fcId = cardEl.dataset.fcId;
+        const fc = NHA_TRANG_GUIDE_HUB.flashcards.find(f => f.id === fcId);
+        if (fc) openFlashcardModal(fc);
+      });
+    });
+
+    container.querySelectorAll('[data-fc-copy]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const text = btn.dataset.fcCopy;
+        if (text) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+              showToast(`📋 베트남어가 복사되었습니다: "${text}"`);
+            });
+          } else {
+            fallbackCopy(text, () => showToast(`📋 베트남어가 복사되었습니다: "${text}"`));
+          }
+        }
+      });
+    });
+  }
+
+  function openFlashcardModal(fc) {
+    if (!fc) return;
+    state.activeModalFlashcard = fc;
+
+    const iconEl = document.getElementById('flashcardModalIcon');
+    const catEl = document.getElementById('flashcardModalCategory');
+    const koEl = document.getElementById('flashcardModalKo');
+    const viEl = document.getElementById('flashcardModalVi');
+    const pronEl = document.getElementById('flashcardModalPron');
+    const purposeEl = document.getElementById('flashcardModalPurpose');
+    const copyBtn = document.getElementById('flashcardCopyBtn');
+    const closeBtn2 = document.getElementById('flashcardModalCloseBtn2');
+
+    if (iconEl) iconEl.textContent = fc.icon || '🗣️';
+    if (catEl) catEl.textContent = fc.categoryLabel || '생존 베트남어';
+    if (koEl) koEl.textContent = fc.ko;
+    if (viEl) viEl.textContent = fc.fullscreenText || fc.vi;
+    if (pronEl) pronEl.textContent = fc.pronunciation;
+    if (purposeEl) purposeEl.textContent = fc.purpose;
+
+    if (copyBtn) {
+      copyBtn.onclick = () => {
+        const textToCopy = fc.vi;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(textToCopy).then(() => {
+            showToast(`📋 복사완료: "${textToCopy}"`);
+          });
+        } else {
+          fallbackCopy(textToCopy, () => showToast(`📋 복사완료: "${textToCopy}"`));
+        }
+      };
+    }
+
+    if (closeBtn2) {
+      closeBtn2.onclick = () => closeFlashcardModal();
+    }
+
+    const modalEl = document.getElementById('flashcardModal');
+    if (modalEl) {
+      modalEl.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeFlashcardModal() {
+    state.activeModalFlashcard = null;
+    const modalEl = document.getElementById('flashcardModal');
+    if (modalEl) {
+      modalEl.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+
   // --- 8.5 Domain Registry ---
-  // 5개 도메인의 배선 차이를 한 테이블로 모은다. 탭을 추가할 때 손댈 곳을
+  // 6개 도메인의 배선 차이를 한 테이블로 모은다. 탭을 추가할 때 손댈 곳을
   // 줄이는 것이 목적이며, 렌더/필터/모달 로직은 각 도메인 섹션에 그대로 있다.
   // activities만 접두어 규칙이 다르다(actCategory / wishlist / detailModal 등) —
   // 접두어로 유도하지 말고 이 표의 값을 그대로 쓸 것.
@@ -2206,7 +3119,7 @@
       heroTitle: '나트랑 힐링 여행 가이드 🌴',
       heroSubtitle: '호핑, 스파, 빈원더스, 선셋 크루즈 큐레이션',
       heroPills: `
-          <span class="hero-stat-pill"><span class="icon">✨</span> 엄선된 43개 리얼 액티비티</span>
+          <span class="hero-stat-pill"><span class="icon">✨</span> 엄선된 32개 리얼 액티비티</span>
           <span class="hero-stat-pill"><span class="icon">💆</span> 프라이빗 스파 & 머드온천</span>
           <span class="hero-stat-pill"><span class="icon">⛵</span> 럭셔리 선셋 크루즈 & 호핑</span>
           <span class="hero-stat-pill"><span class="icon">🏜️</span> 달랏 / 무이네 근교투어</span>
@@ -2257,6 +3170,28 @@
         `
     },
     {
+      key: 'spa',
+      render: () => renderSpa(),
+      categoryNavId: 'spaCategoryNav', tagChipsId: 'spaTagChips',
+      catAttr: 'spacategory', tagAttr: 'spatag',
+      catField: 'spaCategory', tagField: 'spaTag',
+      notesField: 'spaNotes', notesKey: 'nha_trang_spa_notes',
+      activeModalField: 'activeModalSpa',
+      modalId: 'spaModal', modalCloseBtnId: 'spaModalCloseBtn', closeModal: () => closeSpaModal(),
+      noteInputIds: ['spaNoteInput'], noteStatusIds: ['spaNoteStatus'],
+      copyAddressBtnId: 'spaCopyAddressBtn',
+      gridSectionId: 'spaGridSection',
+      placeholder: '스파, 마사지, 이발관, 머드온천 검색 (예: 센스파, 픽업, 핫스톤, 아이리조트)...',
+      heroTitle: '나트랑 힐링 스파 & 마사지 💆',
+      heroSubtitle: '5성급 호텔 스파부터 가성비 로컬 마사지, 황제 이발관, 픽드랍·팁 완벽 정리',
+      heroPills: `
+          <span class="hero-stat-pill"><span class="icon">💆</span> 엄선된 24선 힐링 스파</span>
+          <span class="hero-stat-pill"><span class="icon">🚗</span> 무료 픽업·샌딩 & 짐보관</span>
+          <span class="hero-stat-pill"><span class="icon">💵</span> 코스별 60/90/120분 정찰 시세</span>
+          <span class="hero-stat-pill"><span class="icon">♨️</span> 시그니처 머드 온천 & 바버샵</span>
+        `
+    },
+    {
       key: 'shopping',
       render: () => renderShopping(),
       categoryNavId: 'shoppingCategoryNav', tagChipsId: 'shoppingTagChips',
@@ -2298,6 +3233,28 @@
           <span class="hero-stat-pill"><span class="icon">💎</span> 김청·김빈 100달러 우대 환전</span>
           <span class="hero-stat-pill"><span class="icon">🛡️</span> DCC 이중환전 차단 완벽 가이드</span>
           <span class="hero-stat-pill"><span class="icon">💱</span> 실시간 양방향 환율 계산기</span>
+        `
+    },
+    {
+      key: 'guide',
+      render: () => renderGuide(),
+      categoryNavId: 'guideCategoryNav', tagChipsId: 'guideTagChips',
+      catAttr: 'guidecategory', tagAttr: 'guidetag',
+      catField: 'guideCategory', tagField: 'guideTag',
+      notesField: null, notesKey: null,
+      activeModalField: 'activeModalFlashcard',
+      modalId: 'flashcardModal', modalCloseBtnId: 'flashcardModalCloseBtn', closeModal: () => closeFlashcardModal(),
+      noteInputIds: [], noteStatusIds: [],
+      copyAddressBtnId: null,
+      gridSectionId: 'guideGridSection',
+      placeholder: '가이드 검색 (예: 공항, 그랩, 롯데마트, 스멕타, 고수 빼주세요)...',
+      heroTitle: '나트랑 여행 꿀팁 & 생존 킷 💡',
+      heroSubtitle: '교통·그랩 가이드, 롯데마트 30대 시세표, 응급 상비약/병원, 원터치 베트남어',
+      heroPills: `
+          <span class="hero-stat-pill"><span class="icon">🚗</span> 깜란공항 & 그랩 완벽 가이드</span>
+          <span class="hero-stat-pill"><span class="icon">🛒</span> 롯데마트 30대 기념품 시세표</span>
+          <span class="hero-stat-pill"><span class="icon">💊</span> 응급 상비약 10종 & 24시 병원</span>
+          <span class="hero-stat-pill"><span class="icon">🗣️</span> 원터치 생존 베트남어 21종</span>
         `
     }
   ];
@@ -2372,7 +3329,7 @@
 
     // 영업시간 데이터가 있는 도메인에서만 "지금 영업중" 칩을 노출한다
     const openNowChip = document.getElementById('openNowChip');
-    const hasHours = tab === 'gourmet' || tab === 'shopping' || tab === 'currency';
+    const hasHours = tab === 'gourmet' || tab === 'shopping' || tab === 'currency' || tab === 'spa';
     if (openNowChip) {
       openNowChip.style.display = hasHours ? 'inline-flex' : 'none';
       if (!hasHours) {
@@ -2694,6 +3651,8 @@
       getFilteredActivities,
       getFilteredGourmets,
       getFilteredStays,
+      getFilteredSpa,
+      getFilteredSpas,
       getFilteredShopping,
       getFilteredCurrency,
       // Renderers — exported for the snapshot harness (test-render-snapshot.js).
@@ -2702,14 +3661,23 @@
       renderCards,
       renderGourmets,
       renderStays,
+      renderSpa,
       renderShopping,
       renderCurrency,
       // Modal openers — Phase 4 refactor target, snapshotted the same way.
       openActivityModal,
       openGourmetModal,
       openStayModal,
+      openSpaModal,
+      closeSpaModal,
       openShoppingModal,
-      openCurrencyModal
+      openCurrencyModal,
+      renderGuide,
+      openFlashcardModal,
+      closeFlashcardModal,
+      getFilteredFlashcards,
+      getFilteredSouvenirs,
+      getFilteredPharmacyMeds
     };
   }
 })();

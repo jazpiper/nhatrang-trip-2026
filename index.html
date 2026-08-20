@@ -30,11 +30,11 @@
         <span>Nha Trang</span>
       </a>
 
-      <!-- Center Tabs (Activities, Stays, Gourmet, Shopping, Currency) -->
+      <!-- Center Tabs (Activities, Gourmet, Stays, Spa, Shopping, Currency) -->
       <nav class="header-nav-tabs" aria-label="메인 카테고리">
         <button class="nav-tab-btn active" data-tab="activities">
           <span>🤿 액티비티</span>
-          <span class="tab-badge">43</span>
+          <span class="tab-badge" data-count-for="activity">32</span>
         </button>
         <button class="nav-tab-btn" data-tab="gourmet">
           <span>🍜 맛집</span>
@@ -44,6 +44,10 @@
           <span>🏨 숙소</span>
           <span class="tab-badge">24</span>
         </button>
+        <button class="nav-tab-btn" data-tab="spa">
+          <span>💆 스파</span>
+          <span class="tab-badge" data-count-for="spa">24</span>
+        </button>
         <button class="nav-tab-btn" data-tab="shopping">
           <span>🛍️ 쇼핑</span>
           <span class="tab-badge">18</span>
@@ -51,6 +55,10 @@
         <button class="nav-tab-btn" data-tab="currency">
           <span>💱 환전</span>
           <span class="tab-badge">17</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="guide">
+          <span>💡 꿀팁 & 가이드</span>
+          <span class="tab-badge" data-count-for="guide">4대 가이드</span>
         </button>
       </nav>
 
@@ -88,7 +96,7 @@
         </p>
       </div>
       <div class="hero-tags" id="heroTagsArea">
-        <span class="hero-stat-pill"><span class="icon">✨</span> 43곳</span>
+        <span class="hero-stat-pill"><span class="icon">✨</span> 32곳</span>
         <span class="hero-stat-pill"><span class="icon">📍</span> 구글 지도 실측 정보</span>
       </div>
     </div>
@@ -99,23 +107,15 @@
     <div class="container category-scroll-container">
       <button class="category-item-btn active" data-category="all">
         <span class="cat-icon">✨</span>
-        <span>전체 액티비티 (43곳)</span>
+        <span>전체 액티비티 (32곳)</span>
       </button>
       <button class="category-item-btn" data-category="hopping">
         <span class="cat-icon">🤿</span>
         <span>호핑 & 스노클링</span>
       </button>
-      <button class="category-item-btn" data-category="mudbath">
-        <span class="cat-icon">♨️</span>
-        <span>머드 온천 & 스파</span>
-      </button>
       <button class="category-item-btn" data-category="vinwonders">
         <span class="cat-icon">🎡</span>
         <span>빈원더스 테마파크</span>
-      </button>
-      <button class="category-item-btn" data-category="spa">
-        <span class="cat-icon">💆</span>
-        <span>릴렉스 스파 마사지</span>
       </button>
       <button class="category-item-btn" data-category="cruise">
         <span class="cat-icon">⛵</span>
@@ -204,6 +204,32 @@
     </div>
   </nav>
 
+  <!-- Spa Category Scroll Bar -->
+  <nav class="category-filter-section" id="spaCategoryNav" style="display: none;" aria-label="스파 카테고리 필터">
+    <div class="container category-scroll-container">
+      <button class="category-item-btn active" data-spacategory="all">
+        <span class="cat-icon">💆</span>
+        <span>전체 스파 (24곳)</span>
+      </button>
+      <button class="category-item-btn" data-spacategory="local_budget">
+        <span class="cat-icon">💰</span>
+        <span>가성비 로컬 마사지</span>
+      </button>
+      <button class="category-item-btn" data-spacategory="luxury_resort">
+        <span class="cat-icon">👑</span>
+        <span>5성급 리조트 스파</span>
+      </button>
+      <button class="category-item-btn" data-spacategory="barbershop">
+        <span class="cat-icon">💈</span>
+        <span>베트남 황제 이발관</span>
+      </button>
+      <button class="category-item-btn" data-spacategory="family_maternity">
+        <span class="cat-icon">👶</span>
+        <span>임산부 & 패밀리 케어</span>
+      </button>
+    </div>
+  </nav>
+
   <!-- Shopping Category Scroll Bar -->
   <nav class="category-filter-section" id="shoppingCategoryNav" style="display: none;" aria-label="쇼핑 카테고리 필터">
     <div class="container category-scroll-container">
@@ -272,6 +298,32 @@
     </div>
   </nav>
 
+  <!-- Guide Hub Sub Navigation Scroll Bar -->
+  <nav class="category-filter-section" id="guideCategoryNav" style="display: none;" aria-label="여행 꿀팁 & 생존 킷 카테고리">
+    <div class="container category-scroll-container">
+      <button class="category-item-btn active" data-guidecategory="all">
+        <span class="cat-icon">🌟</span>
+        <span>전체 가이드</span>
+      </button>
+      <button class="category-item-btn" data-guidecategory="transport">
+        <span class="cat-icon">🚗</span>
+        <span>교통 & 그랩 가이드</span>
+      </button>
+      <button class="category-item-btn" data-guidecategory="shopping">
+        <span class="cat-icon">🛒</span>
+        <span>롯데마트 30대 시세표</span>
+      </button>
+      <button class="category-item-btn" data-guidecategory="emergency">
+        <span class="cat-icon">💊</span>
+        <span>응급 상비약 & 24시 병원</span>
+      </button>
+      <button class="category-item-btn" data-guidecategory="flashcards">
+        <span class="cat-icon">🗣️</span>
+        <span>원터치 생존 베트남어 (21종)</span>
+      </button>
+    </div>
+  </nav>
+
   <!-- Filter & Search Toolbar -->
   <section class="toolbar-section">
     <div class="container toolbar-inner">
@@ -311,6 +363,18 @@
         <button class="tag-chip-btn" data-stag="shopping">🛍️ 야시장/쇼핑 인접</button>
       </div>
 
+      <!-- Tag Filters for Spa -->
+      <div class="tag-chips-wrapper" id="spaTagChips" style="display: none;">
+        <button class="tag-chip-btn active" data-spatag="all">전체 태그</button>
+        <button class="tag-chip-btn" data-spatag="pickup">🚗 무료 픽드랍</button>
+        <button class="tag-chip-btn" data-spatag="shower">🚿 짐보관·샤워</button>
+        <button class="tag-chip-btn" data-spatag="tip_included">💵 팁 포함</button>
+        <button class="tag-chip-btn" data-spatag="hot_stone">🔥 핫스톤/아로마</button>
+        <button class="tag-chip-btn" data-spatag="mud_bath">♨️ 머드 온천</button>
+        <button class="tag-chip-btn" data-spatag="couple_room">💑 커플/프라이빗</button>
+        <button class="tag-chip-btn" data-spatag="late_night">🌙 심야영업</button>
+      </div>
+
       <!-- Tag Filters for Shopping -->
       <div class="tag-chips-wrapper" id="shoppingTagChips" style="display: none;">
         <button class="tag-chip-btn active" data-shoptag="all">전체 태그</button>
@@ -334,6 +398,15 @@
         <button class="tag-chip-btn" data-currtag="usd100">💵 100달러 신권 우대</button>
         <button class="tag-chip-btn" data-currtag="livebank_24h">🏧 24시간 LiveBank</button>
         <button class="tag-chip-btn" data-currtag="night_market">🌙 야시장/시내 인근</button>
+      </div>
+
+      <!-- Tag Filters for Guide Hub -->
+      <div class="tag-chips-wrapper" id="guideTagChips" style="display: none;">
+        <button class="tag-chip-btn active" data-guidetag="all">전체</button>
+        <button class="tag-chip-btn" data-guidetag="transport">🚗 교통/공항</button>
+        <button class="tag-chip-btn" data-guidetag="shopping">🛒 쇼핑/시세</button>
+        <button class="tag-chip-btn" data-guidetag="emergency">💊 응급/병원</button>
+        <button class="tag-chip-btn" data-guidetag="flashcards">🗣️ 베트남어 카드</button>
       </div>
 
       <!-- Controls: Sort & View Toggle -->
@@ -368,7 +441,7 @@
   <main class="activities-section" id="activitiesGridSection">
     <div class="container">
       <div class="results-info-bar">
-        <span id="resultCountText">총 <strong>43</strong>개의 추천 액티비티</span>
+        <span id="resultCountText">총 <strong>32</strong>개의 추천 액티비티</span>
         <span>💡 카드를 클릭하면 상세 정보, 준비물, 실전 팁 및 메모를 작성할 수 있습니다.</span>
       </div>
 
@@ -404,6 +477,21 @@
 
       <!-- Stays Grid Cards Container -->
       <div class="cards-grid" id="staysCardsGridContainer">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Main Spa Grid View -->
+  <main class="activities-section" id="spaGridSection" style="display: none;">
+    <div class="container">
+      <div class="results-info-bar">
+        <span id="spaResultCountText">총 <strong id="spaResultCount">24</strong>개의 힐링 스파 & 마사지</span>
+        <span>💆 픽업/샌딩 조건, 팁 정책, 짐보관·샤워 여부 및 코스별 가격을 한눈에 비교하세요.</span>
+      </div>
+
+      <!-- Spa Grid Cards Container -->
+      <div class="cards-grid" id="spaCardsGridContainer">
         <!-- Rendered dynamically by app.js -->
       </div>
     </div>
@@ -550,6 +638,19 @@
 
       <!-- Currency Cards Grid Container -->
       <div class="cards-grid" id="currencyCardsGridContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Guide Hub Domain Grid Container Section -->
+  <main class="activities-section" id="guideGridSection" style="display: none;">
+    <div class="container">
+      <div class="section-title-row">
+        <span id="guideResultCountText">나트랑 실전 여행 꿀팁 & 생존 킷 (4대 핵심 가이드)</span>
+        <div class="view-controls"></div>
+      </div>
+      <div class="guide-hub-container" id="guideCardsGridContainer">
         <!-- Rendered dynamically -->
       </div>
     </div>
@@ -1164,6 +1265,158 @@
       </div>
   </template>
 
+  <!-- Spa Detail Modal -->
+  <template class="modal-tpl" data-modal="spaModal" data-close="spaModalCloseBtn">
+
+      <!-- Gallery -->
+      <div class="modal-gallery-grid" id="spaModalGallery">
+        <div class="gallery-main-img-wrap">
+          <img class="main-img" id="spaModalMainImg" src="" alt="스파 메인 이미지" />
+        </div>
+        <div class="gallery-thumbs-row" id="spaModalThumbs"></div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <div class="modal-header-section">
+          <div class="modal-badges-row">
+            <span class="card-badge-top-left" id="spaModalBadge">추천 스파</span>
+            <span class="mini-tag" id="spaModalCategory">로컬 마사지</span>
+            <span class="mini-tag" id="spaModalTipBadge">팁 별도</span>
+            <span class="mini-tag" id="spaModalPickupBadge">픽드랍 지원</span>
+          </div>
+          <h2 class="modal-title" id="spaModalTitle">스파 이름</h2>
+          <p class="modal-title-en" id="spaModalNameVi">Tên Spa</p>
+
+          <div class="modal-meta-grid">
+            <div class="meta-item">
+              <span class="label">구글 평점</span>
+              <span class="value" id="spaModalRating">★ 4.9</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">영업 시간</span>
+              <span class="value" id="spaModalHours">09:00 ~ 22:30</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">가격대</span>
+              <span class="value" id="spaModalPriceRange">38만~68만동</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">위치</span>
+              <span class="value" id="spaModalLocation">시내 중심</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grab Address Box with Copy Button -->
+        <div class="modal-section-block">
+          <div class="modal-address-box">
+            <div>
+              <div class="modal-address-label">그랩(Grab) 목적지 주소</div>
+              <div id="spaModalAddress" class="modal-address-val">주소</div>
+            </div>
+            <button class="btn-copy-address" id="spaCopyAddressBtn" title="베트남어 주소 복사하기">📋 주소 복사</button>
+          </div>
+        </div>
+
+        <!-- Service Highlights & Terms Grid -->
+        <div class="modal-section-block">
+          <div class="spa-terms-grid">
+            <div class="spa-term-card">
+              <div class="term-title">🚗 픽업 / 샌딩 조건</div>
+              <div class="term-desc" id="spaModalPickup">시내 무료 픽업 지원</div>
+            </div>
+            <div class="spa-term-card">
+              <div class="term-title">💵 팁(Tip) 정책</div>
+              <div class="term-desc" id="spaModalTipPolicy">팁 별도 권장</div>
+            </div>
+            <div class="spa-term-card">
+              <div class="term-title">🚿 짐보관 & 샤워 시설</div>
+              <div class="term-desc" id="spaModalLuggage">무료 짐보관 & 샤워 가능</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 60/90/120min Course Price Matrix Table -->
+        <div class="modal-section-block">
+          <h3>📋 대표 마사지 코스 & 요금표</h3>
+          <div class="spa-course-table-wrap">
+            <table class="spa-course-table" id="spaModalCourseTable">
+              <thead>
+                <tr><th>코스명</th><th>시간</th><th>베트남 동 (VND)</th><th>원화 환산 (KRW)</th></tr>
+              </thead>
+              <tbody id="spaModalCourseTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Amenities -->
+        <div class="modal-section-block">
+          <h3>✨ 편의시설 & 서비스</h3>
+          <div class="spa-amenity-pills" id="spaModalAmenities"></div>
+        </div>
+
+        <!-- Description & Local Tips -->
+        <div class="modal-section-block">
+          <h3>💆 스파 소개</h3>
+          <p id="spaModalDesc" class="modal-desc-text"></p>
+        </div>
+        <div class="modal-section-block">
+          <div class="couple-tip-box">
+            <h4>💡 실전 예약 & 이용 꿀팁</h4>
+            <p id="spaModalTip"></p>
+          </div>
+        </div>
+
+        <!-- User Notes -->
+        <div class="couple-notes-container">
+          <h4>📝 나만의 스파 메모 (자동 저장)</h4>
+          <textarea id="spaNoteInput" placeholder="예: '카톡으로 90분 코스 예약 완료', '마사지 후 샤워하고 공항 가기'"></textarea>
+          <span class="note-save-status" id="spaNoteStatus"></span>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="modal-footer-bar">
+          <div class="modal-price-display">
+            <span class="vnd" id="spaModalAvgPrice">520,000 VND</span>
+            <span class="krw" id="spaModalAvgKrw">(약 28,300원)</span>
+            <span class="price-sub" id="spaModalPricePer">/ 90분 기준</span>
+          </div>
+          <div class="modal-actions-group">
+            <button class="btn-secondary-link" id="spaModalHeartBtn">♡ 찜하기</button>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary-link" id="spaModalPhotosBtn">📸 실시간 사진 ↗</a>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary-reserve" id="spaModalMapBtn">📍 구글 지도로 길찾기 ↗</a>
+          </div>
+        </div>
+      </div>
+  </template>
+
+  <!-- Vietnamese Flashcard Fullscreen Modal -->
+  <template class="modal-tpl" data-modal="flashcardModal" data-close="flashcardModalCloseBtn">
+    <div class="modal-body flashcard-modal-body">
+      <div class="flashcard-fullscreen-box">
+        <div class="flashcard-modal-header">
+          <span class="flashcard-modal-icon" id="flashcardModalIcon">🌿</span>
+          <span class="mini-tag" id="flashcardModalCategory">식당 & 카페</span>
+        </div>
+        <div class="flashcard-modal-ko" id="flashcardModalKo">고수 빼주세요</div>
+        <div class="flashcard-modal-vi-wrap">
+          <div class="flashcard-big-vi" id="flashcardModalVi">KHÔNG CHO RAU MÙI</div>
+          <div class="flashcard-big-pronunciation" id="flashcardModalPron">[둥 조 라우 무이]</div>
+        </div>
+        <div class="flashcard-modal-purpose" id="flashcardModalPurpose">음식 주문 시 고수(향채) 제외 요청</div>
+        <div class="flashcard-modal-actions">
+          <button type="button" class="btn-flashcard-copy" id="flashcardCopyBtn">
+            <span>📋 베트남어 텍스트 복사</span>
+          </button>
+          <button type="button" class="btn-flashcard-close" id="flashcardModalCloseBtn2">
+            <span>닫기</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+
   <!-- Currency Calculator Modal -->
   <div class="modal-overlay" id="calcModal" role="dialog" aria-modal="true">
     <div class="modal-box tool-modal-box">
@@ -1247,7 +1500,7 @@
     <div class="container footer-inner">
       <div>
         <strong>Nha Trang</strong>
-        <p style="margin-top: 4px;">액티비티 · 맛집 · 숙소 · 쇼핑 · 환전 큐레이션</p>
+        <p style="margin-top: 4px;">액티비티 · 맛집 · 숙소 · 스파 · 쇼핑 · 환전 큐레이션</p>
       </div>
       <div class="footer-love">
         <span>모든 수치는 Google Maps 실측값</span>
@@ -1266,11 +1519,17 @@
     <button class="mobile-tab-btn" data-tab="stays">
       <span class="mt-icon">🏨</span><span>숙소</span>
     </button>
+    <button class="mobile-tab-btn" data-tab="spa">
+      <span class="mt-icon">💆</span><span>스파</span>
+    </button>
     <button class="mobile-tab-btn" data-tab="shopping">
       <span class="mt-icon">🛍️</span><span>쇼핑</span>
     </button>
     <button class="mobile-tab-btn" data-tab="currency">
       <span class="mt-icon">💱</span><span>환전</span>
+    </button>
+    <button class="mobile-tab-btn" data-tab="guide">
+      <span class="mt-icon">💡</span><span>가이드</span>
     </button>
   </nav>
 
@@ -1278,8 +1537,10 @@
   <script src="./data.js"></script>
   <script src="./gourmet-data.js"></script>
   <script src="./stays-data.js"></script>
+  <script src="./spa-data.js"></script>
   <script src="./shopping-data.js"></script>
   <script src="./currency-data.js"></script>
+  <script src="./guide-data.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>

@@ -5,11 +5,11 @@
  * ============================================================================
  * 
  * Verifies NHA_TRANG_ACTIVITIES from data.js against:
- * 1. Dataset size: Total activities >= 40 (specifically 43).
- * 2. Unique IDs: Strictly unique alphanumeric identifiers (act-01 to act-43).
+ * 1. Dataset size: Total activities >= 30 (specifically 32).
+ * 2. Unique IDs: Strictly unique alphanumeric identifiers (act-01 to act-32).
  * 3. Schema completeness: All 22 schema fields present and non-empty.
  * 4. Data types & bounds: rating (1.0 <= r <= 5.0), reviewCount (> 0 integer), priceVnd (>= 0).
- * 5. Category taxonomy: Exactly matches the 10 allowed categories.
+ * 5. Category taxonomy: Exactly matches the 8 allowed categories.
  * 6. Image URLs: Non-empty array with >= 3 valid HTTP/HTTPS URLs per entry.
  * 7. Google Map queries & Booking URLs: Non-empty query strings and valid URLs.
  * 8. Sub-array fields: tags, included, notIncluded, whatToBring are populated arrays.
@@ -124,18 +124,18 @@ runner.test('개인 여행 일정 데이터가 노출되지 않는다', () => {
 // ==========================================
 runner.suite('Dataset Size & Capacity Constraints');
 
-runner.test('Total activities count meets minimum requirement (>= 40)', () => {
+runner.test('Total activities count meets minimum requirement (>= 30)', () => {
   assert.ok(
-    activities.length >= 40,
-    `Expected at least 40 activities, but found ${activities.length}`
+    activities.length >= 30,
+    `Expected at least 30 activities, but found ${activities.length}`
   );
 });
 
-runner.test('Total activities count reaches target specification (43 activities)', () => {
+runner.test('Total activities count reaches target specification (32 activities)', () => {
   assert.strictEqual(
     activities.length,
-    43,
-    `Expected exactly 43 activities, but found ${activities.length}`
+    32,
+    `Expected exactly 32 activities, but found ${activities.length}`
   );
 });
 
@@ -144,7 +144,7 @@ runner.test('Total activities count reaches target specification (43 activities)
 // ==========================================
 runner.suite('ID Uniqueness & Identifier Format');
 
-runner.test('Every activity has a unique, well-formatted string ID (e.g., act-01..act-43)', () => {
+runner.test('Every activity has a unique, well-formatted string ID (e.g., act-01..act-32)', () => {
   const idSet = new Set();
   const idRegex = /^act-\d{2,}$/;
 
@@ -246,9 +246,7 @@ runner.suite('Category Taxonomy & Classification');
 
 const ALLOWED_CATEGORIES = [
   'hopping',
-  'mudbath',
   'vinwonders',
-  'spa',
   'cruise',
   'culture',
   'nightlife',
@@ -257,7 +255,7 @@ const ALLOWED_CATEGORIES = [
   'cooking'
 ];
 
-runner.test('All activities belong to the 10 allowed categories', () => {
+runner.test('All activities belong to the 8 allowed categories', () => {
   activities.forEach((act, idx) => {
     assert.ok(
       ALLOWED_CATEGORIES.includes(act.category),

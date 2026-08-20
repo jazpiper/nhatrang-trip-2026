@@ -112,12 +112,67 @@ const requiredIds = [
   'currencyModalHeartBtn',
   'currencyModalPhotosBtn',
   'currencyModalMapBtn',
+  // Spa Domain IDs
+  'spaCategoryNav',
+  'spaTagChips',
+  'spaGridSection',
+  'spaResultCountText',
+  'spaCardsGridContainer',
+  'spaModal',
+  'spaModalCloseBtn',
+  'spaModalGallery',
+  'spaModalMainImg',
+  'spaModalThumbs',
+  'spaModalBadge',
+  'spaModalCategory',
+  'spaModalTipBadge',
+  'spaModalPickupBadge',
+  'spaModalTitle',
+  'spaModalNameVi',
+  'spaModalRating',
+  'spaModalHours',
+  'spaModalPriceRange',
+  'spaModalLocation',
+  'spaModalAddress',
+  'spaCopyAddressBtn',
+  'spaModalPickup',
+  'spaModalTipPolicy',
+  'spaModalLuggage',
+  'spaModalCourseTable',
+  'spaModalCourseTableBody',
+  'spaModalAmenities',
+  'spaModalDesc',
+  'spaModalTip',
+  'spaNoteInput',
+  'spaNoteStatus',
+  'spaModalAvgPrice',
+  'spaModalAvgKrw',
+  'spaModalPricePer',
+  'spaModalHeartBtn',
+  'spaModalPhotosBtn',
+  'spaModalMapBtn',
   // Currency calculator widget
   'calcVndInputMain',
   'calcKrwInputMain',
   'calcVndHelperMain',
   'calcKrwHelperMain',
-  'calcResetBtnMain'
+  'calcResetBtnMain',
+  // Guide Hub Domain IDs
+  'guideCategoryNav',
+  'guideTagChips',
+  'guideGridSection',
+  'guideResultCountText',
+  'guideCardsGridContainer',
+  'flashcardModal',
+  'flashcardModalCloseBtn',
+  'flashcardModalIcon',
+  'flashcardModalCategory',
+  'flashcardModalKo',
+  'flashcardModalVi',
+  'flashcardModalPron',
+  'flashcardModalPurpose',
+  'flashcardCopyBtn',
+  'flashcardModalCloseBtn2'
 ];
 
 let missing = 0;
@@ -145,8 +200,10 @@ const dataScripts = [
   './data.js',
   './gourmet-data.js',
   './stays-data.js',
+  './spa-data.js',
   './shopping-data.js',
-  './currency-data.js'
+  './currency-data.js',
+  './guide-data.js'
 ];
 const hasAppScript = html.includes('<script src="./js/app.js"></script>') || html.includes('<script type="module" src="./js/app.js"></script>');
 const appIdx = html.indexOf('src="./js/app.js"');
@@ -222,7 +279,30 @@ const requiredSelectors = [
   '.btn-currency-photos',
   '.card-fee-info',
   '.supported-cards-grid',
-  '.badge-fee-zero'
+  '.badge-fee-zero',
+  // Spa Selectors
+  '.spa-card',
+  '.spa-badge-service',
+  '.spa-terms-grid',
+  '.spa-term-card',
+  '.spa-course-table-wrap',
+  '.spa-course-table',
+  '.spa-amenity-pills',
+  '.spa-amenity-pill',
+  '.btn-spa-map',
+  '.btn-spa-photos',
+  // Guide Hub Selectors
+  '.guide-hub-container',
+  '.guide-section-block',
+  '.guide-section-title',
+  '.airport-table',
+  '.taxi-compare-card',
+  '.scam-card',
+  '.souvenirs-table',
+  '.med-card',
+  '.hospital-card',
+  '.flashcard-card',
+  '.flashcard-big-vi'
 ];
 
 for (const sel of requiredSelectors) {
@@ -247,9 +327,7 @@ for (const m of appSrcForClasses.matchAll(/class="([^"`]*)"/g)) {
 }
 
 // Debt ledger for classes the renderers emit without a style.css rule. It is
-// currently EMPTY — the original 13 entries were all real drift (the whole
-// timeline view and the activity modal's sub-image column were rendering
-// unstyled) and have been given rules. Shrink this list; never grow it.
+// currently EMPTY — all classes are verified to exist in style.css.
 const KNOWN_UNSTYLED = new Set([]);
 
 const undefinedClasses = [...usedClasses]
@@ -271,8 +349,6 @@ if (newViolations.length > 0) {
 }
 console.log(`  ✔ All ${usedClasses.size - stillOutstanding.length} renderer classes are declared in style.css`);
 
-// Classes the KNOWN_UNSTYLED list claims are missing but that now exist should be
-// removed from the list, otherwise the debt ledger rots.
 const staleAllowlist = [...KNOWN_UNSTYLED].filter(c => css.includes('.' + c));
 if (staleAllowlist.length > 0) {
   console.error(`  ❌ KNOWN_UNSTYLED is stale — these are now styled, remove them: ${staleAllowlist.join(', ')}`);
@@ -427,10 +503,8 @@ if (typeof currencyApp.getFilteredCurrency !== 'function') {
 }
 console.log('  ✔ js/app.js exports the currency filter for testing');
 
-// Every category button and tag chip declared in the markup must return results
-// through the shipped filter. A renamed data attribute or category slug dies here.
-const navBlock = html.slice(html.indexOf('id="currencyCategoryNav"'), html.indexOf('id="currencyTagChips"'));
-const chipBlock = html.slice(html.indexOf('id="currencyTagChips"'), html.indexOf('id="currencyTagChips"') + 6000);
+const navBlock = html.slice(html.indexOf('id="currencyCategoryNav"'), html.indexOf('id="guideCategoryNav"'));
+const chipBlock = html.slice(html.indexOf('id="currencyTagChips"'), html.indexOf('id="guideTagChips"'));
 const navCats = [...navBlock.matchAll(/data-currcategory="([^"]+)"/g)].map(m => m[1]);
 const navTags = [...chipBlock.matchAll(/data-currtag="([^"]+)"/g)].map(m => m[1]);
 
@@ -462,6 +536,99 @@ for (const tag of navTags) {
 }
 currencyApp.resetStateFilters();
 
+console.log('\n=== Suite 8: Spa Tab wired through the real js/app.js ===');
+const { NHA_TRANG_SPAS } = require('./spa-data.js');
+console.log(`  ✔ Loaded ${NHA_TRANG_SPAS.length} spas from spa-data.js`);
+
+global.NHA_TRANG_SPAS = NHA_TRANG_SPAS;
+
+let spaApp;
+try {
+  spaApp = require('./js/app.js');
+} catch (e) {
+  console.error('  ❌ js/app.js could not be loaded in Node:', e.message);
+  process.exit(1);
+}
+
+if (typeof spaApp.getFilteredSpas !== 'function') {
+  console.error('  ❌ js/app.js does not export getFilteredSpas');
+  process.exit(1);
+}
+console.log('  ✔ js/app.js exports the spa filter for testing');
+
+const spaNavBlock = html.slice(html.indexOf('id="spaCategoryNav"'), html.indexOf('id="shoppingCategoryNav"'));
+const spaChipBlock = html.slice(html.indexOf('id="spaTagChips"'), html.indexOf('id="shoppingTagChips"'));
+const spaNavCats = [...spaNavBlock.matchAll(/data-spacategory="([^"]+)"/g)].map(m => m[1]);
+const spaNavTags = [...spaChipBlock.matchAll(/data-spatag="([^"]+)"/g)].map(m => m[1]);
+
+if (spaNavCats.length === 0 || spaNavTags.length === 0) {
+  console.error('  ❌ No spa category buttons / tag chips found in index.html');
+  process.exit(1);
+}
+
+for (const cat of spaNavCats) {
+  spaApp.resetStateFilters();
+  spaApp.state.spaCategory = cat;
+  const n = spaApp.getFilteredSpas().length;
+  if (n === 0) {
+    console.error(`  ❌ Spa category '${cat}' returns 0 results through the real filter`);
+    process.exit(1);
+  }
+  console.log(`  ✔ Spa category '${cat}': ${n} spots matched`);
+}
+
+for (const tag of spaNavTags) {
+  spaApp.resetStateFilters();
+  spaApp.state.spaTag = tag;
+  const n = spaApp.getFilteredSpas().length;
+  if (n === 0) {
+    console.error(`  ❌ Spa tag chip '${tag}' returns 0 results through the real filter`);
+    process.exit(1);
+  }
+  console.log(`  ✔ Spa tag '${tag}': ${n} spots matched`);
+}
+spaApp.resetStateFilters();
+
+console.log('\n=== Suite 9: Guide Hub Tab wired through the real js/app.js ===');
+const { NHA_TRANG_GUIDE_HUB } = require('./guide-data.js');
+console.log(`  ✔ Loaded Guide Hub data (transport, ${NHA_TRANG_GUIDE_HUB.shoppingPriceMatrix.items.length} souvenirs, ${NHA_TRANG_GUIDE_HUB.emergencyPharmacy.pharmacyMeds.length} meds, ${NHA_TRANG_GUIDE_HUB.flashcards.length} flashcards)`);
+
+global.NHA_TRANG_GUIDE_HUB = NHA_TRANG_GUIDE_HUB;
+
+let guideApp;
+try {
+  guideApp = require('./js/app.js');
+} catch (e) {
+  console.error('  ❌ js/app.js could not be loaded in Node for Guide Hub:', e.message);
+  process.exit(1);
+}
+
+if (typeof guideApp.getFilteredFlashcards !== 'function' || typeof guideApp.getFilteredSouvenirs !== 'function') {
+  console.error('  ❌ js/app.js does not export guide filter functions');
+  process.exit(1);
+}
+console.log('  ✔ js/app.js exports Guide Hub filter functions');
+
+const guideNavBlock = html.slice(html.indexOf('id="guideCategoryNav"'), html.indexOf('class="toolbar-section"'));
+const guideChipBlock = html.slice(html.indexOf('id="guideTagChips"'), html.indexOf('class="toolbar-controls"'));
+const guideNavCats = [...guideNavBlock.matchAll(/data-guidecategory="([^"]+)"/g)].map(m => m[1]);
+const guideNavTags = [...guideChipBlock.matchAll(/data-guidetag="([^"]+)"/g)].map(m => m[1]);
+
+for (const cat of guideNavCats) {
+  guideApp.resetStateFilters();
+  guideApp.state.guideCategory = cat;
+  const fcCount = guideApp.getFilteredFlashcards().length;
+  console.log(`  ✔ Guide category '${cat}': ${fcCount} flashcards matching category filter`);
+}
+
+for (const tag of guideNavTags) {
+  guideApp.resetStateFilters();
+  guideApp.state.guideTag = tag;
+  const fcCount = guideApp.getFilteredFlashcards().length;
+  console.log(`  ✔ Guide tag chip '${tag}': ${fcCount} flashcards matching tag filter`);
+}
+guideApp.resetStateFilters();
+
 // Exchange rate must come from one constant, or the calculator and the card prices disagree.
 const dataSrc = fs.readFileSync('data.js', 'utf8');
 const rateMatch = dataSrc.match(/const DEFAULT_EXCHANGE_RATE\s*=\s*([\d.]+)/);
@@ -473,8 +640,6 @@ if (!appCode.includes('DEFAULT_EXCHANGE_RATE') || !appCode.includes('currentBenc
   console.error('  ❌ js/app.js must seed currentBenchmarkRate from DEFAULT_EXCHANGE_RATE');
   process.exit(1);
 }
-// The header calculator modal must read the rate live so it agrees with the currency
-// tab calculator even after the user picks a different rate preset.
 if (!/const getRate = \(\) => currentBenchmarkRate \/ 100/.test(appCode)) {
   console.error('  ❌ The header calculator must derive its rate from currentBenchmarkRate (live), not a snapshot');
   process.exit(1);

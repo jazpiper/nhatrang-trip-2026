@@ -79,11 +79,18 @@ function makeElement(tag = 'div', id = '') {
   return el;
 }
 
+const originalGetHours = Date.prototype.getHours;
+const originalGetMinutes = Date.prototype.getMinutes;
+
 /**
  * Installs a fake `document` (and `window`) on globalThis.
+ * Also mocks Date clock deterministically (14:00) so isOpenNow is reproducible.
  * Returns a handle for reading back what the renderers produced.
  */
 function installDom() {
+  Date.prototype.getHours = () => 14;
+  Date.prototype.getMinutes = () => 0;
+
   const byId = new Map();
 
   const doc = {
@@ -134,6 +141,9 @@ function installDom() {
 }
 
 function uninstallDom() {
+  Date.prototype.getHours = originalGetHours;
+  Date.prototype.getMinutes = originalGetMinutes;
+
   delete globalThis.document;
   delete globalThis.window;
   delete globalThis.CustomEvent;

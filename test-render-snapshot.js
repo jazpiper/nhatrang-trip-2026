@@ -44,6 +44,7 @@ const dataSrc = fs.readFileSync(path.join(__dirname, 'data.js'), 'utf8');
 
 globalThis.NHA_TRANG_GOURMETS = require('./gourmet-data.js').NHA_TRANG_GOURMETS;
 globalThis.NHA_TRANG_STAYS = require('./stays-data.js').NHA_TRANG_STAYS;
+globalThis.NHA_TRANG_SPAS = require('./spa-data.js').NHA_TRANG_SPAS;
 globalThis.NHA_TRANG_SHOPPING = require('./shopping-data.js').NHA_TRANG_SHOPPING;
 globalThis.NHA_TRANG_CURRENCY = require('./currency-data.js').NHA_TRANG_CURRENCY;
 
@@ -85,6 +86,15 @@ const DOMAINS = [
     catField: 'stayCategory', tagField: 'stayTag',
     wishField: 'stayWishlist', data: () => NHA_TRANG_STAYS,
     sampleCat: 'welcome', sampleTag: 'pool', sampleQuery: '인터컨티넨탈'
+  },
+  {
+    key: 'spa',
+    render: () => app.renderSpa(),
+    container: 'spaCardsGridContainer',
+    count: 'spaResultCountText',
+    catField: 'spaCategory', tagField: 'spaTag',
+    wishField: 'spaWishlist', data: () => NHA_TRANG_SPAS,
+    sampleCat: 'local_budget', sampleTag: 'pickup', sampleQuery: '센스파'
   },
   {
     key: 'shopping',
@@ -195,6 +205,7 @@ const MODAL_OPENERS = [
   { key: 'activity', open: item => app.openActivityModal(item), data: () => NHA_TRANG_ACTIVITIES },
   { key: 'gourmet', open: item => app.openGourmetModal(item), data: () => NHA_TRANG_GOURMETS },
   { key: 'stay', open: item => app.openStayModal(item), data: () => NHA_TRANG_STAYS },
+  { key: 'spa', open: item => app.openSpaModal(item), data: () => NHA_TRANG_SPAS },
   { key: 'shopping', open: item => app.openShoppingModal(item), data: () => NHA_TRANG_SHOPPING },
   { key: 'currency', open: item => app.openCurrencyModal(item), data: () => NHA_TRANG_CURRENCY }
 ];

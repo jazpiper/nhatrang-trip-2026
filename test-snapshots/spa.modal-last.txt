@@ -1,0 +1,55 @@
+<!-- modal: spa | item: spa-24 -->
+spaModalAddress
+    text="53 Lê Thánh Tôn, Phường Lộc Thọ, Nha Trang, Khánh Hòa 650000"
+spaModalAmenities
+    html="<span class=\"spa-amenity-pill\">✨ 키즈 버블 욕조</span><span class=\"spa-amenity-pill\">✨ 장난감 플레이존</span><span class=\"spa-amenity-pill\">✨ 패밀리 프라이빗 룸</span><span class=\"spa-amenity-pill\">✨ 샤워 시설</span><span class=\"spa-amenity-pill\">✨ 유아 가운</span>"
+spaModalAvgKrw
+    text="(약 17,400원)"
+spaModalAvgPrice
+    text="320,000 VND"
+spaModalBadge
+    text="유아 전용 스파 베스 & 온가족 패밀리 룸"
+spaModalCategory
+    text="키즈 & 임산부 & 머드온천"
+spaModalCourseTableBody
+    html="\n        <tr>\n          <td class=\"course-name\">\n            <strong>유아 친환경 버블 스파</strong>\n            <p class=\"course-desc\">친환경 천연 버블 입욕제 배스 + 가벼운 아기 성장 마사지</p>\n          </td>\n          <td class=\"course-time\">60분</td>\n          <td class=\"course-vnd\">220,000 VND</td>\n          <td class=\"course-krw\">약 11,990원</td>\n        </tr>\n      \n        <tr>\n          <td class=\"course-name\">\n            <strong>키즈 &amp; 부모 릴렉싱 콤보</strong>\n            <p class=\"course-desc\">아이용 키즈 성장 지압 + 부모 전신 아로마 핫스톤 동시 진행</p>\n          </td>\n          <td class=\"course-time\">90분</td>\n          <td class=\"course-vnd\">320,000 VND</td>\n          <td class=\"course-krw\">약 17,440원</td>\n        </tr>\n      \n        <tr>\n          <td class=\"course-name\">\n            <strong>온가족 패밀리 힐링 패키지</strong>\n            <p class=\"course-desc\">전 가족 프라이빗 룸 + 족욕 + 전신 스파 + 다과 디저트 풀서비스</p>\n          </td>\n          <td class=\"course-time\">120분</td>\n          <td class=\"course-vnd\">480,000 VND</td>\n          <td class=\"course-krw\">약 26,160원</td>\n        </tr>\n      "
+spaModalDesc
+    text="친환경 유기농 입욕제를 푼 따뜻한 버블 욕조에서 물놀이 스파를 한 뒤 아기자기한 키즈 마사지를 받을 수 있으며 부모도 같은 방에서 편안하게 마사지를 받을 수 있습니다."
+spaModalHeartBtn
+    text="♡ 찜하기"
+spaModalHours
+    text="09:00 - 21:00 (연중무휴)"
+spaModalLocation
+    text="시내 중심가 (레탄똔 거리 / 빈컴플라자 인근)"
+spaModalLuggage
+    text="키즈 전용 플레이존, 유아용 친환경 입욕제, 온가족 힐링룸"
+spaModalMainImg
+    src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80"
+spaModalMapBtn
+    href="https://www.google.com/maps/search/?api=1&query=Tyni%20Kid%20Spa%2053%20L%C3%AA%20Th%C3%A1nh%20T%C3%B4n%20L%E1%BB%99c%20Th%E1%BB%8D%20Nha%20Trang"
+spaModalNameVi
+    text="🇻🇳 Tyni Kid & Family Spa Nha Trang"
+spaModalPhotosBtn
+    href="https://www.google.com/maps/search/?api=1&query=Tyni%20Kid%20Spa%2053%20L%C3%AA%20Th%C3%A1nh%20T%C3%B4n%20L%E1%BB%99c%20Th%E1%BB%8D%20Nha%20Trang%20%EC%82%AC%EC%A7%84"
+spaModalPickup
+    text="시내 중심가 빈컴플라자 도보 3분 위치"
+spaModalPickupBadge
+    text="픽드랍 별도"
+    style={background:#F5FBFA;color:#557C7E}
+spaModalPricePer
+    text="90분 키즈 아로마 & 부모 릴렉싱 콤보 기준"
+spaModalPriceRange
+    text="220,000 ~ 480,000 VND"
+spaModalRating
+    text="★ 4.7 (410개 리뷰)"
+spaModalThumbs
+    html="\n        <div class=\"gallery-thumb active\" data-idx=\"0\">\n          <img src=\"https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"티니 키즈 스파 (Tyni Kid &amp; Family Spa) 사진 1\" loading=\"lazy\" />\n        </div>\n      \n        <div class=\"gallery-thumb \" data-idx=\"1\">\n          <img src=\"https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"티니 키즈 스파 (Tyni Kid &amp; Family Spa) 사진 2\" loading=\"lazy\" />\n        </div>\n      \n        <div class=\"gallery-thumb \" data-idx=\"2\">\n          <img src=\"https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"티니 키즈 스파 (Tyni Kid &amp; Family Spa) 사진 3\" loading=\"lazy\" />\n        </div>\n      "
+spaModalTip
+    text="물놀이를 좋아하는 유아들에게 인기 만점이며, 빈컴플라자 쇼핑 후 지친 아이와 함께 휴식을 취하기에 안성맞춤입니다."
+spaModalTipBadge
+    text="팁 별도"
+    style={background:#FEF3C7;color:#92400E}
+spaModalTipPolicy
+    text="팁 자율 (선택 매너 팁)"
+spaModalTitle
+    text="티니 키즈 스파 (Tyni Kid & Family Spa)"

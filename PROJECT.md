@@ -1,90 +1,84 @@
-# Project: Nha Trang Trip 2026 - Currency, ATM & Travel Card Guide Domain
+# Project: Nha Trang Trip 2026 - Comprehensive Travel Guide SPA 2-Phase Expansion
 
 ## Architecture
-Vanilla Single Page Application (SPA) architecture with strict separation of concerns, zero external framework runtime dependencies, and dual Node.js CommonJS test compatibility.
+Vanilla Single Page Application (SPA) architecture with strict separation of concerns, zero external framework runtime dependencies, declarative `DOMAINS` registry in `js/app.js`, and Node.js CommonJS test compatibility.
 
-- **Data Layer (`currency-data.js`)**: Global constant `NHA_TRANG_CURRENCY` loaded before `app.js`, supporting dual Node.js `module.exports` for test runners. Contains 17 ground-truth verified currency exchange spots and zero-fee ATMs with 35-field schema (32 validated by test-currency.js). Also exports `NHA_TRANG_TRAVEL_CARDS` and `NHA_TRANG_ATM_TIPS`.
-- **State Layer (`js/app.js` §3)**: Reactive state managing `currentTab: 'currency'`, `currencyCategory`, `currencyTag`, `currencyWishlist`, `currencyNotes`, and `activeModalCurrency`.
-- **Component Layer (`js/app.js` §8)**: Pure modular functions exporting `renderCurrency()`, `openCurrencyModal()`, `closeCurrencyModal()`, `toggleCurrencyWishlist()`, `getFilteredCurrency()`, and `initCurrencyCalculator()`.
-- **App Controller (`js/app.js`)**: Main SPA orchestrator handling tab switching (`switchMainTab('currency')`), event routing, search filtering, and hero banner updates.
-- **Style Layer (`style.css`)**: Airbnb design tokens, scoped `.currency-card`, `.currency-badge-fee`, `.supported-cards-grid`, `.atm-step-guide`, `.dcc-warning-banner`, `.exchange-rate-table-wrap`, and interactive calculator styling.
-- **Verification Layer (`test-currency.js`, `test-frontend.js`)**: Automated test runner executing 12 validation suites with 100% schema, DOM, URL encoding, card matrix, and business logic coverage.
+- **Data Layer**:
+  - `data.js`: 32 pure tour/marine/theme park activities (`NHA_TRANG_ACTIVITIES`), 6-day timeline (`NHA_TRANG_SCHEDULE`), travel tips (`NHA_TRANG_GUIDE_TIPS`).
+  - `gourmet-data.js`: 113 local restaurants & cafes (`NHA_TRANG_GOURMETS`).
+  - `stays-data.js`: 24 themed accommodations (`NHA_TRANG_STAYS`).
+  - `shopping-data.js`: 18 shopping & market spots (`NHA_TRANG_SHOPPING`).
+  - `currency-data.js`: 17 currency exchange spots & zero-fee ATMs (`NHA_TRANG_CURRENCY`).
+  - `spa-data.js` [Phase 1]: 24 ground-truth verified spa/massage/barbershop spots (`NHA_TRANG_SPAS`) with 39-field schema.
+  - `guide-data.js` [Phase 2]: 4 comprehensive survival kit sub-modules (`NHA_TRANG_GUIDE_HUB`).
+- **State Layer (`js/app.js` §3)**: Reactive state managing active tab, per-domain category/tag filters, wishlist collections, user note stores (`nha_trang_*`), and modal dialogs.
+- **Component & Controller Layer (`js/app.js`)**: Declarative `DOMAINS` table configuration, list/grid renderers (`itemRowHTML`, `itemCardHTML`), detail modal management, wishlist toggles, and live search.
+- **Style Layer (`style.css`)**: Airbnb design tokens, 84px compact list rows, responsive photo cards, modal galleries, flashcard fullscreen overlays, and interactive tables.
+- **Verification Layer (`test-*.js`)**: 12 automated test suites validating schemas, real DOM rendering, CSS class invariants, search/filter algorithms, and snapshot parity.
 
 ## Feature Inventory
 | # | Feature | Description | Milestone | Source |
 |---|---------|-------------|-----------|--------|
-| 1 | Verified Currency & ATM Dataset (`currency-data.js`) | 17 ground-truth verified exchange spots & zero-fee ATMs (35-field schema) | M1 | Spec Miner 2 / Explorer 2 |
-| 2 | 5 Major Korean Travel Cards Specs Matrix | TraveLog, TravelWallet, SOL Travel, Toss Bank, Wibee Travel matching | M1 | Spec Miner 2 / Explorer 2 |
-| 3 | Cash & ATM Operational Guide Dataset | DCC avoidance, 6-digit PIN rules, card-dispense-first order, $100 crisp bill rules | M1 | Spec Miner 2 / Explorer 3 |
-| 4 | Header Navigation Tab & Badge | '💱 환전 & ATM' tab button with dynamic venue count badge (17곳) | M2 | Explorer 1 / 3 |
-| 5 | Category Filter Bar (`#currencyCategoryNav`) | 6 category filters (전체, 수수료 무료 ATM, 시내 금은방, 공항/은행, 트래블로그, 트래블월렛 등) | M2 | Explorer 1 / 3 |
-| 6 | Tag Chips Bar (`#currencyTagChips`) | 8 quick filter chips (수수료 0원, 24시간 LiveBank, 100달러 우대, 야시장 인근 등) | M2 | Explorer 1 / 3 |
-| 7 | Interactive VND ↔ KRW Currency Calculator | Dual bidirectional input, quick preset pills (+50k~+2M), mental math banner, custom rate | M2 | Explorer 3 |
-| 8 | Practical Guide & DCC Defense Infographics | POS terminal simulation, 7-step ATM flowchart, emergency hotlines | M2 | Explorer 3 |
-| 9 | Dynamic Currency Cards Grid Section | Responsive card grid container `#currencyCardsGridContainer` | M2 | Explorer 1 |
-| 10 | Comprehensive Detail Modal (`#currencyModal`) | Modal with photos, Google Maps link, address copy, supported card badges, limits, tips | M2 | Explorer 1 / 3 |
-| 11 | Airbnb CSS Styling & Class Invariants | Styles for currency cards, badges, calculator, tables, guide banners in `style.css` | M3 | Explorer 1 / 3 |
-| 12 | State Store & LocalStorage Extension | `currencyCategory`, `currencyTag`, `currencyWishlist`, `currencyNotes` (`nha_trang_currency_*`) | M3 | Explorer 1 |
-| 13 | Currency Component Module & Router | `js/app.js` §8 + `switchMainTab('currency')`, search, hero | M3 | Explorer 1 / 3 |
-| 14 | Automated Test Suite (`test-currency.js`) | 12 test suites verifying schema, URLs, DOM sync, card matrices, filter simulation | Final | Explorer 1 / 2 / 3 |
-| 15 | Frontend Regression Suite Update | Extend `test-frontend.js` for currency tab DOM IDs and CSS classes | Final | Explorer 1 |
+| 1 | Verified Spa Dataset (`spa-data.js`) | 24 ground-truth verified spots across 4 categories with 39-field schema | M1 | Explorer 2 |
+| 2 | Activity Dataset Cleanup (`data.js`) | Migrate 11 spa spots out, leaving 32 pure activities (`act-01`~`act-32`) | M1 | Explorer 2 |
+| 3 | Automated Spa Test Suite (`test-spa.js`) | 13 test suites validating schema, pricing matrices, addresses, URLs, filters | M1 | Explorer 3 |
+| 4 | Activity Test Suite Update (`test-activity.js`) | Update assertions for 32 activities, verify 100% pass | M1 | Explorer 3 |
+| 5 | Spa UI Markup & Modals (`index.html`) | Header/bottom nav tabs, `#spaCategoryNav`, `#spaTagChips`, `#spaGridSection`, modal | M2 | Explorer 1 |
+| 6 | Spa Logic & `DOMAINS` Registry (`js/app.js`) | Register `spa` domain, `getFilteredSpas()`, `renderSpa()`, list/grid templates | M2 | Explorer 1 |
+| 7 | Spa Styling & CSS Invariants (`style.css`) | Airbnb styles for `.spa-card`, `.spa-course-table`, `.spa-terms-grid`, badges | M2 | Explorer 1 |
+| 8 | Deterministic Test Stub & Snapshot Sync | Fix `isOpenNow` clock in `test-dom-stub.js`, sync `test-render-snapshot.js` | M2 | Explorer 3 |
+| 9 | Survival Kit Dataset (`guide-data.js`) | 4 sub-sections: Transport, Lotte Mart Top 30, Pharmacy/Emergency, Flashcards | M3 | Explorer 3 |
+| 10 | Automated Guide Test Suite (`test-guide.js`) | 8 test suites validating all 4 survival kit sub-modules | M3 | Explorer 3 |
+| 11 | Guide Hub UI Markup & Layout (`index.html`) | Nav tab, `#guideCategoryNav`, interactive containers for 4 sub-modules | M4 | Explorer 1 |
+| 12 | Guide Hub Interactivity & Flashcards (`js/app.js`) | Live search, price comparison table, fullscreen flashcard modal & copy | M4 | Explorer 1 |
+| 13 | Guide Hub Styling (`style.css`) | Accordions, matrix tables, emergency cards, fullscreen flashcards | M4 | Explorer 1 |
+| 14 | Full Regression & Integration Verification | All 12 test suites passing 100% (`test-*.js`, `test-frontend.js`) | M5 | Reviewers / Challengers / Workers |
+| 15 | Forensic Integrity Audit | Systematic anti-hallucination & anti-dummy check | M5 | Forensic Auditor |
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M1 | Verified Real-World Dataset | `currency-data.js` (17 verified spots, 35 fields, 5 travel card matrices, tips) | none | DONE |
-| M2 | SPA Markup & Calculator UI | `index.html` (tab, nav, chips, calculator widget, guide cards, grid, modal) | M1 | DONE |
-| M3 | State Store, Logic & Styling | `js/app.js` (§3 state, §8 currency, §9 router), `style.css` | M1, M2 | DONE |
-| Final | 100% Verification, Audit & Hardening | `test-currency.js` & `test-frontend.js` 100% pass + Forensic Audit | M1, M2, M3 | DONE |
+| M1 | Phase 1 Data Layer & Activity Migration | `spa-data.js`, `data.js`, `test-spa.js`, `test-activity.js` | none | DONE |
+| M2 | Phase 1 Spa UI, Logic & DOM Integration | `index.html`, `js/app.js`, `style.css`, `test-dom-stub.js`, `test-frontend.js` | M1 | DONE |
+| M3 | Phase 2 Survival Kit Hub Dataset | `guide-data.js`, `test-guide.js` | none | DONE |
+| M4 | Phase 2 Guide Hub UI, Flashcards & Interactivity | `index.html`, `js/app.js`, `style.css`, `test-frontend.js` | M3 | DONE |
+| M5 | Final Full Verification, Hardening & Audit | Full regression across all 12 suites + Forensic Integrity Audit | M2, M4 | DONE |
 
 ## Interface Contracts
-### `currency-data.js` ↔ `js/app.js`
-- `window.NHA_TRANG_CURRENCY`: Array of 17 `NhaTrangCurrencySpot` objects.
-- `window.NHA_TRANG_TRAVEL_CARDS`: Array of 5 Korean travel card spec objects.
-- `window.NHA_TRANG_ATM_TIPS`: Array of practical guidelines (DCC, PIN, card ejection, 100 USD bill).
-- Each `NhaTrangCurrencySpot` object contains: `id`, `name`, `nameKo`, `nameVi`, `nameEn`, `category`, `categoryLabel`, `badge`, `rating`, `reviewCount`, `openHours`, `location`, `addressVi`, `phone`, `googleMapQuery`, `googleMapUrl`, `googlePhotosUrl`, `district`, `districtLabel`, `supportedCurrencies`, `supportedCards`, `feeFree`, `feePolicy`, `withdrawalLimit`, `exchangePerks`, `facilities`, `tags`, `highlight`, `description`, `localTip`, `coverImage`, `images`.
+### `spa-data.js` ↔ `js/app.js`
+- `window.NHA_TRANG_SPAS`: Array of 24 `NhaTrangSpaSpot` objects.
+- Each object contains 39 fields: `id` (`spa-01`..`spa-24`), `name`, `nameKo`, `nameVi`, `category` (`local_budget`, `luxury_resort`, `barbershop`, `family_maternity`), `categoryLabel`, `badge`, `rating` (number), `reviewCount` (number), `priceRange`, `prices` (`m60_vnd`, `m60_krw`, `m90_vnd`, `m90_krw`, `m120_vnd`, `m120_krw`), `pickupDropoff`, `tipPolicy`, `luggageShower`, `openHours`, `addressVi`, `district`, `districtLabel`, `phone`, `googleMapQuery`, `googleMapUrl`, `googlePhotosUrl`, `coverImage`, `images` (array >=3), `tags` (array), `facilities` (array), `highlight`, `summary`, `description`, `features` (array), `localTip`.
 
-### `js/app.js` §3 state ↔ §8 currency
-- `state.currencyCategory`: string ('all' | category slug)
-- `state.currencyTag`: string ('all' | tag key)
-- `state.currencyWishlist`: string[] (array of IDs from `nha_trang_currency_wishlist`)
-- `state.currencyNotes`: Record<string, string> (id -> note from `nha_trang_currency_notes`)
-- `state.activeModalCurrency`: object | null
-
-### `js/app.js` §8 Currency Functions
-- `renderCurrency()`: void (renders cards into `#currencyCardsGridContainer`)
-- `openCurrencyModal(spot)`: void (populates `#currencyModal` and adds `.active`)
-- `closeCurrencyModal()`: void (removes `.active` from `#currencyModal`)
-- `toggleCurrencyWishlist(id)`: void (toggles item in wishlist, updates badge & storage)
-- `getFilteredCurrency()`: Array<NhaTrangCurrencySpot> (returns filtered & sorted list)
-- `initCurrencyCalculator()`: void (binds bidirectional calculation and preset pills)
+### `guide-data.js` ↔ `js/app.js`
+- `window.NHA_TRANG_GUIDE_HUB`: Object containing:
+  1. `transport`: Airport matrix (`camRanhToCity`), Taxi comparison (`greenSmVsGrab`), Scam checklist (`scamChecklist`), Intercity bus (`intercityBus`), Motorbike rental (`motorbikeRules`).
+  2. `shoppingPriceMatrix`: Array of 30 top souvenir objects with `nameKo`, `nameVi`, `unit`, `officialPriceVnd`, `marketBargainPriceVnd`, `targetDiscountPercent`, `originalVsFakeTip`, `customsAllowed`.
+  3. `emergencyPharmacy`: 10 OTC symptom-to-medication mappings, 2 International Hospitals (`vinmec`, `vkHospital`), travel insurance claim checklist.
+  4. `flashcards`: Array of 21 communicative cards across categories (`dining`, `transport`, `shopping`, `emergency`) with `ko`, `vi`, `pronunciation`, `purpose`, `icon`.
 
 ## Code Layout
 ```
 ./
-├── data.js                     # Activities & Schedule dataset (43 places)
-├── gourmet-data.js             # Gourmet dataset (113 places)
-├── stays-data.js               # Stays dataset (24 places)
-├── shopping-data.js            # Shopping dataset (18 places)
-├── currency-data.js            # [M1] Currency & ATM dataset (17 places)
-├── index.html                  # [M2] Main SPA markup, calculator widget & currency modal
-├── style.css                   # [M3] Airbnb design styles & currency components
+├── data.js                     # 32 Pure activities + schedule + tips
+├── gourmet-data.js             # 113 Gourmet places
+├── stays-data.js               # 24 Themed accommodations
+├── shopping-data.js            # 18 Shopping spots
+├── currency-data.js            # 17 Currency & ATM spots
+├── spa-data.js                 # [M1] 24 Verified spa/massage/barbershop spots
+├── guide-data.js               # [M3] Survival Kit Hub dataset (4 sub-sections)
+├── index.html                  # [M2, M4] SPA markup, modals, navigation, cards, templates
+├── style.css                   # [M2, M4] Airbnb design tokens, spa/guide styling, invariants
 ├── js/
-│   └── app.js                  # Entire app logic in one IIFE. Sections:
-│                               #   1 storage / 2 format & UI helpers / 3 state
-│                               #   4 activities / 5 gourmet / 6 stays / 7 shopping
-│                               #   8 currency & ATM (+ calculator)
-│                               #   9 tab switching / 10 event binding
-│                               #   11 bootstrap + Node export shim (module.exports)
-├── test-activity.js            # Activity test suite
-├── test-gourmet.js             # Gourmet test suite
-├── test-stays.js               # Stays test suite
-├── test-shopping.js            # Shopping test suite
-├── test-frontend.js            # [Final] Frontend integration test (7 suites)
-└── test-currency.js            # [Final] Dedicated 12-suite currency & ATM test runner
+│   └── app.js                  # SPA Controller (DOMAINS registry, renderers, state, modals)
+├── test-dom-stub.js            # [M2] DOM & clock stub for Node.js test suites
+├── test-activity.js            # [M1] 32 Activity test suite
+├── test-gourmet.js             # 113 Gourmet test suite
+├── test-stays.js               # 24 Stays test suite
+├── test-shopping.js            # 18 Shopping test suite
+├── test-currency.js            # 17 Currency test suite
+├── test-seafood.js             # Seafood test suite
+├── test-spa.js                 # [M1] Dedicated 13-suite Spa test runner
+├── test-guide.js               # [M3] Dedicated 8-suite Guide Hub test runner
+├── test-frontend.js            # [M2, M4] Frontend integration test runner
+└── test-render-snapshot.js     # [M2] Visual snapshot parity test runner
 ```
-
-> The earlier `js/store/`, `js/utils/`, `js/components/` split was reverted — those
-> directories no longer exist. `js/app.js` is the only script. Test suites reach the
-> real filter/sort functions through the `module.exports` shim at the bottom of that
-> file rather than reimplementing them.
