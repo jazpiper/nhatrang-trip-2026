@@ -5,11 +5,11 @@
  * ============================================================================
  * 
  * Verifies NHA_TRANG_ACTIVITIES from data.js against:
- * 1. Dataset size: Total activities >= 40 (specifically 43).
- * 2. Unique IDs: Strictly unique alphanumeric identifiers (act-01 to act-43).
+ * 1. Dataset size: Total activities >= 30 (specifically 32).
+ * 2. Unique IDs: Strictly unique alphanumeric identifiers (act-01 to act-32).
  * 3. Schema completeness: All 22 schema fields present and non-empty.
  * 4. Data types & bounds: rating (1.0 <= r <= 5.0), reviewCount (> 0 integer), priceVnd (>= 0).
- * 5. Category taxonomy: Exactly matches the 10 allowed categories.
+ * 5. Category taxonomy: Exactly matches the 8 allowed categories.
  * 6. Image URLs: Non-empty array with >= 3 valid HTTP/HTTPS URLs per entry.
  * 7. Google Map queries & Booking URLs: Non-empty query strings and valid URLs.
  * 8. Sub-array fields: tags, included, notIncluded, whatToBring are populated arrays.
@@ -20,72 +20,14 @@
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
+const { TestRunner, colors } = require('./test-harness.js');
 
-// Terminal ANSI styling
-const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  green: '\x1b[32m',
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
-  cyan: '\x1b[36m'
-};
-
-class TestRunner {
-  constructor() {
-    this.totalSuites = 0;
-    this.totalTests = 0;
-    this.passedTests = 0;
-    this.failedTests = 0;
-    this.errors = [];
-    this.startTime = Date.now();
-  }
-
-  suite(name) {
-    this.totalSuites++;
-    console.log(`\n${colors.bright}${colors.cyan}=== Suite ${this.totalSuites}: ${name} ===${colors.reset}`);
-  }
-
-  test(description, fn) {
-    this.totalTests++;
-    try {
-      fn();
-      this.passedTests++;
-      console.log(`  ${colors.green}✔ PASS:${colors.reset} ${description}`);
-    } catch (err) {
-      this.failedTests++;
-      console.log(`  ${colors.red}✖ FAIL:${colors.reset} ${description}`);
-      console.log(`    ${colors.yellow}Error: ${err.message}${colors.reset}`);
-      this.errors.push({ description, message: err.message, stack: err.stack });
-    }
-  }
-
-  summary() {
-    const duration = ((Date.now() - this.startTime) / 1000).toFixed(3);
-    console.log(`\n${colors.bright}====================================================${colors.reset}`);
-    console.log(`${colors.bright}Activity Test Execution Summary (${duration}s)${colors.reset}`);
-    console.log(`====================================================`);
-    console.log(`Suites Run:    ${this.totalSuites}`);
-    console.log(`Total Tests:   ${this.totalTests}`);
-    console.log(`Passed Tests:  ${colors.green}${this.passedTests}${colors.reset}`);
-    console.log(`Failed Tests:  ${this.failedTests > 0 ? colors.red : colors.green}${this.failedTests}${colors.reset}`);
-
-    if (this.failedTests > 0) {
-      console.log(`\n${colors.red}${colors.bright}Failures Detected:${colors.reset}`);
-      this.errors.forEach((err, idx) => {
-        console.log(`\n  ${idx + 1}) ${colors.red}${err.description}${colors.reset}`);
-        console.log(`     ${err.message}`);
-      });
-      console.log(`\n${colors.red}❌ Activity Test Suite Failed.${colors.reset}\n`);
-      return false;
-    } else {
-      console.log(`\n${colors.green}${colors.bright}✨ All Activity Test Suites Passed Successfully! 100% Schema & Data Integrity Verified.${colors.reset}\n`);
-      return true;
-    }
-  }
-}
-
-const runner = new TestRunner();
+const runner = new TestRunner({
+  summaryTitle: 'Activity Test Execution Summary',
+  failureHeader: 'Failures Detected:',
+  failureFooter: 'Activity Test Suite Failed.',
+  successMessage: '✨ All Activity Test Suites Passed Successfully! 100% Schema & Data Integrity Verified.'
+});
 
 // ==========================================
 // 1. Module Loading & Dataset Availability
@@ -101,10 +43,7 @@ runner.test('data.js exists on disk', () => {
 let activities = [];
 
 runner.test('data.js loads and exports NHA_TRANG_ACTIVITIES', () => {
-  const dataCode = fs.readFileSync(DATA_FILE_PATH, 'utf8').replace(/const /g, 'global.');
-  eval(dataCode);
-
-  activities = global.NHA_TRANG_ACTIVITIES;
+  activities = require('./data.js').NHA_TRANG_ACTIVITIES;
 
   assert.ok(Array.isArray(activities), 'NHA_TRANG_ACTIVITIES must be an array');
   assert.ok(activities.length > 0, 'NHA_TRANG_ACTIVITIES must not be empty');
@@ -112,9 +51,11 @@ runner.test('data.js loads and exports NHA_TRANG_ACTIVITIES', () => {
 
 // 여행 일정(NHA_TRANG_SCHEDULE)과 suggestedDay는 실제 여행 날짜를 노출하므로
 // 공개 배포를 위해 데이터에서 제거했다. 다시 들어오지 않는지 확인한다.
+// data.js를 직접 텍스트로 읽어 정규식으로 검사한다 (require로는 소스 텍스트에
+// 남아있는 죽은 코드나 주석까지는 못 잡는다).
 runner.test('개인 여행 일정 데이터가 노출되지 않는다', () => {
   const raw = fs.readFileSync(DATA_FILE_PATH, 'utf8');
-  assert.ok(typeof global.NHA_TRANG_SCHEDULE === 'undefined', 'NHA_TRANG_SCHEDULE must not exist');
+  assert.ok(!/NHA_TRANG_SCHEDULE/.test(raw), 'data.js must not contain NHA_TRANG_SCHEDULE');
   assert.ok(!/suggestedDay/.test(raw), 'data.js must not contain suggestedDay');
   assert.ok(!/9\/1[0-9]|9\/2[0-9]|Day ?[1-7]/.test(raw), 'data.js must not contain trip dates or Day markers');
 });
@@ -124,18 +65,18 @@ runner.test('개인 여행 일정 데이터가 노출되지 않는다', () => {
 // ==========================================
 runner.suite('Dataset Size & Capacity Constraints');
 
-runner.test('Total activities count meets minimum requirement (>= 40)', () => {
+runner.test('Total activities count meets minimum requirement (>= 30)', () => {
   assert.ok(
-    activities.length >= 40,
-    `Expected at least 40 activities, but found ${activities.length}`
+    activities.length >= 30,
+    `Expected at least 30 activities, but found ${activities.length}`
   );
 });
 
-runner.test('Total activities count reaches target specification (43 activities)', () => {
+runner.test('Total activities count reaches target specification (32 activities)', () => {
   assert.strictEqual(
     activities.length,
-    43,
-    `Expected exactly 43 activities, but found ${activities.length}`
+    32,
+    `Expected exactly 32 activities, but found ${activities.length}`
   );
 });
 
@@ -144,7 +85,7 @@ runner.test('Total activities count reaches target specification (43 activities)
 // ==========================================
 runner.suite('ID Uniqueness & Identifier Format');
 
-runner.test('Every activity has a unique, well-formatted string ID (e.g., act-01..act-43)', () => {
+runner.test('Every activity has a unique, well-formatted string ID (e.g., act-01..act-32)', () => {
   const idSet = new Set();
   const idRegex = /^act-\d{2,}$/;
 
@@ -246,9 +187,7 @@ runner.suite('Category Taxonomy & Classification');
 
 const ALLOWED_CATEGORIES = [
   'hopping',
-  'mudbath',
   'vinwonders',
-  'spa',
   'cruise',
   'culture',
   'nightlife',
@@ -257,7 +196,7 @@ const ALLOWED_CATEGORIES = [
   'cooking'
 ];
 
-runner.test('All activities belong to the 10 allowed categories', () => {
+runner.test('All activities belong to the 8 allowed categories', () => {
   activities.forEach((act, idx) => {
     assert.ok(
       ALLOWED_CATEGORIES.includes(act.category),

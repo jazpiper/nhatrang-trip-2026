@@ -1,0 +1,13 @@
+<!-- modal: flashcard | item: fc-01 -->
+flashcardModalCategory
+    text="식당 & 카페"
+flashcardModalIcon
+    text="🌿"
+flashcardModalKo
+    text="고수 빼주세요"
+flashcardModalPron
+    text="[둥 조 라우 무이 (콩 응오 리)]"
+flashcardModalPurpose
+    text="음식 주문 시 고수(향채) 제외 요청"
+flashcardModalVi
+    text="KHÔNG CHO RAU MÙI\n(ĐỪNG CHO NGÒ RÍ)"

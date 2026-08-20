@@ -1,6 +1,4 @@
 <!-- modal: currency | item: cam-ranh-airport-t2-atm -->
-currencyModal
-    style={display:flex}
 currencyModalAddress
     text="Tầng 1 Sảnh đến, Nhà ga Quốc tế T2, Sân bay Quốc tế Cam Ranh, Cam Ranh, Khánh Hòa"
 currencyModalAtmSteps
@@ -19,7 +17,7 @@ currencyModalFacilities
     html="\n        <span class=\"facility-chip\">✓ 24시간 공항 ATM 존</span>\n      \n        <span class=\"facility-chip\">✓ 공항 보안 구역</span>\n      \n        <span class=\"facility-chip\">✓ 영문/한국어 지원 인터페이스</span>\n      "
 currencyModalFeeBadge
     text="현지 수수료 0 VND"
-    style={background:#ECFDF5;color:#059669}
+    style={background:var(--success-surface);color:var(--success-mark)}
 currencyModalFeePolicy
     text="기기별 상이 (VPBank/VietinBank/BIDV 등 다수 기기 집결, 제휴 카드 수수료 0원~소액)"
 currencyModalHeartBtn

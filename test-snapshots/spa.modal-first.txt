@@ -1,0 +1,55 @@
+<!-- modal: spa | item: spa-01 -->
+spaModalAddress
+    text="241 Ngô Đến, Phường Ngọc Hiệp, Nha Trang, Khánh Hòa 650000"
+spaModalAmenities
+    html="<span class=\"spa-amenity-pill\">✨ 개별 샤워실</span><span class=\"spa-amenity-pill\">✨ 전용 커플룸</span><span class=\"spa-amenity-pill\">✨ 무료 캐리어 보관</span><span class=\"spa-amenity-pill\">✨ 무료 셔틀버스</span><span class=\"spa-amenity-pill\">✨ 수제 요거트 제공</span>"
+spaModalAvgKrw
+    text="(약 31,600원)"
+spaModalAvgPrice
+    text="580,000 VND"
+spaModalBadge
+    text="카이강 뷰 & 여행자 베스트"
+spaModalCategory
+    text="가성비 & 힐링 스파"
+spaModalCourseTableBody
+    html="\n        <tr>\n          <td class=\"course-name\">\n            <strong>아로마 바디 케어</strong>\n            <p class=\"course-desc\">천연 에센셜 오일을 사용한 부드러운 릴렉싱 전신 마사지</p>\n          </td>\n          <td class=\"course-time\">60분</td>\n          <td class=\"course-vnd\">450,000 VND</td>\n          <td class=\"course-krw\">약 24,525원</td>\n        </tr>\n      \n        <tr>\n          <td class=\"course-name\">\n            <strong>시그니처 핫스톤 &amp; 뱀부</strong>\n            <p class=\"course-desc\">따뜻한 현무암 핫스톤과 천연 대나무 스틱으로 뭉친 근육을 깊숙이 이완</p>\n          </td>\n          <td class=\"course-time\">90분</td>\n          <td class=\"course-vnd\">580,000 VND</td>\n          <td class=\"course-krw\">약 31,610원</td>\n        </tr>\n      \n        <tr>\n          <td class=\"course-name\">\n            <strong>VIP 전신 릴렉스 풀코스</strong>\n            <p class=\"course-desc\">허브 족욕 + 딥티슈 지압 + 페이셜 마스크 + 핫스톤 올인원 풀케어</p>\n          </td>\n          <td class=\"course-time\">120분</td>\n          <td class=\"course-vnd\">780,000 VND</td>\n          <td class=\"course-krw\">약 42,510원</td>\n        </tr>\n      "
+spaModalDesc
+    text="시내 중심가에서 약간 벗어난 카이강변에 위치하여 도심의 소음 없이 고즈넉한 자연 속에서 마사지를 받을 수 있습니다. 마사지 후 제공되는 시원한 수제 요거트와 과일 디저트가 일품입니다."
+spaModalHeartBtn
+    text="♡ 찜하기"
+spaModalHours
+    text="08:30 - 20:30 (연중무휴)"
+spaModalLocation
+    text="나트랑 북부 카이강변 (포나가르 사원 도보 7분)"
+spaModalLuggage
+    text="당일 무료 캐리어 보관 및 개별 샤워실/어메니티/타월 완비"
+spaModalMainImg
+    src="https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=1200&q=80"
+spaModalMapBtn
+    href="https://www.google.com/maps/search/?api=1&query=Sen%20Spa%20241%20Ng%C3%B4%20%C4%90%E1%BA%BFn%20Ng%E1%BB%8Dc%20Hi%E1%BB%87p%20Nha%20Trang"
+spaModalNameVi
+    text="🇻🇳 Sen Spa Nha Trang"
+spaModalPhotosBtn
+    href="https://www.google.com/maps/search/?api=1&query=Sen%20Spa%20241%20Ng%C3%B4%20%C4%90%E1%BA%BFn%20Ng%E1%BB%8Dc%20Hi%E1%BB%87p%20Nha%20Trang%20%EC%82%AC%EC%A7%84"
+spaModalPickup
+    text="시내 및 주요 리조트 전용 셔틀 운행 (사전 예약 시 무료 지원)"
+spaModalPickupBadge
+    text="픽드랍 지원"
+    style={background:var(--color-primary-light);color:var(--color-primary-ink)}
+spaModalPricePer
+    text="90분 핫스톤 & 아로마 코스 기준"
+spaModalPriceRange
+    text="450,000 ~ 780,000 VND"
+spaModalRating
+    text="★ 4.9 (2,150개 리뷰)"
+spaModalThumbs
+    html="\n        <div class=\"gallery-thumb active\" data-idx=\"0\">\n          <img src=\"https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"센 스파 (Sen Spa Nha Trang) 사진 1\" loading=\"lazy\" />\n        </div>\n      \n        <div class=\"gallery-thumb \" data-idx=\"1\">\n          <img src=\"https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"센 스파 (Sen Spa Nha Trang) 사진 2\" loading=\"lazy\" />\n        </div>\n      \n        <div class=\"gallery-thumb \" data-idx=\"2\">\n          <img src=\"https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"센 스파 (Sen Spa Nha Trang) 사진 3\" loading=\"lazy\" />\n        </div>\n      "
+spaModalTip
+    text="포나가르 사원 관광 후 들르는 동선을 추천하며, 카카오톡으로 커플룸 사전 예약 시 대기 없이 편리하게 이용 가능합니다."
+spaModalTipBadge
+    text="팁 별도"
+    style={background:var(--warn-surface);color:var(--warn-ink)}
+spaModalTipPolicy
+    text="팁 별도 (90분 기준 50,000~100,000 VND / 2~4 USD 자율 매너 팁 권장)"
+spaModalTitle
+    text="센 스파 (Sen Spa Nha Trang)"

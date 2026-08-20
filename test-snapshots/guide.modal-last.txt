@@ -1,0 +1,13 @@
+<!-- modal: flashcard | item: fc-21 -->
+flashcardModalCategory
+    text="응급 & 호텔"
+flashcardModalIcon
+    text="⏰"
+flashcardModalKo
+    text="공항 가는 택시(샌딩 차량) 예약해 주세요"
+flashcardModalPron
+    text="[닷 지움 또이 쎄 라 산 바이 깜란]"
+flashcardModalPurpose
+    text="호텔 리셉션에 공항 샌딩 차량 예약 요청"
+flashcardModalVi
+    text="ĐẶT GIÙM TÔI XE\nRA SÂN BAY CAM RANH"
