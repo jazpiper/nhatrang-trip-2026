@@ -37,6 +37,9 @@
 ## 4. Standard SOP: Adding a New Page / Tab (신규 페이지/탭 추가 표준 절차)
 프로젝트는 Vanilla SPA(Single Page Application) 구조로 동작하므로, 신규 탭을 추가할 때는 아래 5단계를 반드시 준수한다.
 
+> **[CRITICAL]** 최상위 루트에 있는 `index.html`과 `js/app.js`는 빌드 결과물이므로 절대 직접 수정하지 마라.
+> 모든 마크업과 로직 변경은 반드시 `src/html/`과 `src/js/` 내의 소스 파일에서 수행해야 한다.
+
 ### Step 1. 데이터 모듈 정의 (`<domain>-data.js`)
 - 최상위 글로벌 변수(예: `const NHA_TRANG_CURRENCY = [...]`)로 내보내고 `index.html`의 `<script>` 태그에 로드.
 - 모든 엔트리는 ID, 한국어명, 베트남 공식명, 카테고리, 태그, 평점, 리뷰수, 가격대, 구글맵 링크(`mapUrl`), 사진 링크(`photosUrl`), 위치, 팁 등 규격화된 스키마를 준수.
@@ -54,7 +57,7 @@
    - `getFiltered<Domain>s()`: 카테고리, 태그 칩, 검색어, 위시리스트 필터, 정렬 로직.
    - `render<Domain>s()`: 카드 템플릿 생성, 상세 모달 오픈 바인딩 로직.
 3. **`11_registry.js`**: `DOMAINS` 테이블에 신규 탭 라우팅 정보 등록.
-4. **빌드 스크립트 실행**: HTML과 JS 작성이 끝나면 터미널에서 `node build.js`를 실행하여 최상위 `index.html`과 `js/app.js`를 생성한다.
+4. **빌드 및 통합 테스트 실행**: 파일 수정이 끝나면 터미널에서 반드시 `node build.js && node test-frontend.js`를 실행하여 빌드와 통합 테스트를 동시에 검증한다.
 
 ### Step 4. `style.css` 스타일 점검 & 반응형 확인
 - Airbnb 스타일의 디자인 토큰(그리드, 뱃지, 태그 칩, 둥근 모서리, 카드 호버 트랜지션, 모바일 반응형 뷰포트) 일관성 유지.
