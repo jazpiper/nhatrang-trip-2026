@@ -15,6 +15,7 @@ const fs = require('fs');
 const { NHA_TRANG_ACTIVITIES } = require('./data.js');
 const { NHA_TRANG_GOURMETS } = require('./gourmet-data.js');
 const { NHA_TRANG_STAYS } = require('./stays-data.js');
+const { NHA_TRANG_HOTEL_DININGS } = require('./hotel-dining-data.js');
 const { NHA_TRANG_SPAS } = require('./spa-data.js');
 const { NHA_TRANG_SHOPPING } = require('./shopping-data.js');
 const { NHA_TRANG_CURRENCY } = require('./currency-data.js');
@@ -27,6 +28,7 @@ const counts = {
   activities: NHA_TRANG_ACTIVITIES.length,
   gourmet: NHA_TRANG_GOURMETS.length,
   stays: NHA_TRANG_STAYS.length,
+  hoteldining: NHA_TRANG_HOTEL_DININGS.length,
   spa: NHA_TRANG_SPAS.length,
   shopping: NHA_TRANG_SHOPPING.length,
   currency: NHA_TRANG_CURRENCY.length
@@ -56,6 +58,7 @@ const navIds = {
   activities: 'activityCategoryNav',
   gourmet: 'gourmetCategoryNav',
   stays: 'stayCategoryNav',
+  hoteldining: 'hoteldiningCategoryNav',
   spa: 'spaCategoryNav',
   shopping: 'shoppingCategoryNav',
   currency: 'currencyCategoryNav'
@@ -91,6 +94,7 @@ const resultCountIds = {
   activities: 'resultCountText',
   gourmet: 'gourmetResultCountText',
   stays: 'stayResultCountText',
+  hoteldining: 'hoteldiningResultCountText',
   spa: 'spaResultCountText',
   shopping: 'shoppingResultCountText',
   currency: 'currencyResultCountText'

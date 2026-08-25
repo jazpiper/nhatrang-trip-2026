@@ -18,7 +18,7 @@
 python3 -m http.server 8000
 ```
 
-테스트는 서버 없이 Node로 바로 실행한다. 데이터 개수를 바꿨으면 `node build-counts.js`로 `index.html` 카운트를 재스탬프한다.
+테스트는 서버 없이 Node로 바로 실행한다. HTML이나 JS를 수정했거나 데이터 개수를 바꿨으면 `node build.js`를 실행하여 파일 병합 및 `index.html` 카운트 재스탬프를 수행한다.
 
 ## 아키텍처
 
@@ -30,8 +30,11 @@ python3 -m http.server 8000
 **나머지 6종에 정적 태그를 다시 넣지 말 것** — lazy와 이중 로드된다. `test-frontend.js` Suite 2가 (정적 태그 부재 + `LAZY_DATA` 등록 + 파일 실존)을 6종 전부 검증한다. `js/app.js`의 lazy 데이터 참조는 전부 `typeof` 가드 뒤에 있으므로, 새 코드가 lazy 전역을 만질 때도 같은 가드를 유지해야 한다.
 
 ```
-index.html         단일 진입점. 7개 탭 정적 마크업 + 모달 template + 하단 탭바 + 하드코딩 카운트
-                   모달은 <template class="modal-tpl">에 있고 크롬은 buildModals()가 생성
+index.html         (자동 생성됨) 단일 진입점. src/html/ 의 8개 조각이 합쳐진 결과물
+src/html/          index.html을 구성하는 8개의 HTML 조각 파일들
+js/app.js          (자동 생성됨) 전체 앱 로직 단일 파일. src/js/ 의 15개 조각이 합쳐진 결과물
+src/js/            js/app.js를 구성하는 15개의 JS 모듈 조각 파일들
+build.js           src/ 내의 파일들을 순서대로 합쳐 최상위 index.html과 js/app.js를 생성하는 스크립트
 robots.txt         크롤러 전면 차단
 vercel.json        보안 + 색인 차단 헤더
 style.css          Sea Glass 디자인 토큰 + 리스트 행/그리드 카드 (단일 파일)
@@ -43,22 +46,13 @@ shopping-data.js   NHA_TRANG_SHOPPING(18)
 currency-data.js   NHA_TRANG_CURRENCY(17) + NHA_TRANG_TRAVEL_CARDS + NHA_TRANG_ATM_TIPS
 guide-data.js      NHA_TRANG_GUIDE_HUB (transport / shoppingPriceMatrix / emergencyPharmacy / flashcards)
                    데이터 7종 전부 module.exports 있음 — 테스트에서 require() 가능
-js/app.js          전체 앱 로직 단일 파일 (IIFE). 섹션 주석으로 구분:
-                     1 스토리지 / 2 포맷·UI 헬퍼 / 3 state
-                     3.5 applyDomainFilter + matchTextFields (공통 필터 파이프라인)
-                     3.55 itemRowHTML + isOpenNow/filterOpenNow (공통 리스트 행)
-                     3.6 renderDomainGrid (공통 렌더 셸 — 리스트/그리드 분기)
-                     3.7 applyModalFields (모달 필드 선언 바인딩)
-                     4 액티비티 / 5 맛집 / 6 숙소 / 7 쇼핑 / 8 환전·ATM
-                     8.4 스파 / 8.5 여행 꿀팁 허브 / 8.6 DOMAINS 레지스트리
-                     9 탭 전환 / 10 이벤트 바인딩 / 11 부트스트랩 + Node export shim
-build-counts.js    index.html의 하드코딩 카운트를 데이터셋에서 파생시켜 재스탬프 (데이터 증감 후 실행)
+build-counts.js    index.html의 하드코딩 카운트를 데이터셋에서 파생시켜 재스탬프 (build.js가 호출)
 test-*.js          Node 검증 스위트 (루트)
 test-snapshots/    렌더 출력 골든 파일 (자동 생성, 직접 편집 금지)
 scratch/, .agents/ 과거 에이전트 작업 산출물. 프로덕션 코드 아님 — 수정/참조 불필요
 ```
 
-과거의 `js/store/`, `js/utils/`, `js/components/` 모듈 분리는 되돌려져 지금은 `js/app.js` 하나뿐이다. **`file://`로 열려면 클래식 스크립트여야 하므로 다시 ES 모듈로 쪼개지 말 것.** `PROJECT.md`나 옛 문서가 그 경로를 언급하면 무시하라.
+**`file://`로 열려면 클래식 스크립트여야 하므로 ES 모듈(`type="module"`)로 쪼개는 것은 금지**된다. 대신 `src/html/`과 `src/js/` 안에서 작업하고 `node build.js`로 단순히 문자열을 합쳐서 단일 파일로 만드는 방식을 사용한다. 루트의 `index.html`과 `js/app.js`를 직접 수정하지 말 것.
 
 ### 도메인 레지스트리 (`DOMAINS`, 섹션 8.6)
 

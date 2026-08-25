@@ -1,0 +1,53 @@
+<!-- modal: hoteldining | item: dining-havana-spices -->
+hoteldiningModalAddress
+    text="38 Trần Phú, Lộc Thọ, Nha Trang, Khánh Hòa"
+hoteldiningModalBadge
+    text="쩐푸 해변 조망 5성급 가성비 뷔페"
+hoteldiningModalCategory
+    text="인터내셔널 & 아시안 뷔페"
+hoteldiningModalDesc
+    text="베트남 정통 로컬 요리와 아시안 특선, 인터내셔널 조식 뷔페를 탁 트인 오션뷰와 함께 즐길 수 있습니다."
+hoteldiningModalDressCode
+    text="캐주얼 / 스마트 캐주얼"
+hoteldiningModalHeartBtn
+    text="♡ 찜하기"
+hoteldiningModalHighlight
+    text="쩐푸 해변을 정면으로 마주하며 즐기는 5성급 호텔의 풍성하고 가성비 좋은 인터내셔널 뷔페!"
+hoteldiningModalHotelName
+    text="🏨 아바나 나트랑 호텔 (Havana Nha Trang Hotel)"
+hoteldiningModalLocation
+    text="아바나 나트랑 호텔 2층"
+hoteldiningModalMainImg
+    src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80"
+hoteldiningModalMapLink
+    href="https://www.google.com/maps/search/?api=1&query=Spices%20Restaurant%20Havana%20Hotel%2038%20Tr%E1%BA%A7n%20Ph%C3%BA%20L%E1%BB%99c%20Th%E1%BB%8D%20Nha%20Trang"
+hoteldiningModalNameVi
+    text="🇻🇳 Spices Restaurant (Havana Nha Trang Hotel)"
+hoteldiningModalOfficialLink
+    href="https://havanahotel.vn/dining/"
+hoteldiningModalOpenHours
+    text="06:30 - 22:00"
+hoteldiningModalPhone
+    text="+84 258 3889 999"
+hoteldiningModalPhotosLink
+    href="https://www.google.com/maps/search/?api=1&query=Spices%20Restaurant%20Havana%20Hotel%2038%20Tr%E1%BA%A7n%20Ph%C3%BA%20L%E1%BB%99c%20Th%E1%BB%8D%20Nha%20Trang%20%EC%82%AC%EC%A7%84"
+hoteldiningModalPriceKrw
+    text="(약 24,500원)"
+hoteldiningModalPricePer
+    text="/ 1인 조식/디너 뷔페 기준 (약 24,000원)"
+hoteldiningModalPriceRange
+    text="200,000 ~ 650,000 VND"
+hoteldiningModalPriceVnd
+    text="450,000 VND"
+hoteldiningModalRating
+    text="★ 4.3 (310개 구글 리뷰)"
+hoteldiningModalReservation
+    text="자유 입장"
+hoteldiningModalSignatureList
+    html="<li><span class=\"bullet\">✔</span> 인터내셔널 &amp; 베트남 로컬 조식 뷔페 (오더메이드 쌀국수)</li><li><span class=\"bullet\">✔</span> 해산물 핫팟(Lẩu Hải Sản) &amp; 즉석 BBQ</li><li><span class=\"bullet\">✔</span> 홈메이드 베이커리 &amp; 열대 과일 코너</li>"
+hoteldiningModalThumbs
+    html="\n        <div class=\"gallery-thumb active\" data-idx=\"0\">\n          <img src=\"https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"다이닝 사진 1\" loading=\"lazy\" />\n        </div>\n      "
+hoteldiningModalTip
+    text="아바나 전용 지하도를 통해 쩐푸 해변과 바로 연결되어 있어 식사 후 해변 산책하기에 최적의 동선입니다."
+hoteldiningModalTitle
+    text="스파이시스 레스토랑 (Spices Restaurant)"

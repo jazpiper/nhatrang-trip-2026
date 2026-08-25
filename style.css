@@ -936,6 +936,7 @@ input, textarea, select {
 }
 
 .gourmet-card .card-badge-top-left {
+  position: static;
   background: rgba(255, 255, 255, 0.95);
   color: var(--neutral-ink-darkest);
 }
@@ -1852,7 +1853,8 @@ input, textarea, select {
 /* --------------------------------------------------------------------------
    Stays (Accommodations) Card & Grid Styles
    -------------------------------------------------------------------------- */
-.stay-card {
+.stay-card,
+.hoteldining-card {
   background: white;
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
@@ -1863,13 +1865,15 @@ input, textarea, select {
   flex-direction: column;
 }
 
-.stay-card:hover {
+.stay-card:hover,
+.hoteldining-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.09);
   border-color: var(--color-border-medium);
 }
 
-.stay-card .card-media-wrapper {
+.stay-card .card-media-wrapper,
+.hoteldining-card .card-media-wrapper {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
@@ -1879,7 +1883,8 @@ input, textarea, select {
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
-.stay-card .card-img {
+.stay-card .card-img,
+.hoteldining-card .card-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1887,7 +1892,8 @@ input, textarea, select {
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.stay-card:hover .card-img {
+.stay-card:hover .card-img,
+.hoteldining-card:hover .card-img {
   transform: scale(1.06);
 }
 
@@ -1920,7 +1926,8 @@ input, textarea, select {
   z-index: 2;
 }
 
-.stay-card .card-body {
+.stay-card .card-body,
+.hoteldining-card .card-body {
   padding: 16px 18px 18px;
   flex: 1;
   display: flex;
@@ -1928,14 +1935,16 @@ input, textarea, select {
   justify-content: space-between;
 }
 
-.stay-card .card-header-line {
+.stay-card .card-header-line,
+.hoteldining-card .card-header-line {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 8px;
 }
 
-.stay-card .card-title {
+.stay-card .card-title,
+.hoteldining-card .card-title {
   font-size: 1.02rem;
   font-weight: 800;
   color: var(--color-text-primary);
@@ -1944,7 +1953,8 @@ input, textarea, select {
   min-height: auto;
 }
 
-.stay-card .card-price-line {
+.stay-card .card-price-line,
+.hoteldining-card .card-price-line {
   margin-top: 10px;
   padding-top: 10px;
   border-top: 1px dashed var(--color-border-light);
@@ -3607,6 +3617,7 @@ input, textarea, select {
 .souv-price-krw {
   font-size: 0.75rem;
   color: var(--neutral-mark);
+  white-space: nowrap;
 }
 
 .souv-discount-badge {

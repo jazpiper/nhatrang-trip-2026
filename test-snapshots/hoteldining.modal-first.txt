@@ -1,0 +1,53 @@
+<!-- modal: hoteldining | item: dining-jw-claycraft -->
+hoteldiningModalAddress
+    text="Lô D4C, Khu du lịch Bắc bán đảo Cam Ranh, Cam Hải Đông, Cam Lâm, Khánh Hòa"
+hoteldiningModalBadge
+    text="참파 도예 감성 시그니처 올데이 뷔페"
+hoteldiningModalCategory
+    text="인터내셔널 뷔페"
+hoteldiningModalDesc
+    text="자체 유기농 농원인 JW 가든의 신선한 채소와 허브, 즉석에서 조리되는 라이브 에그/쌀국수 스테이션, 그리고 깜란 전통 토기(Clay Pot) 요리를 함께 선보이는 메인 레스토랑입니다."
+hoteldiningModalDressCode
+    text="스마트 캐주얼 (수영복/슬리퍼 착용 불가)"
+hoteldiningModalHeartBtn
+    text="♡ 찜하기"
+hoteldiningModalHighlight
+    text="도예 공방(Pottery Studio)의 예술적 감성과 참파 왕국 헤리티지가 어우러진 5성급 럭셔리 올데이 뷔페 다이닝!"
+hoteldiningModalHotelName
+    text="🏨 JW 메리어트 깜란 베이 리조트 & 스파 (JW Marriott Cam Ranh Bay)"
+hoteldiningModalLocation
+    text="리조트 메인 빌딩 1층 가든 윙 (도예 스튜디오 인접)"
+hoteldiningModalMainImg
+    src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80"
+hoteldiningModalMapLink
+    href="https://www.google.com/maps/search/?api=1&query=Clay%20Craft%20JW%20Marriott%20Cam%20Ranh%20L%C3%B4%20D4C%20Cam%20H%E1%BA%A3i%20%C4%90%C3%B4ng%20Cam%20L%C3%A2m%20Kh%C3%A1nh%20H%C3%B2a"
+hoteldiningModalNameVi
+    text="🇻🇳 Clay Craft (JW Marriott Cam Ranh Bay Resort & Spa)"
+hoteldiningModalOfficialLink
+    href="https://www.marriott.com/en-us/hotels/cxrjw-jw-marriott-cam-ranh-bay-resort-and-spa/dining/"
+hoteldiningModalOpenHours
+    text="06:30 - 22:00"
+hoteldiningModalPhone
+    text="+84 258 3995 999"
+hoteldiningModalPhotosLink
+    href="https://www.google.com/maps/search/?api=1&query=Clay%20Craft%20JW%20Marriott%20Cam%20Ranh%20L%C3%B4%20D4C%20Cam%20H%E1%BA%A3i%20%C4%90%C3%B4ng%20Cam%20L%C3%A2m%20Kh%C3%A1nh%20H%C3%B2a%20%EC%82%AC%EC%A7%84"
+hoteldiningModalPriceKrw
+    text="(약 46,300원)"
+hoteldiningModalPricePer
+    text="/ 1인 조식/인터내셔널 뷔페 기준 (약 46,000원)"
+hoteldiningModalPriceRange
+    text="450,000 ~ 1,250,000 VND"
+hoteldiningModalPriceVnd
+    text="850,000 VND"
+hoteldiningModalRating
+    text="★ 4.6 (150개 구글 리뷰)"
+hoteldiningModalReservation
+    text="조식은 자유 입장 / 디너 뷔페는 사전 예약 권장"
+hoteldiningModalSignatureList
+    html="<li><span class=\"bullet\">✔</span> 인터내셔널 조식 뷔페 (오더메이드 에그 &amp; 즉석 쌀국수 스테이션 - 650,000 VND)</li><li><span class=\"bullet\">✔</span> 참파 전통 점토 토기(Clay Pot) 생선 &amp; 돼지고기 조림 (360,000 VND)</li><li><span class=\"bullet\">✔</span> 주말 인터내셔널 &amp; 로컬 씨푸드 디너 뷔페 (1,150,000 VND)</li><li><span class=\"bullet\">✔</span> 호주산 블랙 앵거스 비프 스테이크 &amp; 홈메이드 허브 버터 (780,000 VND)</li>"
+hoteldiningModalThumbs
+    html="\n        <div class=\"gallery-thumb active\" data-idx=\"0\">\n          <img src=\"https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"다이닝 사진 1\" loading=\"lazy\" />\n        </div>\n      \n        <div class=\"gallery-thumb \" data-idx=\"1\">\n          <img src=\"https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"다이닝 사진 2\" loading=\"lazy\" />\n        </div>\n      \n        <div class=\"gallery-thumb \" data-idx=\"2\">\n          <img src=\"https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"다이닝 사진 3\" loading=\"lazy\" />\n        </div>\n      "
+hoteldiningModalTip
+    text="메리어트 본보이(Marriott Bonvoy) 회원은 10~20% F&B 할인이 적용되며, 조식 시 가든 테라스 야외석을 요청하면 싱그러운 아침 정원을 바라보며 식사할 수 있습니다."
+hoteldiningModalTitle
+    text="클레이 크래프트 (Clay Craft)"

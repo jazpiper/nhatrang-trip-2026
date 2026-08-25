@@ -13,14 +13,17 @@
 ---
 
 ## 2. Single Source of Truth & Data Architecture (데이터 아키텍처)
-- **데이터셋 파일 분리 & 단일 진실 공급원 (SSOT)** (총 5대 도메인 215개 장소):
-  - `data.js`: 액티비티 43선 (`NHA_TRANG_ACTIVITIES`), 6박 7일 타임라인(`NHA_TRANG_SCHEDULE`), 여행 팁(`NHA_TRANG_GUIDE_TIPS`)
+- **데이터셋 파일 분리 & 단일 진실 공급원 (SSOT)** (총 7대 도메인 252개 장소 + 4대 가이드):
+  - `data.js`: 액티비티 32선 (`NHA_TRANG_ACTIVITIES`), 6박 7일 타임라인(`NHA_TRANG_SCHEDULE`), 여행 팁(`NHA_TRANG_GUIDE_TIPS`)
   - `gourmet-data.js`: 로컬 맛집 & 카페 113선 (`NHA_TRANG_GOURMETS`)
   - `stays-data.js`: 숙소 4개 테마 24선 (`NHA_TRANG_STAYS`)
+  - `hotel-dining-data.js`: 5성급 호텔 시그니처 다이닝 24선 (`NHA_TRANG_HOTEL_DININGS`)
+  - `spa-data.js`: 힐링 스파 & 마사지 24선 (`NHA_TRANG_SPAS`)
   - `shopping-data.js`: 짝퉁 & 쇼핑 실전 시세 18선 (`NHA_TRANG_SHOPPING`)
   - `currency-data.js`: 환전소 & 수수료 무료 ATM 17선 (`NHA_TRANG_CURRENCY`)
+  - `guide-data.js`: 여행 꿀팁 & 생존 킷 4대 가이드 (`NHA_TRANG_GUIDE_HUB`)
 - **UI 및 정적 HTML 불일치 방지**:
-  - 헤더 탭 뱃지, 카테고리 첫 버튼(예: `전체 액티비티 (43곳)`, `전체 맛집 (113곳)`, `전체 숙소 (24곳)`, `전체 쇼핑 (18곳)`, `전체 환전/ATM (17곳)`), 히어로 뱃지, 검색 결과 카운트 텍스트를 데이터셋의 실제 길이(`length`)와 100% 일치하도록 동기화한다.
+  - 헤더 탭 뱃지, 카테고리 첫 버튼(예: `전체 액티비티 (32곳)`, `전체 맛집 (113곳)`, `전체 숙소 (24곳)`, `전체 호텔 (24곳)`, `전체 스파 (24곳)`, `전체 쇼핑 (18곳)`, `전체 환전/ATM (17곳)`), 히어로 뱃지, 검색 결과 카운트 텍스트를 데이터셋의 실제 길이(`length`)와 100% 일치하도록 동기화한다.
 
 ---
 
@@ -38,19 +41,20 @@
 - 최상위 글로벌 변수(예: `const NHA_TRANG_CURRENCY = [...]`)로 내보내고 `index.html`의 `<script>` 태그에 로드.
 - 모든 엔트리는 ID, 한국어명, 베트남 공식명, 카테고리, 태그, 평점, 리뷰수, 가격대, 구글맵 링크(`mapUrl`), 사진 링크(`photosUrl`), 위치, 팁 등 규격화된 스키마를 준수.
 
-### Step 2. `index.html` 마크업 확장
-1. **상단 네비게이션 (`header .header-nav-tabs`)**: 신규 탭 버튼 `<button class="nav-tab-btn" data-tab="<domain>">` 추가 및 뱃지 동기화.
-2. **카테고리 스크롤 바 (`nav.category-filter-section`)**: `<nav id="<domain>CategoryNav" style="display: none;">` 및 카테고리 버튼들 추가.
-3. **태그 칩스 바 (`.tag-chips-wrapper`)**: `<div id="<domain>TagChips" style="display: none;">` 추가.
-4. **메인 콘텐츠 섹션 (`main`)**: `<section id="<domain>GridSection" style="display: none;">` 및 카드 컨테이너 `<div id="<domain>CardsGridContainer">` 추가.
-5. **상세 모달 (`dialog`/`modal`)**: 필요 시 신규 상세 모달 마크업 추가.
+### Step 2. 마크업 확장 (`src/html/` 조각 파일들)
+1. **`02_header.html`**: 신규 탭 버튼 `<button class="nav-tab-btn" data-tab="<domain>">` 추가 및 뱃지 동기화.
+2. **`04_nav_categories.html`**: `<nav id="<domain>CategoryNav" style="display: none;">` 및 카테고리 버튼들 추가.
+3. **`05_toolbar.html`**: `<div id="<domain>TagChips" style="display: none;">` 추가.
+4. **`06_main_grids.html`**: `<main id="<domain>GridSection" style="display: none;">` 및 카드 컨테이너 `<div id="<domain>CardsGridContainer">` 추가.
+5. **`07_modals.html`**: 필요 시 신규 상세 모달 마크업 추가.
 
-### Step 3. 모듈화된 상태 관리 및 렌더링 로직 연동 (`js/`)
-1. **`js/store/state.js`**: 도메인별 상태(카테고리, 태그, 위시리스트, 메모 등) 등록 및 로컬스토리지 연동.
-2. **`js/components/<domain>.js`**:
-   - `getFiltered<Domain>s()`: 카테고리, 태그 칩, 검색어, 위시리스트 필터, 정렬 지원.
-   - `render<Domain>s()`: 카드 템플릿 생성, 이미지 에러 핸들러, 찜하기 이벤트, 상세 모달 오픈 바인딩.
-3. **`js/app.js`**: `switchMainTab(tabName)` 라우터에 신규 탭 활성화 및 렌더러 연결.
+### Step 3. 모듈화된 상태 관리 및 렌더링 로직 연동 (`src/js/`)
+1. **`03_state_and_common.js`**: 도메인별 상태(카테고리, 태그, 위시리스트, 메모 등) 등록.
+2. **신규 도메인 파일 (`src/js/XX_domain_<domain>.js` 생성)**:
+   - `getFiltered<Domain>s()`: 카테고리, 태그 칩, 검색어, 위시리스트 필터, 정렬 로직.
+   - `render<Domain>s()`: 카드 템플릿 생성, 상세 모달 오픈 바인딩 로직.
+3. **`11_registry.js`**: `DOMAINS` 테이블에 신규 탭 라우팅 정보 등록.
+4. **빌드 스크립트 실행**: HTML과 JS 작성이 끝나면 터미널에서 `node build.js`를 실행하여 최상위 `index.html`과 `js/app.js`를 생성한다.
 
 ### Step 4. `style.css` 스타일 점검 & 반응형 확인
 - Airbnb 스타일의 디자인 토큰(그리드, 뱃지, 태그 칩, 둥근 모서리, 카드 호버 트랜지션, 모바일 반응형 뷰포트) 일관성 유지.

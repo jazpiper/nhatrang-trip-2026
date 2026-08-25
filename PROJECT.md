@@ -66,10 +66,13 @@ Vanilla Single Page Application (SPA) architecture with strict separation of con
 ├── currency-data.js            # 17 Currency & ATM spots
 ├── spa-data.js                 # [M1] 24 Verified spa/massage/barbershop spots
 ├── guide-data.js               # [M3] Survival Kit Hub dataset (4 sub-sections)
-├── index.html                  # [M2, M4] SPA markup, modals, navigation, cards, templates
+├── index.html                  # Generated from src/html/
 ├── style.css                   # [M2, M4] Airbnb design tokens, spa/guide styling, invariants
 ├── js/
-│   └── app.js                  # SPA Controller (DOMAINS registry, renderers, state, modals)
+│   └── app.js                  # Generated from src/js/
+├── src/                        # Source directory
+│   ├── html/                   # HTML partials (01_head.html, 02_header.html, etc.)
+│   └── js/                     # JS modules (01_storage.js, 02_helpers.js, domain files, etc.)
 ├── test-dom-stub.js            # [M2] DOM & clock stub for Node.js test suites
 ├── test-activity.js            # [M1] 32 Activity test suite
 ├── test-gourmet.js             # 113 Gourmet test suite

@@ -144,6 +144,10 @@
     stayCategory: 'all',
     stayTag: 'all',
 
+    // Hotel Dining Filter State
+    hoteldiningCategory: 'all',
+    hoteldiningTag: 'all',
+
     // Shopping Filter State
     shoppingCategory: 'all',
     shoppingTag: 'all',
@@ -172,12 +176,14 @@
     wishlist: loadFromStorage('nha_trang_wishlist', []),
     gourmetWishlist: loadFromStorage('nha_trang_gourmet_wishlist', []),
     stayWishlist: loadFromStorage('nha_trang_stay_wishlist', []),
+    hoteldiningWishlist: loadFromStorage('nha_trang_hoteldining_wishlist', []),
     spaWishlist: loadFromStorage('nha_trang_spa_wishlist', []),
     shoppingWishlist: loadFromStorage('nha_trang_shopping_wishlist', []),
     currencyWishlist: loadFromStorage('nha_trang_currency_wishlist', []),
     notes: loadFromStorage('nha_trang_notes', {}),
     gourmetNotes: loadFromStorage('nha_trang_gourmet_notes', {}),
     stayNotes: loadFromStorage('nha_trang_stay_notes', {}),
+    hoteldiningNotes: loadFromStorage('nha_trang_hoteldining_notes', {}),
     spaNotes: loadFromStorage('nha_trang_spa_notes', {}),
     shoppingNotes: loadFromStorage('nha_trang_shopping_notes', {}),
     currencyNotes: loadFromStorage('nha_trang_currency_notes', {}),
@@ -186,6 +192,7 @@
     activeModalActivity: null,
     activeModalGourmet: null,
     activeModalStay: null,
+    activeModalHoteldining: null,
     activeModalSpa: null,
     activeModalShopping: null,
     activeModalCurrency: null,
@@ -196,6 +203,7 @@
     const total = (state.wishlist ? state.wishlist.length : 0) +
                   (state.gourmetWishlist ? state.gourmetWishlist.length : 0) +
                   (state.stayWishlist ? state.stayWishlist.length : 0) +
+                  (state.hoteldiningWishlist ? state.hoteldiningWishlist.length : 0) +
                   (state.spaWishlist ? state.spaWishlist.length : 0) +
                   (state.shoppingWishlist ? state.shoppingWishlist.length : 0) +
                   (state.currencyWishlist ? state.currencyWishlist.length : 0);
@@ -213,6 +221,8 @@
     state.gourmetTag = 'all';
     state.stayCategory = 'all';
     state.stayTag = 'all';
+    state.hoteldiningCategory = 'all';
+    state.hoteldiningTag = 'all';
     state.spaCategory = 'all';
     state.spaTag = 'all';
     state.shoppingCategory = 'all';
@@ -1465,7 +1475,6 @@
       modalAcBadge.style.display = item.hasAirConditioning ? 'inline-block' : 'none';
     }
 
-    // Facilities & Payment Badges
     const facilitiesEl = document.getElementById('shoppingModalFacilities');
     if (facilitiesEl) {
       const allFacilities = (item.facilities || []).concat(item.paymentMethods || []);
@@ -1476,72 +1485,8 @@
       }
     }
 
-    // Bargaining Table
-    const bargainTableEl = document.getElementById('shoppingModalBargainingTable');
-    if (bargainTableEl) {
-      if (item.bargainingGuide && item.bargainingGuide.length > 0) {
-        bargainTableEl.innerHTML = `
-          <table class="bargain-table">
-            <thead>
-              <tr>
-                <th>품목</th>
-                <th>상인 호가 (부르는 값)</th>
-                <th>추천 적정가 (흥정 목표)</th>
-                <th>실전 꿀팁</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${item.bargainingGuide.map(row => `
-                <tr>
-                  <td><strong>${escapeHtml(row.item)}</strong></td>
-                  <td class="price-asking">${escapeHtml(row.askingPrice || '-')}</td>
-                  <td class="price-target">${escapeHtml(row.targetPrice || '-')}</td>
-                  <td class="price-tip">${escapeHtml(row.tip || '-')}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        `;
-      } else {
-        bargainTableEl.innerHTML = '<p class="modal-empty-note">정찰제 매장이거나 현장 시세에 따라 안내됩니다.</p>';
-      }
-    }
-
-    // Sentiment Analysis
-    const sentimentPanel = document.getElementById('shoppingModalSentimentPanel');
-    if (sentimentPanel) {
-      if (item.sentimentAnalysis) {
-        const sa = item.sentimentAnalysis;
-        sentimentPanel.innerHTML = `
-          <div class="pros-cons-grid">
-            <div class="pros-box">
-              <h4>👍 한국인 여행자 칭찬 포인트</h4>
-              <ul>
-                ${(sa.pros || []).map(p => `<li><span class="bullet">✔</span> ${escapeHtml(p)}</li>`).join('')}
-              </ul>
-            </div>
-            <div class="cons-box">
-              <h4>⚠️ 주의 및 아쉬운 점</h4>
-              <ul>
-                ${(sa.cons || []).map(c => `<li><span class="bullet">✕</span> ${escapeHtml(c)}</li>`).join('')}
-              </ul>
-            </div>
-          </div>
-          ${sa.communityVerdict ? `
-            <div class="community-verdict-box">
-              📢 커뮤니티 총평: ${escapeHtml(sa.communityVerdict)}
-            </div>
-          ` : ''}
-          ${sa.scamWarning ? `
-            <div class="scam-warning-box">
-              🚨 호객/눈탱이 방지: ${escapeHtml(sa.scamWarning)}
-            </div>
-          ` : ''}
-        `;
-      } else {
-        sentimentPanel.innerHTML = '<p class="modal-empty-note">커뮤니티 후기 분석 정보 준비 중입니다.</p>';
-      }
-    }
+    renderShoppingBargainTable(item, document.getElementById('shoppingModalBargainingTable'));
+    renderShoppingSentiment(item, document.getElementById('shoppingModalSentimentPanel'));
 
     // Customs Warning
     const customsWarningText = document.getElementById('shoppingCustomsWarningText');
@@ -1551,6 +1496,72 @@
 
     finishModalOpen('shopping', item, modal);
   }
+
+  function renderShoppingBargainTable(item, containerEl) {
+    if (!containerEl) return;
+    if (item.bargainingGuide && item.bargainingGuide.length > 0) {
+      containerEl.innerHTML = `
+        <table class="bargain-table">
+          <thead>
+            <tr>
+              <th>품목</th>
+              <th>상인 호가 (부르는 값)</th>
+              <th>추천 적정가 (흥정 목표)</th>
+              <th>실전 꿀팁</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${item.bargainingGuide.map(row => `
+              <tr>
+                <td><strong>${escapeHtml(row.item)}</strong></td>
+                <td class="price-asking">${escapeHtml(row.askingPrice || '-')}</td>
+                <td class="price-target">${escapeHtml(row.targetPrice || '-')}</td>
+                <td class="price-tip">${escapeHtml(row.tip || '-')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } else {
+      containerEl.innerHTML = '<p class="modal-empty-note">정찰제 매장이거나 현장 시세에 따라 안내됩니다.</p>';
+    }
+  }
+
+  function renderShoppingSentiment(item, containerEl) {
+    if (!containerEl) return;
+    if (item.sentimentAnalysis) {
+      const sa = item.sentimentAnalysis;
+      containerEl.innerHTML = `
+        <div class="pros-cons-grid">
+          <div class="pros-box">
+            <h4>👍 한국인 여행자 칭찬 포인트</h4>
+            <ul>
+              ${(sa.pros || []).map(p => `<li><span class="bullet">✔</span> ${escapeHtml(p)}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="cons-box">
+            <h4>⚠️ 주의 및 아쉬운 점</h4>
+            <ul>
+              ${(sa.cons || []).map(c => `<li><span class="bullet">✕</span> ${escapeHtml(c)}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+        ${sa.communityVerdict ? `
+          <div class="community-verdict-box">
+            📢 커뮤니티 총평: ${escapeHtml(sa.communityVerdict)}
+          </div>
+        ` : ''}
+        ${sa.scamWarning ? `
+          <div class="scam-warning-box">
+            🚨 호객/눈탱이 방지: ${escapeHtml(sa.scamWarning)}
+          </div>
+        ` : ''}
+      `;
+    } else {
+      containerEl.innerHTML = '<p class="modal-empty-note">커뮤니티 후기 분석 정보 준비 중입니다.</p>';
+    }
+  }
+
 
   function closeShoppingModal() { closeDomainModal('shopping'); }
 
@@ -1879,83 +1890,90 @@
     // NOTE: copy handler is bound once in initEvents() via addEventListener.
     // Do NOT also assign .onclick here — both would fire on a single click.
 
-    const cardsListEl = document.getElementById('currencyModalCardsList');
-    if (cardsListEl) {
-      cardsListEl.innerHTML = (item.supportedCards || []).map(card => `
-        <div class="supported-card-item">
-          <span class="card-icon">💳</span>
-          <span class="card-name">${escapeHtml(card)}</span>
-          <span class="card-status-badge ${item.feeFree ? 'free' : 'exchange'}">${item.feeFree ? '수수료 0원' : '환전 가능'}</span>
-        </div>
-      `).join('');
-    }
-
-    const atmStepsEl = document.getElementById('currencyModalAtmSteps');
-    if (atmStepsEl) {
-      if (item.category === 'atm_zero_fee') {
-        atmStepsEl.innerHTML = `
-          <div class="atm-steps-box">
-            <div class="atm-step-item"><span class="step-badge">1</span><span><strong>카드 삽입 & 언어:</strong> 영문(English) 선택</span></div>
-            <div class="atm-step-item"><span class="step-badge">2</span><span><strong>6자리 PIN 입력:</strong> 4자리 비밀번호 + 뒤에 00 입력 후 ENTER</span></div>
-            <div class="atm-step-item"><span class="step-badge">3</span><span><strong>계좌 선택:</strong> 반드시 [Checking / Current Account] 선택</span></div>
-            <div class="atm-step-item"><span class="step-badge">4</span><span><strong>금액 선택:</strong> 1회 인출 한도 (${escapeHtml(item.withdrawalLimit || '500만동')})</span></div>
-            <div class="atm-step-item danger"><span class="step-badge">5</span><span><strong>★DCC 거절:</strong> 'Without Conversion' / 'No' 선택</span></div>
-            <div class="atm-step-item warning"><span class="step-badge">6</span><span><strong>★★카드 먼저 회수!:</strong> 현금보다 카드가 먼저 나옵니다 (30초 내 회수)</span></div>
-            <div class="atm-step-item"><span class="step-badge">7</span><span><strong>현금 & 영수증:</strong> 50만동 지폐 매수 확인 후 수령</span></div>
-          </div>
-        `;
-      } else {
-        atmStepsEl.innerHTML = `
-          <div class="atm-steps-box">
-            <div class="atm-step-item"><span class="step-badge">1</span><span><strong>지폐 상태 확인:</strong> 2013년 이후 발행 빳빳한 $100 신권(낙서/찢김 없음) 제시</span></div>
-            <div class="atm-step-item"><span class="step-badge">2</span><span><strong>환율 호가 확인:</strong> 매장 내 계산기에 직원이 찍어주는 환율 확인</span></div>
-            <div class="atm-step-item"><span class="step-badge">3</span><span><strong>계수기 대조:</strong> 지폐 계수기 앞에서 금액 확인 후 즉시 가방 안쪽에 수납</span></div>
-          </div>
-        `;
-      }
-    }
-
-    const dccGuideEl = document.getElementById('currencyModalDccGuide');
-    if (dccGuideEl) {
-      dccGuideEl.innerHTML = `
-        <div class="dcc-warning-box">
-          <div class="dcc-warning-header">
-            <span>🛡️ DCC(원화 이중결제) 차단 필수 수칙</span>
-          </div>
-          <p>ATM 화면 또는 POS 단말기에서 통화 선택 창이 뜰 경우 <strong>반드시 [Without Conversion] 및 [VND]</strong>를 선택하세요. 원화(KRW) 선택 시 3~8% 불필요한 바가지 수수료가 발생합니다.</p>
-        </div>
-      `;
-    }
-
-    const ratesBoxEl = document.getElementById('currencyModalRatesBox');
-    if (ratesBoxEl) {
-      ratesBoxEl.innerHTML = `
-        <div class="exchange-perks-list">
-          ${(item.exchangePerks || []).map(perk => `
-            <div class="perk-item"><span class="perk-icon">✨</span><span>${escapeHtml(perk)}</span></div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    const limitsBoxEl = document.getElementById('currencyModalLimitsBox');
-    if (limitsBoxEl) {
-      limitsBoxEl.innerHTML = `
-        <div class="limit-info-box">
-          <div class="limit-row"><strong>인출/환전 한도:</strong> <span>${escapeHtml(item.withdrawalLimit || '제한 없음')}</span></div>
-          <div class="limit-row"><strong>지원 통화/수단:</strong> <span>${(item.supportedCurrencies || []).map(c => escapeHtml(c)).join(', ')}</span></div>
-        </div>
-      `;
-    }
-
-    const facilitiesEl = document.getElementById('currencyModalFacilities');
-    if (facilitiesEl) {
-      facilitiesEl.innerHTML = (item.facilities || []).map(f => `
-        <span class="facility-chip">✓ ${escapeHtml(f)}</span>
-      `).join('');
-    }
+    renderCurrencyCardsList(item, document.getElementById('currencyModalCardsList'));
+    renderCurrencyAtmSteps(item, document.getElementById('currencyModalAtmSteps'));
+    renderCurrencyDccGuide(document.getElementById('currencyModalDccGuide'));
+    renderCurrencyRatesBox(item, document.getElementById('currencyModalRatesBox'));
+    renderCurrencyLimitsBox(item, document.getElementById('currencyModalLimitsBox'));
+    renderCurrencyFacilities(item, document.getElementById('currencyModalFacilities'));
 
     finishModalOpen('currency', item, modal);
+  }
+
+  function renderCurrencyCardsList(item, el) {
+    if (!el) return;
+    el.innerHTML = (item.supportedCards || []).map(card => `
+      <div class="supported-card-item">
+        <span class="card-icon">💳</span>
+        <span class="card-name">${escapeHtml(card)}</span>
+        <span class="card-status-badge ${item.feeFree ? 'free' : 'exchange'}">${item.feeFree ? '수수료 0원' : '환전 가능'}</span>
+      </div>
+    `).join('');
+  }
+
+  function renderCurrencyAtmSteps(item, el) {
+    if (!el) return;
+    if (item.category === 'atm_zero_fee') {
+      el.innerHTML = `
+        <div class="atm-steps-box">
+          <div class="atm-step-item"><span class="step-badge">1</span><span><strong>카드 삽입 & 언어:</strong> 영문(English) 선택</span></div>
+          <div class="atm-step-item"><span class="step-badge">2</span><span><strong>6자리 PIN 입력:</strong> 4자리 비밀번호 + 뒤에 00 입력 후 ENTER</span></div>
+          <div class="atm-step-item"><span class="step-badge">3</span><span><strong>계좌 선택:</strong> 반드시 [Checking / Current Account] 선택</span></div>
+          <div class="atm-step-item"><span class="step-badge">4</span><span><strong>금액 선택:</strong> 1회 인출 한도 (${escapeHtml(item.withdrawalLimit || '500만동')})</span></div>
+          <div class="atm-step-item danger"><span class="step-badge">5</span><span><strong>★DCC 거절:</strong> 'Without Conversion' / 'No' 선택</span></div>
+          <div class="atm-step-item warning"><span class="step-badge">6</span><span><strong>★★카드 먼저 회수!:</strong> 현금보다 카드가 먼저 나옵니다 (30초 내 회수)</span></div>
+          <div class="atm-step-item"><span class="step-badge">7</span><span><strong>현금 & 영수증:</strong> 50만동 지폐 매수 확인 후 수령</span></div>
+        </div>
+      `;
+    } else {
+      el.innerHTML = `
+        <div class="atm-steps-box">
+          <div class="atm-step-item"><span class="step-badge">1</span><span><strong>지폐 상태 확인:</strong> 2013년 이후 발행 빳빳한 $100 신권(낙서/찢김 없음) 제시</span></div>
+          <div class="atm-step-item"><span class="step-badge">2</span><span><strong>환율 호가 확인:</strong> 매장 내 계산기에 직원이 찍어주는 환율 확인</span></div>
+          <div class="atm-step-item"><span class="step-badge">3</span><span><strong>계수기 대조:</strong> 지폐 계수기 앞에서 금액 확인 후 즉시 가방 안쪽에 수납</span></div>
+        </div>
+      `;
+    }
+  }
+
+  function renderCurrencyDccGuide(el) {
+    if (!el) return;
+    el.innerHTML = `
+      <div class="dcc-warning-box">
+        <div class="dcc-warning-header">
+          <span>🛡️ DCC(원화 이중결제) 차단 필수 수칙</span>
+        </div>
+        <p>ATM 화면 또는 POS 단말기에서 통화 선택 창이 뜰 경우 <strong>반드시 [Without Conversion] 및 [VND]</strong>를 선택하세요. 원화(KRW) 선택 시 3~8% 불필요한 바가지 수수료가 발생합니다.</p>
+      </div>
+    `;
+  }
+
+  function renderCurrencyRatesBox(item, el) {
+    if (!el) return;
+    el.innerHTML = `
+      <div class="exchange-perks-list">
+        ${(item.exchangePerks || []).map(perk => `
+          <div class="perk-item"><span class="perk-icon">✨</span><span>${escapeHtml(perk)}</span></div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function renderCurrencyLimitsBox(item, el) {
+    if (!el) return;
+    el.innerHTML = `
+      <div class="limit-info-box">
+        <div class="limit-row"><strong>인출/환전 한도:</strong> <span>${escapeHtml(item.withdrawalLimit || '제한 없음')}</span></div>
+        <div class="limit-row"><strong>지원 통화/수단:</strong> <span>${(item.supportedCurrencies || []).map(c => escapeHtml(c)).join(', ')}</span></div>
+      </div>
+    `;
+  }
+
+  function renderCurrencyFacilities(item, el) {
+    if (!el) return;
+    el.innerHTML = (item.facilities || []).map(f => `
+      <span class="facility-chip">✓ ${escapeHtml(f)}</span>
+    `).join('');
   }
 
   function closeCurrencyModal() { closeDomainModal('currency'); }
@@ -2051,6 +2069,231 @@
     }
   }
 
+  // --- 8.35 Hotel Dining Domain Logic ---
+  const HOTELDINING_SEARCH_SPEC = {
+    strings: ['name', 'nameVi', 'hotelName', 'location', 'addressVi', 'highlight', 'description', 'localTip', 'categoryLabel', 'badge', 'dressCode'],
+    arrays: ['tags', 'signatureMenu']
+  };
+
+  function hoteldiningCategoryMatch(item, cat) {
+    if (cat === 'all') return true;
+    return item.hotelKey === cat || item.category === cat;
+  }
+
+  function hoteldiningTagMatch(item, tag) {
+    if (tag === 'all') return true;
+    const allText = [
+      ...(item.tags || []),
+      ...(item.signatureMenu || []),
+      item.hotelName || '',
+      item.name || '',
+      item.highlight || '',
+      item.description || ''
+    ].join(' ').toLowerCase();
+
+    if (tag === 'ocean_view') {
+      return allText.includes('오션뷰') || allText.includes('비치') || allText.includes('해변') || allText.includes('바다');
+    }
+    if (tag === 'breakfast' || tag === 'buffet') {
+      return allText.includes('조식') || allText.includes('뷔페') || (item.category === 'buffet');
+    }
+    if (tag === 'sunset_bar' || tag === 'lounge_bar') {
+      return allText.includes('선셋') || allText.includes('루프탑') || allText.includes('라운지') || (item.category === 'lounge_bar');
+    }
+    if (tag === 'seafood_bbq') {
+      return allText.includes('씨푸드') || allText.includes('해산물') || allText.includes('bbq') || allText.includes('그릴') || (item.category === 'seafood_bbq');
+    }
+    if (tag === 'fine_dining') {
+      return allText.includes('파인다이닝') || allText.includes('코스') || allText.includes('프렌치') || (item.category === 'fine_dining');
+    }
+    if (tag === 'family') {
+      return allText.includes('가족') || allText.includes('키즈') || allText.includes('풀보드') || allText.includes('어린이');
+    }
+    return (item.tags || []).includes(tag);
+  }
+
+  function hoteldiningCompare(a, b) {
+    if (state.sortBy === 'rating') {
+      return ((b.rating || 0) * 10000 + (b.reviewCount || 0)) - ((a.rating || 0) * 10000 + (a.reviewCount || 0));
+    }
+    if (state.sortBy === 'price-asc') {
+      return (a.avgPriceVnd || 0) - (b.avgPriceVnd || 0);
+    }
+    if (state.sortBy === 'price-desc') {
+      return (b.avgPriceVnd || 0) - (a.avgPriceVnd || 0);
+    }
+    return 0;
+  }
+
+  function getFilteredHotelDinings() {
+    if (typeof NHA_TRANG_HOTEL_DININGS === 'undefined') return [];
+    return applyDomainFilter({
+      source: NHA_TRANG_HOTEL_DININGS,
+      catField: 'hoteldiningCategory',
+      tagField: 'hoteldiningTag',
+      wishField: 'hoteldiningWishlist',
+      categoryMatch: hoteldiningCategoryMatch,
+      tagMatch: hoteldiningTagMatch,
+      searchMatch: (item, q) => matchTextFields(item, q, HOTELDINING_SEARCH_SPEC),
+      compare: hoteldiningCompare
+    });
+  }
+
+  function hoteldiningCardTemplate(item) {
+    const isWish = (state.hoteldiningWishlist || []).includes(item.id);
+    const userNote = (state.hoteldiningNotes || {})[item.id];
+    const mainImg = item.coverImage || (item.images && item.images[0]) || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80';
+    const tagsHtml = (item.tags || []).slice(0, 3).map(tag => `<span class="card-tag-pill">${escapeHtml(tag)}</span>`).join('');
+    const hotelShortName = item.hotelName ? item.hotelName.split('(')[0].trim() : '5성급 호텔';
+
+    return `
+      <div class="activity-card hoteldining-card" data-id="${item.id}">
+        <div class="card-media-wrapper">
+          <img class="card-img" src="${escapeHtml(mainImg)}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80'" />
+          <span class="card-badge-top-left stay-badge-cat">${escapeHtml(item.categoryLabel || '호텔 다이닝')}</span>
+          <span class="stay-badge-theme">${escapeHtml(item.badge || '추천')}</span>
+          <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+            ♥
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="card-meta-line" style="font-weight: 700; color: var(--color-primary-ink); margin-bottom: 2px;">
+            <span>🏨 ${escapeHtml(hotelShortName)}</span>
+          </div>
+          <div class="card-header-line">
+            <span class="card-title">${escapeHtml(item.name)}</span>
+            <span class="card-rating">
+              <span class="star">★</span> ${item.rating || 4.5} 
+              <span class="card-review-count">(${Number(item.reviewCount || 0).toLocaleString()})</span>
+            </span>
+          </div>
+          <div class="card-meta-line">
+            <span>🕒 ${escapeHtml(item.openHours || '영업')}</span>
+            <span>•</span>
+            <span>📍 ${escapeHtml(item.location || '')}</span>
+          </div>
+          <div class="card-tag-pill-list">
+            ${tagsHtml}
+          </div>
+          <div class="card-price-line">
+            <span class="price-main">${formatVND(item.avgPriceVnd)}</span>
+            <span class="price-krw">(${formatKRW(item.avgPriceVnd)})</span>
+            <span class="price-sub">${escapeHtml(item.pricePer || '/ 1인 기준')}</span>
+          </div>
+          ${userNote ? `
+            <div class="card-note-badge">
+              <span>📝</span>
+              <span>${escapeHtml(userNote)}</span>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  function hoteldiningRowTemplate(item, idx) {
+    return itemRowHTML({
+      id: item.id,
+      rank: idx + 1,
+      imgUrl: item.coverImage || (item.images && item.images[0]) || '',
+      emoji: item.iconEmoji || '🍽️',
+      name: item.name,
+      tags: [
+        item.categoryLabel ? { label: item.categoryLabel, hot: true } : null,
+        item.badge ? { label: item.badge } : null
+      ].filter(Boolean),
+      rating: item.rating,
+      reviewCount: item.reviewCount,
+      openState: isOpenNow(item.openHours),
+      metaParts: [item.hotelName, item.location].filter(Boolean),
+      sigLabel: (item.signatureMenu || []).length ? `🍽️ ${item.signatureMenu[0]}` : '',
+      subText: item.dressCode ? `👔 ${item.dressCode}` : '',
+      priceMain: formatVND(item.avgPriceVnd),
+      priceKrw: formatKRW(item.avgPriceVnd),
+      priceUnit: item.pricePer || '1인 기준',
+      isWish: (state.hoteldiningWishlist || []).includes(item.id),
+      note: (state.hoteldiningNotes || {})[item.id],
+      mapUrl: buildMapUrl(item)
+    });
+  }
+
+  function renderHotelDinings() {
+    renderDomainGrid({
+      gridContainerId: 'hoteldiningCardsGridContainer',
+      countTextId: 'hoteldiningResultCountText',
+      getFiltered: getFilteredHotelDinings,
+      countHtml: (n) => `총 <strong>${n}</strong>개의 호텔 시그니처 다이닝`,
+      emptyHtml: () => `
+        <div class="empty-state">
+          <div class="icon">🍽️</div>
+          <h3>조건에 맞는 호텔 다이닝이 없습니다</h3>
+          <p>필터 조건을 초기화하거나 다른 검색어로 찾아보세요.</p>
+          <button class="btn-reset-filters" id="btnResetHotelDiningFilters">필터 전체 초기화</button>
+        </div>
+      `,
+      resetBtnId: 'btnResetHotelDiningFilters',
+      cardTemplate: hoteldiningCardTemplate,
+      rowTemplate: hoteldiningRowTemplate,
+      cardSelector: '.hoteldining-card',
+      ignoreSelectors: ['.card-heart-btn'],
+      findItem: (id) => (typeof NHA_TRANG_HOTEL_DININGS !== 'undefined' ? NHA_TRANG_HOTEL_DININGS : []).find(d => d.id === id),
+      openModal: openHotelDiningModal,
+      toggleWishlist: toggleHotelDiningWishlist,
+      rerender: renderHotelDinings
+    });
+  }
+
+  function toggleHotelDiningWishlist(id) {
+    toggleDomainWishlist('hoteldining', id);
+  }
+
+  const HOTELDINING_MODAL_FIELDS = [
+    { id: 'hoteldiningModalBadge', value: item => item.badge || '호텔 다이닝' },
+    { id: 'hoteldiningModalCategory', value: item => item.categoryLabel || item.category || '다이닝' },
+    { id: 'hoteldiningModalTitle', value: 'name' },
+    { id: 'hoteldiningModalHotelName', value: item => `🏨 ${item.hotelName || ''}` },
+    { id: 'hoteldiningModalNameVi', value: item => `🇻🇳 ${item.nameVi || ''}` },
+    { id: 'hoteldiningModalRating', value: item => `★ ${item.rating || 4.5} (${Number(item.reviewCount || 0).toLocaleString()}개 구글 리뷰)` },
+    { id: 'hoteldiningModalPriceRange', value: item => item.priceRangeVnd || `${formatVND(item.avgPriceVnd)}` },
+    { id: 'hoteldiningModalOpenHours', value: item => item.openHours || '06:30 - 22:00' },
+    { id: 'hoteldiningModalLocation', value: item => item.location || '호텔 내' },
+    { id: 'hoteldiningModalAddress', value: item => item.addressVi || '' },
+    { id: 'hoteldiningModalHighlight', value: item => item.highlight || item.name },
+    { id: 'hoteldiningModalDressCode', value: item => item.dressCode || '스마트 캐주얼' },
+    { id: 'hoteldiningModalReservation', value: item => item.reservationRequired || '사전 예약 권장' },
+    { id: 'hoteldiningModalPhone', value: item => item.phone || '호텔 대표번호 문의' },
+    { id: 'hoteldiningModalDesc', value: item => item.description || '' },
+    { id: 'hoteldiningModalTip', value: item => item.localTip || '방문 전 창가 좌석 사전 예약을 권장합니다.' },
+    { id: 'hoteldiningModalPriceVnd', value: item => formatVND(item.avgPriceVnd) },
+    { id: 'hoteldiningModalPriceKrw', value: item => `(${formatKRW(item.avgPriceVnd)})` },
+    { id: 'hoteldiningModalPricePer', value: item => item.pricePer ? `/ ${item.pricePer}` : '/ 1인 기준' },
+    { id: 'hoteldiningModalMapLink', as: 'href', value: item => item.googleMapUrl || buildMapUrl(item) },
+    { id: 'hoteldiningModalPhotosLink', as: 'href', value: item => item.googlePhotosUrl || item.googleMapUrl || buildMapUrl(item) },
+    { id: 'hoteldiningModalOfficialLink', as: 'href', value: item => item.officialUrl || item.googleMapUrl || '#' }
+  ];
+
+  function openHotelDiningModal(item) {
+    state.activeModalHoteldining = item;
+    const modal = document.getElementById('hoteldiningModal');
+    if (!modal) return;
+
+    const photos = (item.images && item.images.length > 0) ? item.images : (item.coverImage ? [item.coverImage] : ['https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80']);
+    renderModalGallery({
+      mainImgId: 'hoteldiningModalMainImg', thumbsId: 'hoteldiningModalThumbs',
+      images: photos, mainSrc: photos[0], mainAlt: item.name, thumbAlt: '다이닝'
+    });
+
+    applyModalFields(item, HOTELDINING_MODAL_FIELDS);
+
+    // Signature Menu List
+    setBulletList('hoteldiningModalSignatureList', item.signatureMenu, '대표 메뉴 정보는 공식 안내를 참고하세요.');
+
+    finishModalOpen('hoteldining', item, modal);
+  }
+
+  function closeHotelDiningModal() {
+    closeDomainModal('hoteldining');
+  }
   // --- 8.4 Spa & Massage Domain ---
   const SPA_SEARCH_SPEC = {
     strings: ['name', 'nameKo', 'nameVi', 'nameEn', 'location', 'districtLabel', 'addressVi', 'highlight', 'description', 'localTip', 'pickupDropoff', 'tipPolicy'],
@@ -2980,6 +3223,32 @@
         `
     },
     {
+      key: 'hoteldining',
+      render: () => renderHotelDinings(),
+      categoryNavId: 'hoteldiningCategoryNav', tagChipsId: 'hoteldiningTagChips',
+      catAttr: 'hdcategory', tagAttr: 'hdtag',
+      catField: 'hoteldiningCategory', tagField: 'hoteldiningTag',
+      notesField: 'hoteldiningNotes', notesKey: 'nha_trang_hoteldining_notes',
+      wishField: 'hoteldiningWishlist', wishKey: 'nha_trang_hoteldining_wishlist',
+      wishToastAdd: '♥ 호텔 다이닝 위시리스트에 저장되었습니다!', wishToastRemove: '호텔 다이닝 위시리스트에서 제외되었습니다.',
+      modalHeartBtnId: 'hoteldiningModalHeartBtn',
+      hasOpenHours: true, hasPriceSort: true, showViewToggle: true,
+      activeModalField: 'activeModalHoteldining',
+      modalId: 'hoteldiningModal', modalCloseBtnId: 'hoteldiningModalCloseBtn', closeModal: () => closeHotelDiningModal(),
+      noteInputIds: ['hoteldiningNoteInput'], noteStatusIds: ['hoteldiningNoteStatus'],
+      copyAddressBtnId: 'hoteldiningCopyAddressBtn',
+      gridSectionId: 'hoteldiningGridSection',
+      placeholder: '호텔 다이닝, 뷔페, 메뉴 검색 (예: 쿡북카페, 피스트, 바카로, 씨푸드BBQ, 조식)...',
+      heroTitle: '나트랑 5성급 호텔 시그니처 다이닝 🍽️',
+      heroSubtitle: '인터내셔널 조식·디너 뷔페부터 오션뷰 씨푸드 BBQ, 파인다이닝 & 루프탑 바 큐레이션',
+      heroPills: `
+          <span class="hero-stat-pill"><span class="icon">🏨</span> 5성급 호텔 시그니처 24곳</span>
+          <span class="hero-stat-pill"><span class="icon">🦞</span> 랍스터 & 해산물 무제한 BBQ</span>
+          <span class="hero-stat-pill"><span class="icon">🌅</span> 나트랑 비치 파노라마 오션뷰</span>
+          <span class="hero-stat-pill"><span class="icon">🍸</span> 45층 360도 스카이라운지 바</span>
+        `
+    },
+    {
       key: 'spa',
       render: () => renderSpa(),
       categoryNavId: 'spaCategoryNav', tagChipsId: 'spaTagChips',
@@ -3105,6 +3374,7 @@
   const LAZY_DATA = {
     gourmet: { src: './gourmet-data.js', containerId: 'gourmetCardsGridContainer', ready: () => typeof NHA_TRANG_GOURMETS !== 'undefined' },
     stays: { src: './stays-data.js', containerId: 'staysCardsGridContainer', ready: () => typeof NHA_TRANG_STAYS !== 'undefined' },
+    hoteldining: { src: './hotel-dining-data.js', containerId: 'hoteldiningCardsGridContainer', ready: () => typeof NHA_TRANG_HOTEL_DININGS !== 'undefined' },
     spa: { src: './spa-data.js', containerId: 'spaCardsGridContainer', ready: () => typeof NHA_TRANG_SPAS !== 'undefined' },
     shopping: { src: './shopping-data.js', containerId: 'shoppingCardsGridContainer', ready: () => typeof NHA_TRANG_SHOPPING !== 'undefined' },
     currency: { src: './currency-data.js', containerId: 'currencyCardsGridContainer', ready: () => typeof NHA_TRANG_CURRENCY !== 'undefined' },
@@ -3560,6 +3830,7 @@
       getFilteredActivities,
       getFilteredGourmets,
       getFilteredStays,
+      getFilteredHotelDinings,
       getFilteredSpas,
       getFilteredShopping,
       getFilteredCurrency,
@@ -3569,6 +3840,7 @@
       renderCards,
       renderGourmets,
       renderStays,
+      renderHotelDinings,
       renderSpa,
       renderShopping,
       renderCurrency,
@@ -3576,6 +3848,8 @@
       openActivityModal,
       openGourmetModal,
       openStayModal,
+      openHotelDiningModal,
+      closeHotelDiningModal,
       openSpaModal,
       closeSpaModal,
       openShoppingModal,

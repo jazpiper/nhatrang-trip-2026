@@ -1,0 +1,124 @@
+  <!-- Filter & Search Toolbar -->
+  <section class="toolbar-section">
+    <div class="container toolbar-inner">
+      <!-- Search Input -->
+      <div class="search-capsule">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="액티비티 검색 (예: 스노클링, 마사지, 인생샷, 아이리조트)..." />
+        <button class="search-clear-btn" id="searchClearBtn" title="검색어 지우기">✕</button>
+      </div>
+
+      <!-- Tag Filters for Activities -->
+      <div class="tag-chips-wrapper" id="activityTagChips">
+        <button class="tag-chip-btn active" data-tag="all">전체 태그</button>
+        <button class="tag-chip-btn" data-tag="wife">💖 인기 추천</button>
+        <button class="tag-chip-btn" data-tag="photo">📸 인생샷 스팟</button>
+        <button class="tag-chip-btn" data-tag="spa">💆 힐링 & 스파</button>
+        <button class="tag-chip-btn" data-tag="rain">☔ 비오는 날 강추</button>
+      </div>
+
+      <!-- Tag Filters for Gourmet -->
+      <div class="tag-chips-wrapper" id="gourmetTagChips" style="display: none;">
+        <button class="tag-chip-btn active" data-gtag="all">전체 태그</button>
+        <button class="tag-chip-btn" data-gtag="line">🔥 현지인 줄서는 집</button>
+        <button class="tag-chip-btn" data-gtag="ac">❄️ 에어컨 완비</button>
+        <button class="tag-chip-btn" data-gtag="breakfast">🌅 아침식사 추천</button>
+        <button class="tag-chip-btn" data-gtag="seafood">🦞 해산물 정찰제</button>
+        <button class="tag-chip-btn" data-gtag="night">🌙 야식/맥주 추천</button>
+      </div>
+
+      <!-- Tag Filters for Stays -->
+      <div class="tag-chips-wrapper" id="stayTagChips" style="display: none;">
+        <button class="tag-chip-btn active" data-stag="all">전체 태그</button>
+        <button class="tag-chip-btn" data-stag="pool">🏊 수영장/인피니티풀</button>
+        <button class="tag-chip-btn" data-stag="beach">🌊 오션뷰/비치</button>
+        <button class="tag-chip-btn" data-stag="private_pool">🏡 단독 프라이빗풀</button>
+        <button class="tag-chip-btn" data-stag="budget">💰 5만원 이하 알짜</button>
+        <button class="tag-chip-btn" data-stag="shopping">🛍️ 야시장/쇼핑 인접</button>
+      </div>
+
+      <!-- Tag Filters for Hotel Dining -->
+      <div class="tag-chips-wrapper" id="hoteldiningTagChips" style="display: none;">
+        <button class="tag-chip-btn active" data-hdtag="all">전체 태그</button>
+        <button class="tag-chip-btn" data-hdtag="ocean_view">🌊 오션뷰</button>
+        <button class="tag-chip-btn" data-hdtag="breakfast">🌅 조식뷔페</button>
+        <button class="tag-chip-btn" data-hdtag="sunset_bar">🍸 루프탑·선셋</button>
+        <button class="tag-chip-btn" data-hdtag="seafood_bbq">🦞 씨푸드BBQ</button>
+        <button class="tag-chip-btn" data-hdtag="fine_dining">🍷 파인다이닝</button>
+        <button class="tag-chip-btn" data-hdtag="family">👶 키즈·가족</button>
+      </div>
+
+      <!-- Tag Filters for Spa -->
+      <div class="tag-chips-wrapper" id="spaTagChips" style="display: none;">
+        <button class="tag-chip-btn active" data-spatag="all">전체 태그</button>
+        <button class="tag-chip-btn" data-spatag="pickup">🚗 무료 픽드랍</button>
+        <button class="tag-chip-btn" data-spatag="shower">🚿 짐보관·샤워</button>
+        <button class="tag-chip-btn" data-spatag="tip_included">💵 팁 포함</button>
+        <button class="tag-chip-btn" data-spatag="hot_stone">🔥 핫스톤/아로마</button>
+        <button class="tag-chip-btn" data-spatag="mud_bath">♨️ 머드 온천</button>
+        <button class="tag-chip-btn" data-spatag="couple_room">💑 커플/프라이빗</button>
+        <button class="tag-chip-btn" data-spatag="late_night">🌙 심야영업</button>
+      </div>
+
+      <!-- Tag Filters for Shopping -->
+      <div class="tag-chips-wrapper" id="shoppingTagChips" style="display: none;">
+        <button class="tag-chip-btn active" data-shoptag="all">전체 태그</button>
+        <button class="tag-chip-btn" data-shoptag="ac">❄️ 에어컨 완비</button>
+        <button class="tag-chip-btn" data-shoptag="fixed">🏷️ 정찰제 / 편안함</button>
+        <button class="tag-chip-btn" data-shoptag="transfer">💳 계좌이체/GLN 가능</button>
+        <button class="tag-chip-btn" data-shoptag="bargain">🔥 흥정필수 (호가 반값)</button>
+        <button class="tag-chip-btn" data-shoptag="mirror_tier">👑 미러급/SA급</button>
+        <button class="tag-chip-btn" data-shoptag="value">💰 가성비 갓템</button>
+      </div>
+
+      <!-- Tag Filters for Currency -->
+      <div class="tag-chips-wrapper" id="currencyTagChips" style="display: none;">
+        <button class="tag-chip-btn active" data-currtag="all">전체 태그</button>
+        <button class="tag-chip-btn" data-currtag="fee_free">🎁 현지 수수료 0원</button>
+        <button class="tag-chip-btn" data-currtag="travellog">💳 하나 트래블로그</button>
+        <button class="tag-chip-btn" data-currtag="travelwallet">👛 트래블월렛</button>
+        <button class="tag-chip-btn" data-currtag="sol_travel">⚡ 신한 쏠트래블</button>
+        <button class="tag-chip-btn" data-currtag="toss_bank">💙 토스뱅크 외화체크</button>
+        <button class="tag-chip-btn" data-currtag="wibee">🐝 우리 위비트래블</button>
+        <button class="tag-chip-btn" data-currtag="usd100">💵 100달러 신권 우대</button>
+        <button class="tag-chip-btn" data-currtag="livebank_24h">🏧 24시간 LiveBank</button>
+        <button class="tag-chip-btn" data-currtag="night_market">🌙 야시장/시내 인근</button>
+      </div>
+
+      <!-- Tag Filters for Guide Hub -->
+      <div class="tag-chips-wrapper" id="guideTagChips" style="display: none;">
+        <button class="tag-chip-btn active" data-guidetag="all">전체</button>
+        <button class="tag-chip-btn" data-guidetag="transport">🚗 교통/공항</button>
+        <button class="tag-chip-btn" data-guidetag="shopping">🛒 쇼핑/시세</button>
+        <button class="tag-chip-btn" data-guidetag="emergency">💊 응급/병원</button>
+        <button class="tag-chip-btn" data-guidetag="flashcards">🗣️ 베트남어 카드</button>
+      </div>
+
+      <!-- Controls: Sort & View Toggle -->
+      <div class="toolbar-controls">
+        <button class="tag-chip-btn" id="openNowChip" title="지금 문을 연 곳만" aria-pressed="false">🕘 지금 영업중</button>
+
+        <select class="sort-select" id="sortSelect" aria-label="정렬 기준">
+          <option value="recommended">추천순 정렬</option>
+          <option value="rating">평점 높은 순</option>
+          <option value="price-asc">가격 낮은 순</option>
+          <option value="price-desc">가격 높은 순</option>
+        </select>
+
+        <div id="viewToggleButtons">
+          <button class="view-toggle-btn active" id="viewListBtn" title="정보 위주 리스트 뷰">
+            <span>☰</span> <span>리스트</span>
+          </button>
+          <button class="view-toggle-btn" id="viewGridBtn" title="사진 위주 그리드 뷰">
+            <span>▦</span> <span>그리드</span>
+          </button>
+        </div>
+
+        <div id="densityToggleButtons">
+          <button class="view-toggle-btn active" id="densityTightBtn" title="한 화면에 더 많이">밀집</button>
+          <button class="view-toggle-btn" id="densityComfyBtn" title="여유 있게">넉넉</button>
+        </div>
+      </div>
+    </div>
+  </section>
+

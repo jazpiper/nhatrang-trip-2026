@@ -38,6 +38,44 @@ const requiredIds = [
   'stayModalHeartBtn',
   'stayModalMapBtn',
   'stayModalTripBtn',
+  // Hotel Dining Domain IDs
+  'hoteldiningCategoryNav',
+  'hoteldiningTagChips',
+  'hoteldiningGridSection',
+  'hoteldiningResultCountText',
+  'hoteldiningCardsGridContainer',
+  'hoteldiningModal',
+  'hoteldiningModalCloseBtn',
+  'hoteldiningModalGallery',
+  'hoteldiningModalMainImg',
+  'hoteldiningModalThumbs',
+  'hoteldiningModalBadge',
+  'hoteldiningModalCategory',
+  'hoteldiningModalTitle',
+  'hoteldiningModalHotelName',
+  'hoteldiningModalNameVi',
+  'hoteldiningModalRating',
+  'hoteldiningModalPriceRange',
+  'hoteldiningModalOpenHours',
+  'hoteldiningModalLocation',
+  'hoteldiningModalAddress',
+  'hoteldiningCopyAddressBtn',
+  'hoteldiningModalHighlight',
+  'hoteldiningModalSignatureList',
+  'hoteldiningModalDressCode',
+  'hoteldiningModalReservation',
+  'hoteldiningModalPhone',
+  'hoteldiningModalDesc',
+  'hoteldiningModalTip',
+  'hoteldiningNoteInput',
+  'hoteldiningNoteStatus',
+  'hoteldiningModalPriceVnd',
+  'hoteldiningModalPriceKrw',
+  'hoteldiningModalPricePer',
+  'hoteldiningModalHeartBtn',
+  'hoteldiningModalMapLink',
+  'hoteldiningModalPhotosLink',
+  'hoteldiningModalOfficialLink',
   // Shopping Domain IDs
   'shoppingCategoryNav',
   'shoppingTagChips',
@@ -678,11 +716,13 @@ console.log('\n=== Suite 10: Dataset Count Synchronization (index.html + js/app.
 // actually fails this suite instead of silently drifting.
 const { NHA_TRANG_ACTIVITIES } = require('./data.js');
 const { NHA_TRANG_GOURMETS } = require('./gourmet-data.js');
+const { NHA_TRANG_HOTEL_DININGS } = require('./hotel-dining-data.js');
 
 const domainCounts = {
   activities: NHA_TRANG_ACTIVITIES.length,
   gourmet: NHA_TRANG_GOURMETS.length,
   stays: NHA_TRANG_STAYS.length,
+  hoteldining: NHA_TRANG_HOTEL_DININGS.length,
   spa: NHA_TRANG_SPAS.length,
   shopping: NHA_TRANG_SHOPPING.length,
   currency: NHA_TRANG_CURRENCY.length
@@ -714,6 +754,7 @@ const categoryNavIds = {
   activities: 'activityCategoryNav',
   gourmet: 'gourmetCategoryNav',
   stays: 'stayCategoryNav',
+  hoteldining: 'hoteldiningCategoryNav',
   spa: 'spaCategoryNav',
   shopping: 'shoppingCategoryNav',
   currency: 'currencyCategoryNav'
@@ -750,6 +791,7 @@ const heroPillPatterns = {
   activities: /엄선된 (\d+)개 리얼 액티비티/,
   gourmet: /현지인 & 스페셜티 (\d+)곳/,
   stays: /엄선 (\d+)선/,
+  hoteldining: /5성급 호텔 시그니처 (\d+)곳/,
   spa: /엄선된 (\d+)선 힐링 스파/
 };
 

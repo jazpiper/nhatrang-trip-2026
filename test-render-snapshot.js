@@ -40,6 +40,7 @@ globalThis.DEFAULT_EXCHANGE_RATE = activityData.DEFAULT_EXCHANGE_RATE;
 
 globalThis.NHA_TRANG_GOURMETS = require('./gourmet-data.js').NHA_TRANG_GOURMETS;
 globalThis.NHA_TRANG_STAYS = require('./stays-data.js').NHA_TRANG_STAYS;
+globalThis.NHA_TRANG_HOTEL_DININGS = require('./hotel-dining-data.js').NHA_TRANG_HOTEL_DININGS;
 globalThis.NHA_TRANG_SPAS = require('./spa-data.js').NHA_TRANG_SPAS;
 globalThis.NHA_TRANG_SHOPPING = require('./shopping-data.js').NHA_TRANG_SHOPPING;
 globalThis.NHA_TRANG_CURRENCY = require('./currency-data.js').NHA_TRANG_CURRENCY;
@@ -83,6 +84,15 @@ const DOMAINS = [
     catField: 'stayCategory', tagField: 'stayTag',
     wishField: 'stayWishlist', data: () => NHA_TRANG_STAYS,
     sampleCat: 'welcome', sampleTag: 'pool', sampleQuery: '인터컨티넨탈'
+  },
+  {
+    key: 'hoteldining',
+    render: () => app.renderHotelDinings(),
+    container: 'hoteldiningCardsGridContainer',
+    count: 'hoteldiningResultCountText',
+    catField: 'hoteldiningCategory', tagField: 'hoteldiningTag',
+    wishField: 'hoteldiningWishlist', data: () => NHA_TRANG_HOTEL_DININGS,
+    sampleCat: 'jw_marriott', sampleTag: 'ocean_view', sampleQuery: '메리어트'
   },
   {
     key: 'spa',
@@ -239,6 +249,7 @@ const MODAL_OPENERS = [
   { key: 'activity', open: item => app.openActivityModal(item), data: () => NHA_TRANG_ACTIVITIES },
   { key: 'gourmet', open: item => app.openGourmetModal(item), data: () => NHA_TRANG_GOURMETS },
   { key: 'stay', open: item => app.openStayModal(item), data: () => NHA_TRANG_STAYS },
+  { key: 'hoteldining', open: item => app.openHotelDiningModal(item), data: () => NHA_TRANG_HOTEL_DININGS },
   { key: 'spa', open: item => app.openSpaModal(item), data: () => NHA_TRANG_SPAS },
   { key: 'shopping', open: item => app.openShoppingModal(item), data: () => NHA_TRANG_SHOPPING },
   { key: 'currency', open: item => app.openCurrencyModal(item), data: () => NHA_TRANG_CURRENCY }
