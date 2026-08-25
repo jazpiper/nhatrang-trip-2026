@@ -70,19 +70,19 @@
   function shoppingCardTemplate(item) {
     const isWish = (state.shoppingWishlist || []).includes(item.id);
     const userNote = (state.shoppingNotes || {})[item.id];
-    const mainImg = (item.photos && item.photos[0]) || 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80';
+    const mainImg = sanitizeImageUrl((item.photos && item.photos[0]) || 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80');
     const tagPills = (item.tags || []).slice(0, 3).map(t => `<span class="card-tag-pill">${escapeHtml(t)}</span>`).join('');
     const qualityTierBadge = item.qualityTier ? `<span class="shopping-badge-tier">${escapeHtml(item.qualityTier)}</span>` : '';
     const acBadge = item.hasAirConditioning ? `<span class="shopping-badge-ac">❄️ 에어컨</span>` : '';
 
     return `
-        <div class="activity-card shopping-card" data-id="${item.id}">
+        <div class="activity-card shopping-card" data-id="${escapeHtml(item.id)}">
           <div class="card-media-wrapper">
-            <img class="card-img" src="${mainImg}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80'" />
+            <img class="card-img" src="${escapeHtml(mainImg)}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80'" />
             <span class="card-badge-top-left">${escapeHtml(item.badge || item.categoryLabel || '쇼핑')}</span>
             ${qualityTierBadge}
             ${acBadge}
-            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" title="위시리스트 저장" aria-label="위시리스트 저장">
               ♥
             </button>
           </div>
@@ -90,7 +90,7 @@
             <div class="card-header-line">
               <span class="card-title">${escapeHtml(item.nameKo || item.name)}</span>
               <span class="card-rating">
-                <span class="star">★</span> ${item.rating || 4.7} 
+                <span class="star">★</span> ${escapeHtml(item.rating || 4.7)} 
                 <span class="card-review-count">(${Number(item.reviewCount || 0).toLocaleString()})</span>
               </span>
             </div>
@@ -192,8 +192,8 @@
     { id: 'shoppingModalAvgPrice', value: item => formatVND(item.avgPriceVnd) },
     { id: 'shoppingModalAvgKrw', value: item => `(${formatKRW(item.avgPriceVnd)})` },
     { id: 'shoppingModalPricePer', value: () => '/ 평균 기준' },
-    { id: 'shoppingModalPhotosBtn', as: 'href', value: item => item.photosUrl || item.mapUrl || '#' },
-    { id: 'shoppingModalMapBtn', as: 'href', value: item => item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.nameKo || item.name) + ' Nha Trang')}` },
+    { id: 'shoppingModalPhotosBtn', as: 'href', value: item => sanitizeUrl(item.photosUrl || item.mapUrl || '#') },
+    { id: 'shoppingModalMapBtn', as: 'href', value: item => sanitizeUrl(item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.nameKo || item.name) + ' Nha Trang')}`) },
   ];
 
   function openShoppingModal(item) {

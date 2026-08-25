@@ -37,8 +37,8 @@
     // Global Toolbar State
     searchQuery: '',
     sortBy: 'recommended',
-    currentView: loadFromStorage('nha_trang_view', 'list'),   // 'list' | 'grid'
-    density: loadFromStorage('nha_trang_density', 'tight'),   // 'tight' | 'comfy'
+    currentView: ['list', 'grid'].includes(loadFromStorage('nha_trang_view', 'list')) ? loadFromStorage('nha_trang_view', 'list') : 'list',
+    density: ['tight', 'comfy'].includes(loadFromStorage('nha_trang_density', 'tight')) ? loadFromStorage('nha_trang_density', 'tight') : 'tight',
     openNowOnly: false,
     wishlistOnly: false,
     
@@ -199,11 +199,11 @@
 
   /** 데이터에 지도 URL이 있으면 그대로, 없으면 정식 상호 + 주소로 검색 URL을 만든다. */
   function buildMapUrl(item) {
-    if (item.googleMapUrl) return item.googleMapUrl;
+    if (item.googleMapUrl) return sanitizeUrl(item.googleMapUrl);
     const query = item.googleMapQuery
       || [item.nameVi, item.addressVi].filter(Boolean).join(' ')
       || `${item.nameKo || item.name || item.title || ''} Nha Trang`;
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+    return sanitizeUrl(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`);
   }
 
   /**
@@ -214,8 +214,9 @@
   function itemRowHTML(v) {
     // 이미지가 깨져도 빈 박스가 남지 않게 이모지를 아래에 깔고 그 위에 사진을 올린다
     const fallback = `<span class="row-thumb-fallback">${escapeHtml(v.emoji || '📍')}</span>`;
-    const thumb = v.imgUrl
-      ? `${fallback}<img class="row-img" src="${v.imgUrl}" alt="${escapeHtml(v.name)}" loading="lazy" onerror="this.remove();" />`
+    const safeImg = sanitizeImageUrl(v.imgUrl);
+    const thumb = safeImg
+      ? `${fallback}<img class="row-img" src="${escapeHtml(safeImg)}" alt="${escapeHtml(v.name)}" loading="lazy" onerror="this.remove();" />`
       : fallback;
 
     const tags = (v.tags || []).slice(0, 2).map(t =>
@@ -223,7 +224,7 @@
     ).join('');
 
     const ratingHtml = v.rating
-      ? `<span class="row-rating"><span class="star">★</span> ${v.rating}` +
+      ? `<span class="row-rating"><span class="star">★</span> ${escapeHtml(v.rating)}` +
         (v.reviewCount ? ` <span class="cnt">(${Number(v.reviewCount).toLocaleString()})</span>` : '') +
         `</span>`
       : '';
@@ -246,11 +247,13 @@
     }
     if (v.subText) line3Bits.push(`<span class="row-vi">${escapeHtml(v.subText)}</span>`);
 
+    const safeMapUrl = sanitizeUrl(v.mapUrl);
+
     return `
-      <article class="item-row" data-id="${v.id}" tabindex="0">
+      <article class="item-row" data-id="${escapeHtml(v.id)}" tabindex="0">
         <div class="row-thumb">
           ${thumb}
-          ${v.rank ? `<span class="row-rank">${v.rank}</span>` : ''}
+          ${v.rank ? `<span class="row-rank">${escapeHtml(v.rank)}</span>` : ''}
         </div>
         <div class="row-main">
           <div class="row-line1">
@@ -268,8 +271,8 @@
             ${v.priceUnit ? `<span class="row-price-u">${escapeHtml(v.priceUnit)}</span>` : ''}
           </div>
           <div class="row-acts">
-            <button type="button" class="row-ico row-heart ${v.isWish ? 'is-wishlisted' : ''}" data-id="${v.id}" title="찜하기" aria-label="찜하기">♥</button>
-            <a class="row-ico" href="${v.mapUrl}" target="_blank" rel="noopener noreferrer" title="구글 지도에서 보기" aria-label="구글 지도에서 보기">↗</a>
+            <button type="button" class="row-ico row-heart ${v.isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(v.id)}" title="찜하기" aria-label="찜하기">♥</button>
+            <a class="row-ico" href="${escapeHtml(safeMapUrl)}" target="_blank" rel="noopener noreferrer" title="구글 지도에서 보기" aria-label="구글 지도에서 보기">↗</a>
           </div>
         </div>
       </article>
@@ -358,8 +361,8 @@
       if (!el) return;
       const v = typeof f.value === 'function' ? f.value(item) : item[f.value];
       if (f.as === 'html') el.innerHTML = v == null ? '' : v;
-      else if (f.as === 'src') el.src = v == null ? '' : v;
-      else if (f.as === 'href') el.href = v == null ? '' : v;
+      else if (f.as === 'src') el.src = sanitizeImageUrl(v == null ? '' : v);
+      else if (f.as === 'href') el.href = sanitizeUrl(v == null ? '' : v);
       else el.textContent = v == null ? '' : v;
     });
   }
@@ -450,21 +453,21 @@
     const images = cfg.images || [];
 
     if (mainImgEl) {
-      mainImgEl.src = cfg.mainSrc;
-      mainImgEl.alt = cfg.mainAlt;
+      mainImgEl.src = sanitizeImageUrl(cfg.mainSrc);
+      mainImgEl.alt = cfg.mainAlt || '';
     }
     if (!thumbsRow) return;
 
     thumbsRow.innerHTML = images.map((src, idx) => `
         <div class="gallery-thumb ${idx === 0 ? 'active' : ''}" data-idx="${idx}">
-          <img src="${escapeHtml(src)}" alt="${escapeHtml(cfg.thumbAlt)} 사진 ${idx + 1}" loading="lazy" />
+          <img src="${escapeHtml(sanitizeImageUrl(src))}" alt="${escapeHtml(cfg.thumbAlt)} 사진 ${idx + 1}" loading="lazy" />
         </div>
       `).join('');
 
     thumbsRow.querySelectorAll('.gallery-thumb').forEach(th => {
       th.addEventListener('click', () => {
         const idx = parseInt(th.dataset.idx, 10);
-        if (mainImgEl && images[idx]) mainImgEl.src = images[idx];
+        if (mainImgEl && images[idx]) mainImgEl.src = sanitizeImageUrl(images[idx]);
         thumbsRow.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
         th.classList.add('active');
       });

@@ -297,7 +297,7 @@
               <div class="customs-info-card customs-info-card-info">
                 <strong class="customs-info-label-info">💵 1인 면세 한도:</strong>
                 <ul class="customs-info-list">
-                  <li>기본 면세: 미화 <strong>${matrix.customsQuarantine.dutyFreeAllowance.basicAllowanceUsd}</strong></li>
+                  <li>기본 면세: 미화 <strong>${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.basicAllowanceUsd)}</strong></li>
                   <li>주류: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.alcoholLimit)}</li>
                   <li>담배: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.tobaccoLimit)}</li>
                   <li>향수: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.perfumeLimit)}</li>
@@ -377,13 +377,13 @@
                     <p class="hospital-address">📍 ${escapeHtml(h.addressVi)}</p>
                   </div>
                   <div class="hospital-hotline-box">
-                    <a href="tel:${h.hotline.replace(/\s+/g, '')}" class="hospital-hotline-btn">
+                    <a href="${escapeHtml(sanitizeUrl('tel:' + h.hotline.replace(/\s+/g, '')))}" class="hospital-hotline-btn">
                       <span>📞 진료 예약/문의: ${escapeHtml(h.hotline)}</span>
                     </a>
-                    <a href="tel:${h.emergency24h.replace(/\s+/g, '')}" class="hospital-hotline-btn hospital-hotline-btn-emergency">
+                    <a href="${escapeHtml(sanitizeUrl('tel:' + h.emergency24h.replace(/\s+/g, '')))}" class="hospital-hotline-btn hospital-hotline-btn-emergency">
                       <span>🚨 24시 응급실: ${escapeHtml(h.emergency24h)}</span>
                     </a>
-                    <a href="${h.googleMapUrl}" target="_blank" rel="noopener noreferrer" class="btn-secondary hospital-directions-link">
+                    <a href="${escapeHtml(sanitizeUrl(h.googleMapUrl))}" target="_blank" rel="noopener noreferrer" class="btn-secondary hospital-directions-link">
                       <span>🗺️ 구글 지도 길찾기</span>
                     </a>
                   </div>
@@ -405,7 +405,7 @@
             <div>
               ${emergency.insuranceGuide.steps.map(st => `
                 <div class="insurance-step-item">
-                  <div class="insurance-step-no">${st.stepNo}</div>
+                  <div class="insurance-step-no">${escapeHtml(st.stepNo)}</div>
                   <div>
                     <div class="insurance-step-title">${escapeHtml(st.nameKo)}</div>
                     <div class="insurance-step-desc">${escapeHtml(st.desc)}</div>
@@ -437,9 +437,9 @@
           <!-- Flashcards Responsive Grid -->
           <div class="flashcards-grid">
             ${flashcards.map(fc => `
-              <div class="flashcard-card" data-fc-id="${fc.id}">
+              <div class="flashcard-card" data-fc-id="${escapeHtml(fc.id)}">
                 <div class="flashcard-card-top">
-                  <span class="flashcard-card-icon">${fc.icon}</span>
+                  <span class="flashcard-card-icon">${escapeHtml(fc.icon || '🗣️')}</span>
                   <span class="flashcard-card-cat">${escapeHtml(fc.categoryLabel)}</span>
                 </div>
                 <h3 class="flashcard-card-ko">${escapeHtml(fc.ko)}</h3>
@@ -447,7 +447,7 @@
                 <div class="flashcard-card-pron">${escapeHtml(fc.pronunciation)}</div>
                 <div class="flashcard-card-purpose">🎯 ${escapeHtml(fc.purpose)}</div>
                 <div class="flashcard-card-actions">
-                  <button type="button" class="btn-flashcard-zoom" data-fc-zoom="${fc.id}">
+                  <button type="button" class="btn-flashcard-zoom" data-fc-zoom="${escapeHtml(fc.id)}">
                     <span>🔍 크게 보기</span>
                   </button>
                   <button type="button" class="btn-flashcard-card-copy" data-fc-copy="${escapeHtml(fc.vi)}">

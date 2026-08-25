@@ -90,10 +90,10 @@
     ).join('');
 
     return `
-      <div class="spa-card" data-id="${item.id}" tabindex="0" role="button" aria-label="${escapeHtml(item.nameKo || item.name)}">
+      <div class="spa-card" data-id="${escapeHtml(item.id)}" tabindex="0" role="button" aria-label="${escapeHtml(item.nameKo || item.name)}">
         <div class="card-media-wrapper">
-          <img class="card-img" src="${escapeHtml(item.coverImage || (item.images && item.images[0]) || '')}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" />
-          <button class="card-heart-btn ${isWishlisted ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 토글" aria-label="위시리스트">
+          <img class="card-img" src="${escapeHtml(sanitizeImageUrl(item.coverImage || (item.images && item.images[0]) || ''))}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" />
+          <button class="card-heart-btn ${isWishlisted ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" title="위시리스트 토글" aria-label="위시리스트">
             ${isWishlisted ? '♥' : '♡'}
           </button>
           <span class="card-badge-top-left">${escapeHtml(item.badge || '추천 스파')}</span>
@@ -106,7 +106,7 @@
           <h3 class="card-title">${escapeHtml(item.nameKo || item.name)}</h3>
           <p class="card-name-vi">🇻🇳 ${escapeHtml(item.nameVi || '')}</p>
           <div class="card-meta-line">
-            <span class="rating">★ ${item.rating || '-'}</span>
+            <span class="rating">★ ${escapeHtml(item.rating || '-')}</span>
             <span class="reviews">(${(item.reviewCount || 0).toLocaleString()})</span>
             <span class="dot">·</span>
             <span class="hours">⏰ ${escapeHtml(item.openHours || '영업시간 미확인')}</span>
@@ -120,7 +120,7 @@
           <p class="card-highlight-text">✨ ${escapeHtml(item.highlight || '')}</p>
 
           <div class="card-price-line">
-            <span class="price-main">${item.avgPriceVnd ? formatVND(item.avgPriceVnd) : (item.priceRangeVnd || '')}</span>
+            <span class="price-main">${item.avgPriceVnd ? formatVND(item.avgPriceVnd) : escapeHtml(item.priceRangeVnd || '')}</span>
             <span class="price-krw">(${item.avgPriceVnd ? formatKRW(item.avgPriceVnd) : ''})</span>
             <span class="price-sub">${escapeHtml(item.pricePer || '/ 90분 기준')}</span>
           </div>
@@ -208,8 +208,8 @@
     { id: 'spaModalAvgPrice', value: item => item.avgPriceVnd ? formatVND(item.avgPriceVnd) : '' },
     { id: 'spaModalAvgKrw', value: item => item.avgPriceVnd ? `(${formatKRW(item.avgPriceVnd)})` : '' },
     { id: 'spaModalPricePer', value: item => item.pricePer || '/ 90분 기준' },
-    { id: 'spaModalPhotosBtn', as: 'href', value: item => item.googlePhotosUrl || item.googleMapUrl },
-    { id: 'spaModalMapBtn', as: 'href', value: 'googleMapUrl' },
+    { id: 'spaModalPhotosBtn', as: 'href', value: item => sanitizeUrl(item.googlePhotosUrl || item.googleMapUrl || '#') },
+    { id: 'spaModalMapBtn', as: 'href', value: item => sanitizeUrl(item.googleMapUrl || buildMapUrl(item)) },
   ];
 
   function openSpaModal(item) {
@@ -252,9 +252,9 @@
             <strong>${escapeHtml(c.name || '')}</strong>
             ${c.description ? `<p class="course-desc">${escapeHtml(c.description)}</p>` : ''}
           </td>
-          <td class="course-time">${c.durationMin || '-'}분</td>
-          <td class="course-vnd">${(c.priceVnd || 0).toLocaleString()} VND</td>
-          <td class="course-krw">약 ${(c.priceKrw || Math.round((c.priceVnd || 0) * currentBenchmarkRate / 100)).toLocaleString()}원</td>
+          <td class="course-time">${escapeHtml(c.durationMin || '-')}분</td>
+          <td class="course-vnd">${escapeHtml(Number(c.priceVnd || 0).toLocaleString())} VND</td>
+          <td class="course-krw">약 ${escapeHtml(Number(c.priceKrw || Math.round((c.priceVnd || 0) * currentBenchmarkRate / 100)).toLocaleString())}원</td>
         </tr>
       `).join('');
     }

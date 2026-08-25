@@ -397,6 +397,17 @@
       }
     });
 
+    // POS Simulator Choice Handlers
+    document.querySelectorAll('.btn-pos-choice').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.posChoice === 'vnd') {
+          alert('🎉 정답입니다! 현지 통화(VND) 결제로 추가 수수료 0원을 방어했습니다.');
+        } else if (btn.dataset.posChoice === 'krw') {
+          alert('⚠️ 주의! KRW 결제 시 3~8% 이중 환전 수수료가 발생합니다. 반드시 VND를 선택하세요!');
+        }
+      });
+    });
+
     // Initialize currency calculator
     initCurrencyCalculator();
   }

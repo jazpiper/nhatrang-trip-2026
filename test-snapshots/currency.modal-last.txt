@@ -2,19 +2,19 @@
 currencyModalAddress
     text="Tầng 1 Sảnh đến, Nhà ga Quốc tế T2, Sân bay Quốc tế Cam Ranh, Cam Ranh, Khánh Hòa"
 currencyModalAtmSteps
-    html="\n          <div class=\"atm-steps-box\">\n            <div class=\"atm-step-item\"><span class=\"step-badge\">1</span><span><strong>카드 삽입 & 언어:</strong> 영문(English) 선택</span></div>\n            <div class=\"atm-step-item\"><span class=\"step-badge\">2</span><span><strong>6자리 PIN 입력:</strong> 4자리 비밀번호 + 뒤에 00 입력 후 ENTER</span></div>\n            <div class=\"atm-step-item\"><span class=\"step-badge\">3</span><span><strong>계좌 선택:</strong> 반드시 [Checking / Current Account] 선택</span></div>\n            <div class=\"atm-step-item\"><span class=\"step-badge\">4</span><span><strong>금액 선택:</strong> 1회 인출 한도 (1회 2,000,000 ~ 3,000,000 VND)</span></div>\n            <div class=\"atm-step-item danger\"><span class=\"step-badge\">5</span><span><strong>★DCC 거절:</strong> 'Without Conversion' / 'No' 선택</span></div>\n            <div class=\"atm-step-item warning\"><span class=\"step-badge\">6</span><span><strong>★★카드 먼저 회수!:</strong> 현금보다 카드가 먼저 나옵니다 (30초 내 회수)</span></div>\n            <div class=\"atm-step-item\"><span class=\"step-badge\">7</span><span><strong>현금 & 영수증:</strong> 50만동 지폐 매수 확인 후 수령</span></div>\n          </div>\n        "
+    html="\n        <div class=\"atm-steps-box\">\n          <div class=\"atm-step-item\"><span class=\"step-badge\">1</span><span><strong>카드 삽입 & 언어:</strong> 영문(English) 선택</span></div>\n          <div class=\"atm-step-item\"><span class=\"step-badge\">2</span><span><strong>6자리 PIN 입력:</strong> 4자리 비밀번호 + 뒤에 00 입력 후 ENTER</span></div>\n          <div class=\"atm-step-item\"><span class=\"step-badge\">3</span><span><strong>계좌 선택:</strong> 반드시 [Checking / Current Account] 선택</span></div>\n          <div class=\"atm-step-item\"><span class=\"step-badge\">4</span><span><strong>금액 선택:</strong> 1회 인출 한도 (1회 2,000,000 ~ 3,000,000 VND)</span></div>\n          <div class=\"atm-step-item danger\"><span class=\"step-badge\">5</span><span><strong>★DCC 거절:</strong> 'Without Conversion' / 'No' 선택</span></div>\n          <div class=\"atm-step-item warning\"><span class=\"step-badge\">6</span><span><strong>★★카드 먼저 회수!:</strong> 현금보다 카드가 먼저 나옵니다 (30초 내 회수)</span></div>\n          <div class=\"atm-step-item\"><span class=\"step-badge\">7</span><span><strong>현금 & 영수증:</strong> 50만동 지폐 매수 확인 후 수령</span></div>\n        </div>\n      "
 currencyModalBadge
     text="착륙 즉시 첫 현금 인출 & 24시간 운영"
 currencyModalCardsList
-    html="\n        <div class=\"supported-card-item\">\n          <span class=\"card-icon\">💳</span>\n          <span class=\"card-name\">트래블로그</span>\n          <span class=\"card-status-badge free\">수수료 0원</span>\n        </div>\n      \n        <div class=\"supported-card-item\">\n          <span class=\"card-icon\">💳</span>\n          <span class=\"card-name\">트래블월렛</span>\n          <span class=\"card-status-badge free\">수수료 0원</span>\n        </div>\n      \n        <div class=\"supported-card-item\">\n          <span class=\"card-icon\">💳</span>\n          <span class=\"card-name\">신한쏠트래블</span>\n          <span class=\"card-status-badge free\">수수료 0원</span>\n        </div>\n      \n        <div class=\"supported-card-item\">\n          <span class=\"card-icon\">💳</span>\n          <span class=\"card-name\">토스뱅크</span>\n          <span class=\"card-status-badge free\">수수료 0원</span>\n        </div>\n      \n        <div class=\"supported-card-item\">\n          <span class=\"card-icon\">💳</span>\n          <span class=\"card-name\">위비트래블</span>\n          <span class=\"card-status-badge free\">수수료 0원</span>\n        </div>\n      "
+    html="\n      <div class=\"supported-card-item\">\n        <span class=\"card-icon\">💳</span>\n        <span class=\"card-name\">트래블로그</span>\n        <span class=\"card-status-badge free\">수수료 0원</span>\n      </div>\n    \n      <div class=\"supported-card-item\">\n        <span class=\"card-icon\">💳</span>\n        <span class=\"card-name\">트래블월렛</span>\n        <span class=\"card-status-badge free\">수수료 0원</span>\n      </div>\n    \n      <div class=\"supported-card-item\">\n        <span class=\"card-icon\">💳</span>\n        <span class=\"card-name\">신한쏠트래블</span>\n        <span class=\"card-status-badge free\">수수료 0원</span>\n      </div>\n    \n      <div class=\"supported-card-item\">\n        <span class=\"card-icon\">💳</span>\n        <span class=\"card-name\">토스뱅크</span>\n        <span class=\"card-status-badge free\">수수료 0원</span>\n      </div>\n    \n      <div class=\"supported-card-item\">\n        <span class=\"card-icon\">💳</span>\n        <span class=\"card-name\">위비트래블</span>\n        <span class=\"card-status-badge free\">수수료 0원</span>\n      </div>\n    "
 currencyModalCategory
     text="공항 ATM"
 currencyModalDccGuide
-    html="\n        <div class=\"dcc-warning-box\">\n          <div class=\"dcc-warning-header\">\n            <span>🛡️ DCC(원화 이중결제) 차단 필수 수칙</span>\n          </div>\n          <p>ATM 화면 또는 POS 단말기에서 통화 선택 창이 뜰 경우 <strong>반드시 [Without Conversion] 및 [VND]</strong>를 선택하세요. 원화(KRW) 선택 시 3~8% 불필요한 바가지 수수료가 발생합니다.</p>\n        </div>\n      "
+    html="\n      <div class=\"dcc-warning-box\">\n        <div class=\"dcc-warning-header\">\n          <span>🛡️ DCC(원화 이중결제) 차단 필수 수칙</span>\n        </div>\n        <p>ATM 화면 또는 POS 단말기에서 통화 선택 창이 뜰 경우 <strong>반드시 [Without Conversion] 및 [VND]</strong>를 선택하세요. 원화(KRW) 선택 시 3~8% 불필요한 바가지 수수료가 발생합니다.</p>\n      </div>\n    "
 currencyModalDesc
     text="깜란 국제공항 T2 입국장 게이트를 나오자마자 좌측에 위치한 24시간 ATM 존입니다. 여러 은행의 ATM이 모여 있어 한국에서 가져온 여행 체크카드로 시내 이동 전 필요한 소액 현금을 즉시 인출할 수 있습니다."
 currencyModalFacilities
-    html="\n        <span class=\"facility-chip\">✓ 24시간 공항 ATM 존</span>\n      \n        <span class=\"facility-chip\">✓ 공항 보안 구역</span>\n      \n        <span class=\"facility-chip\">✓ 영문/한국어 지원 인터페이스</span>\n      "
+    html="\n      <span class=\"facility-chip\">✓ 24시간 공항 ATM 존</span>\n    \n      <span class=\"facility-chip\">✓ 공항 보안 구역</span>\n    \n      <span class=\"facility-chip\">✓ 영문/한국어 지원 인터페이스</span>\n    "
 currencyModalFeeBadge
     text="현지 수수료 0 VND"
     style={background:var(--success-surface);color:var(--success-mark)}
@@ -27,7 +27,7 @@ currencyModalHighlightText
 currencyModalHours
     text="24시간 상시 운영"
 currencyModalLimitsBox
-    html="\n        <div class=\"limit-info-box\">\n          <div class=\"limit-row\"><strong>인출/환전 한도:</strong> <span>1회 2,000,000 ~ 3,000,000 VND</span></div>\n          <div class=\"limit-row\"><strong>지원 통화/수단:</strong> <span>VND</span></div>\n        </div>\n      "
+    html="\n      <div class=\"limit-info-box\">\n        <div class=\"limit-row\"><strong>인출/환전 한도:</strong> <span>1회 2,000,000 ~ 3,000,000 VND</span></div>\n        <div class=\"limit-row\"><strong>지원 통화/수단:</strong> <span>VND</span></div>\n      </div>\n    "
 currencyModalLocation
     text="깜란 국제공항 T2 1층 입국장 출구 좌측 (택시 승강장 방면)"
 currencyModalMainImg
@@ -39,7 +39,7 @@ currencyModalNameVi
 currencyModalPhotosBtn
     href="https://www.google.com/maps/search/?api=1&query=ATM%20Nh%C3%A0%20ga%20T2%20S%C3%A2n%20bay%20Qu%E1%BB%91c%20t%E1%BA%BF%20Cam%20Ranh%20Kh%C3%A1nh%20H%C3%B2a%20%EC%82%AC%EC%A7%84"
 currencyModalRatesBox
-    html="\n        <div class=\"exchange-perks-list\">\n          \n            <div class=\"perk-item\"><span class=\"perk-icon\">✨</span><span>입국 심사 및 세관 통과 후 시내 택시 타기 직전 즉시 현금 확보</span></div>\n          \n            <div class=\"perk-item\"><span class=\"perk-icon\">✨</span><span>24시간 국제선 항공편 심야/새벽 도착 시에도 언제나 인출 가능</span></div>\n          \n            <div class=\"perk-item\"><span class=\"perk-icon\">✨</span><span>복수 은행 ATM이 나란히 배치되어 있어 카드 브랜드별 선택 가능</span></div>\n          \n        </div>\n      "
+    html="\n      <div class=\"exchange-perks-list\">\n        \n          <div class=\"perk-item\"><span class=\"perk-icon\">✨</span><span>입국 심사 및 세관 통과 후 시내 택시 타기 직전 즉시 현금 확보</span></div>\n        \n          <div class=\"perk-item\"><span class=\"perk-icon\">✨</span><span>24시간 국제선 항공편 심야/새벽 도착 시에도 언제나 인출 가능</span></div>\n        \n          <div class=\"perk-item\"><span class=\"perk-icon\">✨</span><span>복수 은행 ATM이 나란히 배치되어 있어 카드 브랜드별 선택 가능</span></div>\n        \n      </div>\n    "
 currencyModalRating
     text="★ 4.1 (290개 리뷰)"
 currencyModalThumbs

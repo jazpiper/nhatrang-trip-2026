@@ -72,11 +72,11 @@
       : '';
 
     return `
-        <div class="activity-card gourmet-card" data-id="${item.id}">
+        <div class="activity-card gourmet-card" data-id="${escapeHtml(item.id)}">
           <div class="card-media-wrapper">
             <div class="gourmet-media-top-row">
               <span class="card-badge-top-left">${escapeHtml(item.badge || item.categoryLabel || '맛집')}</span>
-              <button class="card-heart-btn card-heart-btn-static ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+              <button class="card-heart-btn card-heart-btn-static ${isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" title="위시리스트 저장" aria-label="위시리스트 저장">
                 ♥
               </button>
             </div>
@@ -89,7 +89,7 @@
           <div class="card-body">
             <div class="card-header-line">
               <span class="card-title">${escapeHtml(item.name)}</span>
-              <span class="card-rating"><span class="star">★</span> ${item.rating || 4.5} <span class="card-review-count">(${Number(item.reviewCount || 0).toLocaleString()})</span></span>
+              <span class="card-rating"><span class="star">★</span> ${escapeHtml(item.rating || 4.5)} <span class="card-review-count">(${Number(item.reviewCount || 0).toLocaleString()})</span></span>
             </div>
             <div class="card-meta-line">
               <span>⏰ ${escapeHtml(item.openHours || '영업시간 확인')}</span>
@@ -191,8 +191,8 @@
     { id: 'gourmetModalAvgPrice', value: item => formatVND(item.avgPriceVnd) },
     { id: 'gourmetModalAvgKrw', value: item => `(${formatKRW(item.avgPriceVnd)})` },
     { id: 'gourmetModalPricePer', value: () => '/ 1인 예상' },
-    { id: 'gourmetModalPhotosBtn', as: 'href', value: item => item.photosUrl || item.mapUrl || '#' },
-    { id: 'gourmetModalMapBtn', as: 'href', value: item => item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.name) + ' Nha Trang')}` },
+    { id: 'gourmetModalPhotosBtn', as: 'href', value: item => sanitizeUrl(item.photosUrl || item.mapUrl || '#') },
+    { id: 'gourmetModalMapBtn', as: 'href', value: item => sanitizeUrl(item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.name) + ' Nha Trang')}`) },
   ];
 
   function openGourmetModal(item) {
@@ -222,7 +222,7 @@
     }
 
     const officialBtn = document.getElementById('gourmetModalOfficialBtn');
-    if (officialBtn) officialBtn.href = item.photosUrl || item.mapUrl || '#';
+    if (officialBtn) officialBtn.href = sanitizeUrl(item.photosUrl || item.mapUrl || '#');
 
     finishModalOpen('gourmet', item, modal);
   }

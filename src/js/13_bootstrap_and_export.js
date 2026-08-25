@@ -53,6 +53,8 @@
       state,
       resetStateFilters,
       escapeHtml,
+      sanitizeUrl,
+      sanitizeImageUrl,
       formatVND,
       formatKRW,
       formatVerbalVND,

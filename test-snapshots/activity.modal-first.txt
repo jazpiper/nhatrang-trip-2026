@@ -10,7 +10,7 @@ modalCoupleTip
 modalDuration
     text="반일 (08:30 ~ 14:30, 약 6시간)"
 modalGallery
-    html="\n        <div class=\"gallery-main-img-wrap\">\n          <img class=\"main-img\" src=\"https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80\" alt=\"혼문섬 &amp; 랑섬 럭셔리 스피드보트 호핑투어\" />\n        </div>\n        \n          <div class=\"sub-imgs-grid\">\n            <img src=\"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80\" alt=\"갤러리 사진\" loading=\"lazy\" /><img src=\"https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1200&q=80\" alt=\"갤러리 사진\" loading=\"lazy\" />\n          </div>\n        \n      "
+    html="\n        <div class=\"gallery-main-img-wrap\">\n          <img class=\"main-img\" src=\"https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"혼문섬 &amp; 랑섬 럭셔리 스피드보트 호핑투어\" />\n        </div>\n        \n          <div class=\"sub-imgs-grid\">\n            <img src=\"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"갤러리 사진\" loading=\"lazy\" /><img src=\"https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&amp;fit=crop&amp;w=1200&amp;q=80\" alt=\"갤러리 사진\" loading=\"lazy\" />\n          </div>\n        \n      "
 modalHeartBtn
     text="♡ 찜하기"
 modalHighlight

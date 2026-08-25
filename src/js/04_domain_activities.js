@@ -61,18 +61,18 @@
       .map(t => `<span class="card-tag-pill">${escapeHtml(activityTagLabel(t))}</span>`).join('');
 
     return `
-        <div class="activity-card" data-id="${item.id}">
+        <div class="activity-card" data-id="${escapeHtml(item.id)}">
           <div class="card-media-wrapper">
-            <img class="card-img" src="${item.imageUrl || (item.images && item.images[0]) || ''}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=600&q=80'" />
+            <img class="card-img" src="${escapeHtml(sanitizeImageUrl(item.imageUrl || (item.images && item.images[0]) || ''))}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=600&q=80'" />
             <span class="card-badge-top-left">${escapeHtml(item.badge || item.categoryLabel || '추천')}</span>
-            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" title="위시리스트 저장" aria-label="위시리스트 저장">
               ♥
             </button>
           </div>
           <div class="card-body">
             <div class="card-header-line">
               <span class="card-title">${escapeHtml(item.title)}</span>
-              <span class="card-rating"><span class="star">★</span> ${item.rating || 4.8}</span>
+              <span class="card-rating"><span class="star">★</span> ${escapeHtml(item.rating || 4.8)}</span>
             </div>
             <div class="card-meta-line">
               <span>⏱️ ${escapeHtml(item.duration || '약 2~3시간')}</span>
@@ -167,8 +167,8 @@
     { id: 'modalPriceVnd', value: item => formatVND(item.priceVnd) },
     { id: 'modalPriceKrw', value: item => `(${formatKRW(item.priceVnd)})` },
     { id: 'modalPricePer', value: item => `/ ${item.pricePer || '1인 기준'}` },
-    { id: 'modalMapLink', as: 'href', value: item => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.googleMapQuery || item.titleEn || item.title) + ' Nha Trang')}` },
-    { id: 'modalReserveLink', as: 'href', value: item => item.reserveUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.title + ' Nha Trang')}` },
+    { id: 'modalMapLink', as: 'href', value: item => sanitizeUrl(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.googleMapQuery || item.titleEn || item.title) + ' Nha Trang')}`) },
+    { id: 'modalReserveLink', as: 'href', value: item => sanitizeUrl(item.reserveUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.title + ' Nha Trang')}`) },
   ];
 
   function openActivityModal(item) {
@@ -180,16 +180,16 @@
     const galleryGrid = document.getElementById('modalGallery');
     if (galleryGrid) {
       const imgs = (item.images && item.images.length > 0) ? item.images : [item.imageUrl];
-      const mainImg = imgs[0] || 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=600&q=80';
+      const mainImg = sanitizeImageUrl(imgs[0] || 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=600&q=80');
       const subImgs = imgs.slice(1, 5);
 
       galleryGrid.innerHTML = `
         <div class="gallery-main-img-wrap">
-          <img class="main-img" src="${mainImg}" alt="${escapeHtml(item.title)}" />
+          <img class="main-img" src="${escapeHtml(mainImg)}" alt="${escapeHtml(item.title)}" />
         </div>
         ${subImgs.length > 0 ? `
           <div class="sub-imgs-grid">
-            ${subImgs.map(src => `<img src="${src}" alt="갤러리 사진" loading="lazy" />`).join('')}
+            ${subImgs.map(src => `<img src="${escapeHtml(sanitizeImageUrl(src))}" alt="갤러리 사진" loading="lazy" />`).join('')}
           </div>
         ` : ''}
       `;

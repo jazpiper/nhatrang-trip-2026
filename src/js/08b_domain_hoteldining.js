@@ -71,17 +71,17 @@
   function hoteldiningCardTemplate(item) {
     const isWish = (state.hoteldiningWishlist || []).includes(item.id);
     const userNote = (state.hoteldiningNotes || {})[item.id];
-    const mainImg = item.coverImage || (item.images && item.images[0]) || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80';
+    const mainImg = sanitizeImageUrl(item.coverImage || (item.images && item.images[0]) || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80');
     const tagsHtml = (item.tags || []).slice(0, 3).map(tag => `<span class="card-tag-pill">${escapeHtml(tag)}</span>`).join('');
     const hotelShortName = item.hotelName ? item.hotelName.split('(')[0].trim() : '5성급 호텔';
 
     return `
-      <div class="activity-card hoteldining-card" data-id="${item.id}">
+      <div class="activity-card hoteldining-card" data-id="${escapeHtml(item.id)}">
         <div class="card-media-wrapper">
           <img class="card-img" src="${escapeHtml(mainImg)}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80'" />
           <span class="card-badge-top-left stay-badge-cat">${escapeHtml(item.categoryLabel || '호텔 다이닝')}</span>
           <span class="stay-badge-theme">${escapeHtml(item.badge || '추천')}</span>
-          <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+          <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" title="위시리스트 저장" aria-label="위시리스트 저장">
             ♥
           </button>
         </div>
@@ -92,7 +92,7 @@
           <div class="card-header-line">
             <span class="card-title">${escapeHtml(item.name)}</span>
             <span class="card-rating">
-              <span class="star">★</span> ${item.rating || 4.5} 
+              <span class="star">★</span> ${escapeHtml(item.rating || 4.5)} 
               <span class="card-review-count">(${Number(item.reviewCount || 0).toLocaleString()})</span>
             </span>
           </div>
@@ -196,9 +196,9 @@
     { id: 'hoteldiningModalPriceVnd', value: item => formatVND(item.avgPriceVnd) },
     { id: 'hoteldiningModalPriceKrw', value: item => `(${formatKRW(item.avgPriceVnd)})` },
     { id: 'hoteldiningModalPricePer', value: item => item.pricePer ? `/ ${item.pricePer}` : '/ 1인 기준' },
-    { id: 'hoteldiningModalMapLink', as: 'href', value: item => item.googleMapUrl || buildMapUrl(item) },
-    { id: 'hoteldiningModalPhotosLink', as: 'href', value: item => item.googlePhotosUrl || item.googleMapUrl || buildMapUrl(item) },
-    { id: 'hoteldiningModalOfficialLink', as: 'href', value: item => item.officialUrl || item.googleMapUrl || '#' }
+    { id: 'hoteldiningModalMapLink', as: 'href', value: item => sanitizeUrl(item.googleMapUrl || buildMapUrl(item)) },
+    { id: 'hoteldiningModalPhotosLink', as: 'href', value: item => sanitizeUrl(item.googlePhotosUrl || item.googleMapUrl || buildMapUrl(item)) },
+    { id: 'hoteldiningModalOfficialLink', as: 'href', value: item => sanitizeUrl(item.officialUrl || item.googleMapUrl || '#') }
   ];
 
   function openHotelDiningModal(item) {

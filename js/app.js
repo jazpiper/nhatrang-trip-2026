@@ -18,13 +18,67 @@
     }
   }
 
+  /**
+   * Sanitizes deserialized localStorage data to prevent prototype pollution,
+   * type confusion, and poisoned array/object properties.
+   */
+  function sanitizeStorageData(data, fallback) {
+    if (data === null || data === undefined) return fallback;
+
+    if (Array.isArray(fallback)) {
+      if (!Array.isArray(data)) return fallback.slice();
+      return data
+        .filter(item => typeof item === 'string' || typeof item === 'number')
+        .slice(0, 500)
+        .map(item => String(item).slice(0, 200));
+    }
+
+    if (typeof fallback === 'object' && fallback !== null) {
+      if (typeof data !== 'object' || data === null || Array.isArray(data)) return Object.assign({}, fallback);
+      const cleanObj = Object.create(null);
+      const entries = Object.entries(data).slice(0, 500);
+      for (const [k, v] of entries) {
+        if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
+        const cleanKey = String(k).slice(0, 100);
+        if (typeof v === 'string') {
+          cleanObj[cleanKey] = v.slice(0, 5000);
+        } else if (v !== null && v !== undefined && (typeof v === 'number' || typeof v === 'boolean')) {
+          cleanObj[cleanKey] = String(v).slice(0, 5000);
+        }
+      }
+      return Object.assign({}, cleanObj);
+    }
+
+    if (typeof fallback === 'string') {
+      if (typeof data !== 'string') return fallback;
+      return data.slice(0, 5000);
+    }
+
+    if (typeof fallback === 'number') {
+      const num = Number(data);
+      return isNaN(num) ? fallback : num;
+    }
+
+    if (typeof fallback === 'boolean') {
+      return typeof data === 'boolean' ? data : fallback;
+    }
+
+    return fallback;
+  }
+
   function loadFromStorage(key, fallback) {
     if (!hasStorage()) return fallback;
     try {
-      const data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : fallback;
+      if (typeof key !== 'string' || !key.startsWith('nha_trang_')) {
+        console.warn('Blocked reading from non-namespaced storage key:', key);
+        return fallback;
+      }
+      const raw = localStorage.getItem(key);
+      if (raw === null || raw === undefined) return fallback;
+      const parsed = JSON.parse(raw);
+      return sanitizeStorageData(parsed, fallback);
     } catch (e) {
-      console.warn('LocalStorage error:', e);
+      console.warn('LocalStorage load error for key "' + key + '":', e);
       return fallback;
     }
   }
@@ -32,11 +86,16 @@
   function saveToStorage(key, val) {
     if (!hasStorage()) return;
     try {
+      if (typeof key !== 'string' || !key.startsWith('nha_trang_')) {
+        console.warn('Blocked writing to non-namespaced storage key:', key);
+        return;
+      }
       localStorage.setItem(key, JSON.stringify(val));
     } catch (e) {
-      console.warn('LocalStorage save error:', e);
+      console.warn('LocalStorage save error for key "' + key + '":', e);
     }
   }
+
 
   // --- 2. Formatting & UI Helpers ---
   function formatVND(num) {
@@ -52,13 +111,129 @@
   }
 
   function escapeHtml(str) {
-    if (!str) return '';
+    if (str === null || str === undefined) return '';
     return String(str)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+  }
+
+  function decodeHtmlEntities(str) {
+    if (!str || typeof str !== 'string') return '';
+    let decoded = str;
+    const namedMap = {
+      '&colon;': ':',
+      '&sol;': '/',
+      '&bsol;': '\\',
+      '&tab;': '',
+      '&newline;': '',
+      '&amp;': '&',
+      '&quot;': '"',
+      '&apos;': "'",
+      '&lt;': '<',
+      '&gt;': '>'
+    };
+    for (let i = 0; i < 5; i++) {
+      const prev = decoded;
+      decoded = decoded
+        .replace(/&(?:colon|sol|bsol|tab|newline|amp|quot|apos|lt|gt);?/gi, m => {
+          const key = m.toLowerCase().endsWith(';') ? m.toLowerCase() : m.toLowerCase() + ';';
+          return namedMap[key] !== undefined ? namedMap[key] : '';
+        })
+        .replace(/&#x([0-9a-f]+);?/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16) || 0))
+        .replace(/&#([0-9]+);?/g, (_, dec) => String.fromCharCode(parseInt(dec, 10) || 0));
+      if (decoded === prev) break;
+    }
+    return decoded;
+  }
+
+  /**
+   * Sanitizes dynamic URLs to prevent javascript:, vbscript:, data:, and other XSS attacks.
+   * Only allows valid http(s), tel, mailto, anchor (#), and safe relative paths.
+   */
+  function sanitizeUrl(url, fallback = '#') {
+    if (!url || typeof url !== 'string') return fallback;
+    const trimmed = url.trim();
+    if (trimmed === '' || trimmed === '#') return '#';
+
+    const decoded = decodeHtmlEntities(trimmed);
+    const normalized = decoded.replace(/[\x00-\x1f\x7f-\x9f\s]/g, '');
+
+    if (/^(?:javascript|vbscript|data|file|blob|livescript|mocha):/i.test(normalized)) {
+      return fallback;
+    }
+
+    if (/^[/\\\\]{2}/.test(normalized) || /^[/\\\\]{2}/.test(trimmed) || /^[/\\\\]{2}/.test(decoded)) {
+      return fallback;
+    }
+
+    const schemeMatch = normalized.match(/^([a-z0-9+.-]+):/i);
+    if (schemeMatch) {
+      const scheme = schemeMatch[1].toLowerCase();
+      if (['http', 'https', 'tel', 'mailto'].includes(scheme)) {
+        if ((scheme === 'http' || scheme === 'https') && !/^(?:https?:\/\/)/i.test(normalized)) {
+          return fallback;
+        }
+        return trimmed;
+      }
+      return fallback;
+    }
+
+    if (/^(?:#|\/|\.\/|\.\.\/|\?)/.test(trimmed) && !/^[/\\\\]{2}/.test(trimmed) && !/^[/\\\\]{2}/.test(normalized)) {
+      return trimmed;
+    }
+
+    if (/^[a-zA-Z0-9_.~!*();@&=+$,/?%#[\]-]+$/.test(trimmed) && !trimmed.includes(':') && !decoded.includes(':') && !/^[/\\\\]{2}/.test(trimmed) && !/^[/\\\\]{2}/.test(normalized)) {
+      return trimmed;
+    }
+
+    return fallback;
+  }
+
+  /**
+   * Sanitizes image URLs to prevent script execution via image attributes or handlers.
+   */
+  function sanitizeImageUrl(url, fallback = '') {
+    if (!url || typeof url !== 'string') return fallback;
+    const trimmed = url.trim();
+    if (trimmed === '') return fallback;
+
+    const decoded = decodeHtmlEntities(trimmed);
+    const normalized = decoded.replace(/[\x00-\x1f\x7f-\x9f\s]/g, '');
+
+    if (/^(?:javascript|vbscript|file|blob|livescript|mocha):/i.test(normalized)) {
+      return fallback;
+    }
+
+    if (/^data:image\/(?:png|jpeg|jpg|webp|gif);base64,[a-zA-Z0-9+/=]+$/i.test(normalized)) {
+      return trimmed;
+    }
+
+    if (/^[/\\\\]{2}/.test(normalized) || /^[/\\\\]{2}/.test(trimmed) || /^[/\\\\]{2}/.test(decoded)) {
+      return fallback;
+    }
+
+    const schemeMatch = normalized.match(/^([a-z0-9+.-]+):/i);
+    if (schemeMatch) {
+      const scheme = schemeMatch[1].toLowerCase();
+      if (scheme === 'http' || scheme === 'https') {
+        if (!/^(?:https?:\/\/)/i.test(normalized)) return fallback;
+        return trimmed;
+      }
+      return fallback;
+    }
+
+    if (/^(?:\/|\.\/|\.\.\/)/.test(trimmed) && !/^[/\\\\]{2}/.test(trimmed) && !/^[/\\\\]{2}/.test(normalized)) {
+      return trimmed;
+    }
+
+    if (/^[a-zA-Z0-9_.~!*();@&=+$,/?%#[\]-]+$/.test(trimmed) && !trimmed.includes(':') && !decoded.includes(':') && !/^[/\\\\]{2}/.test(trimmed) && !/^[/\\\\]{2}/.test(normalized)) {
+      return trimmed;
+    }
+
+    return fallback;
   }
 
   function getIntensityStars(level) {
@@ -90,12 +265,12 @@
     const notifySuccess = () => {
       showToast('📋 베트남어 주소가 복사되었습니다! 그랩(Grab)에 붙여넣기 하세요.');
       if (btnEl) {
-        const origText = btnEl.innerHTML;
-        btnEl.innerHTML = '✓ 복사완료';
+        const origText = btnEl.textContent;
+        btnEl.textContent = '✓ 복사완료';
         btnEl.style.borderColor = 'var(--color-sea)';
         btnEl.style.color = 'var(--color-sea)';
         setTimeout(() => {
-          btnEl.innerHTML = origText;
+          btnEl.textContent = origText;
           btnEl.style.borderColor = '';
           btnEl.style.color = '';
         }, 2000);
@@ -127,6 +302,7 @@
     }
     ta.remove();
   }
+
 
   // --- 3. Global Application State ---
   const state = {
@@ -167,8 +343,8 @@
     // Global Toolbar State
     searchQuery: '',
     sortBy: 'recommended',
-    currentView: loadFromStorage('nha_trang_view', 'list'),   // 'list' | 'grid'
-    density: loadFromStorage('nha_trang_density', 'tight'),   // 'tight' | 'comfy'
+    currentView: ['list', 'grid'].includes(loadFromStorage('nha_trang_view', 'list')) ? loadFromStorage('nha_trang_view', 'list') : 'list',
+    density: ['tight', 'comfy'].includes(loadFromStorage('nha_trang_density', 'tight')) ? loadFromStorage('nha_trang_density', 'tight') : 'tight',
     openNowOnly: false,
     wishlistOnly: false,
     
@@ -329,11 +505,11 @@
 
   /** 데이터에 지도 URL이 있으면 그대로, 없으면 정식 상호 + 주소로 검색 URL을 만든다. */
   function buildMapUrl(item) {
-    if (item.googleMapUrl) return item.googleMapUrl;
+    if (item.googleMapUrl) return sanitizeUrl(item.googleMapUrl);
     const query = item.googleMapQuery
       || [item.nameVi, item.addressVi].filter(Boolean).join(' ')
       || `${item.nameKo || item.name || item.title || ''} Nha Trang`;
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+    return sanitizeUrl(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`);
   }
 
   /**
@@ -344,8 +520,9 @@
   function itemRowHTML(v) {
     // 이미지가 깨져도 빈 박스가 남지 않게 이모지를 아래에 깔고 그 위에 사진을 올린다
     const fallback = `<span class="row-thumb-fallback">${escapeHtml(v.emoji || '📍')}</span>`;
-    const thumb = v.imgUrl
-      ? `${fallback}<img class="row-img" src="${v.imgUrl}" alt="${escapeHtml(v.name)}" loading="lazy" onerror="this.remove();" />`
+    const safeImg = sanitizeImageUrl(v.imgUrl);
+    const thumb = safeImg
+      ? `${fallback}<img class="row-img" src="${escapeHtml(safeImg)}" alt="${escapeHtml(v.name)}" loading="lazy" onerror="this.remove();" />`
       : fallback;
 
     const tags = (v.tags || []).slice(0, 2).map(t =>
@@ -353,7 +530,7 @@
     ).join('');
 
     const ratingHtml = v.rating
-      ? `<span class="row-rating"><span class="star">★</span> ${v.rating}` +
+      ? `<span class="row-rating"><span class="star">★</span> ${escapeHtml(v.rating)}` +
         (v.reviewCount ? ` <span class="cnt">(${Number(v.reviewCount).toLocaleString()})</span>` : '') +
         `</span>`
       : '';
@@ -376,11 +553,13 @@
     }
     if (v.subText) line3Bits.push(`<span class="row-vi">${escapeHtml(v.subText)}</span>`);
 
+    const safeMapUrl = sanitizeUrl(v.mapUrl);
+
     return `
-      <article class="item-row" data-id="${v.id}" tabindex="0">
+      <article class="item-row" data-id="${escapeHtml(v.id)}" tabindex="0">
         <div class="row-thumb">
           ${thumb}
-          ${v.rank ? `<span class="row-rank">${v.rank}</span>` : ''}
+          ${v.rank ? `<span class="row-rank">${escapeHtml(v.rank)}</span>` : ''}
         </div>
         <div class="row-main">
           <div class="row-line1">
@@ -398,8 +577,8 @@
             ${v.priceUnit ? `<span class="row-price-u">${escapeHtml(v.priceUnit)}</span>` : ''}
           </div>
           <div class="row-acts">
-            <button type="button" class="row-ico row-heart ${v.isWish ? 'is-wishlisted' : ''}" data-id="${v.id}" title="찜하기" aria-label="찜하기">♥</button>
-            <a class="row-ico" href="${v.mapUrl}" target="_blank" rel="noopener noreferrer" title="구글 지도에서 보기" aria-label="구글 지도에서 보기">↗</a>
+            <button type="button" class="row-ico row-heart ${v.isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(v.id)}" title="찜하기" aria-label="찜하기">♥</button>
+            <a class="row-ico" href="${escapeHtml(safeMapUrl)}" target="_blank" rel="noopener noreferrer" title="구글 지도에서 보기" aria-label="구글 지도에서 보기">↗</a>
           </div>
         </div>
       </article>
@@ -488,8 +667,8 @@
       if (!el) return;
       const v = typeof f.value === 'function' ? f.value(item) : item[f.value];
       if (f.as === 'html') el.innerHTML = v == null ? '' : v;
-      else if (f.as === 'src') el.src = v == null ? '' : v;
-      else if (f.as === 'href') el.href = v == null ? '' : v;
+      else if (f.as === 'src') el.src = sanitizeImageUrl(v == null ? '' : v);
+      else if (f.as === 'href') el.href = sanitizeUrl(v == null ? '' : v);
       else el.textContent = v == null ? '' : v;
     });
   }
@@ -580,21 +759,21 @@
     const images = cfg.images || [];
 
     if (mainImgEl) {
-      mainImgEl.src = cfg.mainSrc;
-      mainImgEl.alt = cfg.mainAlt;
+      mainImgEl.src = sanitizeImageUrl(cfg.mainSrc);
+      mainImgEl.alt = cfg.mainAlt || '';
     }
     if (!thumbsRow) return;
 
     thumbsRow.innerHTML = images.map((src, idx) => `
         <div class="gallery-thumb ${idx === 0 ? 'active' : ''}" data-idx="${idx}">
-          <img src="${escapeHtml(src)}" alt="${escapeHtml(cfg.thumbAlt)} 사진 ${idx + 1}" loading="lazy" />
+          <img src="${escapeHtml(sanitizeImageUrl(src))}" alt="${escapeHtml(cfg.thumbAlt)} 사진 ${idx + 1}" loading="lazy" />
         </div>
       `).join('');
 
     thumbsRow.querySelectorAll('.gallery-thumb').forEach(th => {
       th.addEventListener('click', () => {
         const idx = parseInt(th.dataset.idx, 10);
-        if (mainImgEl && images[idx]) mainImgEl.src = images[idx];
+        if (mainImgEl && images[idx]) mainImgEl.src = sanitizeImageUrl(images[idx]);
         thumbsRow.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
         th.classList.add('active');
       });
@@ -675,18 +854,18 @@
       .map(t => `<span class="card-tag-pill">${escapeHtml(activityTagLabel(t))}</span>`).join('');
 
     return `
-        <div class="activity-card" data-id="${item.id}">
+        <div class="activity-card" data-id="${escapeHtml(item.id)}">
           <div class="card-media-wrapper">
-            <img class="card-img" src="${item.imageUrl || (item.images && item.images[0]) || ''}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=600&q=80'" />
+            <img class="card-img" src="${escapeHtml(sanitizeImageUrl(item.imageUrl || (item.images && item.images[0]) || ''))}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=600&q=80'" />
             <span class="card-badge-top-left">${escapeHtml(item.badge || item.categoryLabel || '추천')}</span>
-            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" title="위시리스트 저장" aria-label="위시리스트 저장">
               ♥
             </button>
           </div>
           <div class="card-body">
             <div class="card-header-line">
               <span class="card-title">${escapeHtml(item.title)}</span>
-              <span class="card-rating"><span class="star">★</span> ${item.rating || 4.8}</span>
+              <span class="card-rating"><span class="star">★</span> ${escapeHtml(item.rating || 4.8)}</span>
             </div>
             <div class="card-meta-line">
               <span>⏱️ ${escapeHtml(item.duration || '약 2~3시간')}</span>
@@ -781,8 +960,8 @@
     { id: 'modalPriceVnd', value: item => formatVND(item.priceVnd) },
     { id: 'modalPriceKrw', value: item => `(${formatKRW(item.priceVnd)})` },
     { id: 'modalPricePer', value: item => `/ ${item.pricePer || '1인 기준'}` },
-    { id: 'modalMapLink', as: 'href', value: item => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.googleMapQuery || item.titleEn || item.title) + ' Nha Trang')}` },
-    { id: 'modalReserveLink', as: 'href', value: item => item.reserveUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.title + ' Nha Trang')}` },
+    { id: 'modalMapLink', as: 'href', value: item => sanitizeUrl(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.googleMapQuery || item.titleEn || item.title) + ' Nha Trang')}`) },
+    { id: 'modalReserveLink', as: 'href', value: item => sanitizeUrl(item.reserveUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.title + ' Nha Trang')}`) },
   ];
 
   function openActivityModal(item) {
@@ -794,16 +973,16 @@
     const galleryGrid = document.getElementById('modalGallery');
     if (galleryGrid) {
       const imgs = (item.images && item.images.length > 0) ? item.images : [item.imageUrl];
-      const mainImg = imgs[0] || 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=600&q=80';
+      const mainImg = sanitizeImageUrl(imgs[0] || 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=600&q=80');
       const subImgs = imgs.slice(1, 5);
 
       galleryGrid.innerHTML = `
         <div class="gallery-main-img-wrap">
-          <img class="main-img" src="${mainImg}" alt="${escapeHtml(item.title)}" />
+          <img class="main-img" src="${escapeHtml(mainImg)}" alt="${escapeHtml(item.title)}" />
         </div>
         ${subImgs.length > 0 ? `
           <div class="sub-imgs-grid">
-            ${subImgs.map(src => `<img src="${src}" alt="갤러리 사진" loading="lazy" />`).join('')}
+            ${subImgs.map(src => `<img src="${escapeHtml(sanitizeImageUrl(src))}" alt="갤러리 사진" loading="lazy" />`).join('')}
           </div>
         ` : ''}
       `;
@@ -896,11 +1075,11 @@
       : '';
 
     return `
-        <div class="activity-card gourmet-card" data-id="${item.id}">
+        <div class="activity-card gourmet-card" data-id="${escapeHtml(item.id)}">
           <div class="card-media-wrapper">
             <div class="gourmet-media-top-row">
               <span class="card-badge-top-left">${escapeHtml(item.badge || item.categoryLabel || '맛집')}</span>
-              <button class="card-heart-btn card-heart-btn-static ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+              <button class="card-heart-btn card-heart-btn-static ${isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" title="위시리스트 저장" aria-label="위시리스트 저장">
                 ♥
               </button>
             </div>
@@ -913,7 +1092,7 @@
           <div class="card-body">
             <div class="card-header-line">
               <span class="card-title">${escapeHtml(item.name)}</span>
-              <span class="card-rating"><span class="star">★</span> ${item.rating || 4.5} <span class="card-review-count">(${Number(item.reviewCount || 0).toLocaleString()})</span></span>
+              <span class="card-rating"><span class="star">★</span> ${escapeHtml(item.rating || 4.5)} <span class="card-review-count">(${Number(item.reviewCount || 0).toLocaleString()})</span></span>
             </div>
             <div class="card-meta-line">
               <span>⏰ ${escapeHtml(item.openHours || '영업시간 확인')}</span>
@@ -1015,8 +1194,8 @@
     { id: 'gourmetModalAvgPrice', value: item => formatVND(item.avgPriceVnd) },
     { id: 'gourmetModalAvgKrw', value: item => `(${formatKRW(item.avgPriceVnd)})` },
     { id: 'gourmetModalPricePer', value: () => '/ 1인 예상' },
-    { id: 'gourmetModalPhotosBtn', as: 'href', value: item => item.photosUrl || item.mapUrl || '#' },
-    { id: 'gourmetModalMapBtn', as: 'href', value: item => item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.name) + ' Nha Trang')}` },
+    { id: 'gourmetModalPhotosBtn', as: 'href', value: item => sanitizeUrl(item.photosUrl || item.mapUrl || '#') },
+    { id: 'gourmetModalMapBtn', as: 'href', value: item => sanitizeUrl(item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.name) + ' Nha Trang')}`) },
   ];
 
   function openGourmetModal(item) {
@@ -1046,7 +1225,7 @@
     }
 
     const officialBtn = document.getElementById('gourmetModalOfficialBtn');
-    if (officialBtn) officialBtn.href = item.photosUrl || item.mapUrl || '#';
+    if (officialBtn) officialBtn.href = sanitizeUrl(item.photosUrl || item.mapUrl || '#');
 
     finishModalOpen('gourmet', item, modal);
   }
@@ -1107,17 +1286,17 @@
   function stayCardTemplate(item) {
     const isWish = (state.stayWishlist || []).includes(item.id);
     const userNote = (state.stayNotes || {})[item.id];
-    const mainImg = (item.photos && item.photos[0]) || 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80';
+    const mainImg = sanitizeImageUrl((item.photos && item.photos[0]) || 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80');
     const themeLabel = item.themeName ? item.themeName.split(' ')[0] : '추천 숙소';
     const amenitiesBadges = (item.amenities || []).slice(0, 3).map(a => `<span class="card-tag-pill">${escapeHtml(a)}</span>`).join('');
 
     return `
-        <div class="activity-card stay-card" data-id="${item.id}">
+        <div class="activity-card stay-card" data-id="${escapeHtml(item.id)}">
           <div class="card-media-wrapper">
-            <img class="card-img" src="${mainImg}" alt="${escapeHtml(item.nameKo)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80'" />
+            <img class="card-img" src="${escapeHtml(mainImg)}" alt="${escapeHtml(item.nameKo)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80'" />
             <span class="card-badge-top-left stay-badge-cat">${escapeHtml(item.category || '호텔')}</span>
             <span class="stay-badge-theme">${escapeHtml(themeLabel)}</span>
-            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" title="위시리스트 저장" aria-label="위시리스트 저장">
               ♥
             </button>
           </div>
@@ -1125,7 +1304,7 @@
             <div class="card-header-line">
               <span class="card-title">${escapeHtml(item.nameKo)}</span>
               <span class="card-rating">
-                <span class="star">★</span> ${item.rating || 4.5} 
+                <span class="star">★</span> ${escapeHtml(item.rating || 4.5)} 
                 <span class="card-review-count">(${Number(item.reviewCount || 0).toLocaleString()})</span>
               </span>
             </div>
@@ -1223,7 +1402,7 @@
     { id: 'stayModalAvgPrice', value: item => formatVND(item.pricePerNightVnd) },
     { id: 'stayModalAvgKrw', value: item => `(${formatKRW(item.pricePerNightVnd)})` },
     { id: 'stayModalPricePer', value: () => '/ 1박 기준' },
-    { id: 'stayModalMapBtn', as: 'href', value: item => item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.nameKo) + ' Nha Trang')}` },
+    { id: 'stayModalMapBtn', as: 'href', value: item => sanitizeUrl(item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.nameKo) + ' Nha Trang')}`) },
   ];
 
   function openStayModal(item) {
@@ -1250,7 +1429,7 @@
     setBulletList('stayModalNearbyList', item.nearbySpots, fallback);
 
     const tripBtn = document.getElementById('stayModalTripBtn');
-    if (tripBtn) tripBtn.href = item.bookingUrl || item.mapUrl || '#';
+    if (tripBtn) tripBtn.href = sanitizeUrl(item.bookingUrl || item.mapUrl || '#');
 
     finishModalOpen('stays', item, modal);
   }
@@ -1329,19 +1508,19 @@
   function shoppingCardTemplate(item) {
     const isWish = (state.shoppingWishlist || []).includes(item.id);
     const userNote = (state.shoppingNotes || {})[item.id];
-    const mainImg = (item.photos && item.photos[0]) || 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80';
+    const mainImg = sanitizeImageUrl((item.photos && item.photos[0]) || 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80');
     const tagPills = (item.tags || []).slice(0, 3).map(t => `<span class="card-tag-pill">${escapeHtml(t)}</span>`).join('');
     const qualityTierBadge = item.qualityTier ? `<span class="shopping-badge-tier">${escapeHtml(item.qualityTier)}</span>` : '';
     const acBadge = item.hasAirConditioning ? `<span class="shopping-badge-ac">❄️ 에어컨</span>` : '';
 
     return `
-        <div class="activity-card shopping-card" data-id="${item.id}">
+        <div class="activity-card shopping-card" data-id="${escapeHtml(item.id)}">
           <div class="card-media-wrapper">
-            <img class="card-img" src="${mainImg}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80'" />
+            <img class="card-img" src="${escapeHtml(mainImg)}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80'" />
             <span class="card-badge-top-left">${escapeHtml(item.badge || item.categoryLabel || '쇼핑')}</span>
             ${qualityTierBadge}
             ${acBadge}
-            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" title="위시리스트 저장" aria-label="위시리스트 저장">
               ♥
             </button>
           </div>
@@ -1349,7 +1528,7 @@
             <div class="card-header-line">
               <span class="card-title">${escapeHtml(item.nameKo || item.name)}</span>
               <span class="card-rating">
-                <span class="star">★</span> ${item.rating || 4.7} 
+                <span class="star">★</span> ${escapeHtml(item.rating || 4.7)} 
                 <span class="card-review-count">(${Number(item.reviewCount || 0).toLocaleString()})</span>
               </span>
             </div>
@@ -1451,8 +1630,8 @@
     { id: 'shoppingModalAvgPrice', value: item => formatVND(item.avgPriceVnd) },
     { id: 'shoppingModalAvgKrw', value: item => `(${formatKRW(item.avgPriceVnd)})` },
     { id: 'shoppingModalPricePer', value: () => '/ 평균 기준' },
-    { id: 'shoppingModalPhotosBtn', as: 'href', value: item => item.photosUrl || item.mapUrl || '#' },
-    { id: 'shoppingModalMapBtn', as: 'href', value: item => item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.nameKo || item.name) + ' Nha Trang')}` },
+    { id: 'shoppingModalPhotosBtn', as: 'href', value: item => sanitizeUrl(item.photosUrl || item.mapUrl || '#') },
+    { id: 'shoppingModalMapBtn', as: 'href', value: item => sanitizeUrl(item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.nameKo || item.name) + ' Nha Trang')}`) },
   ];
 
   function openShoppingModal(item) {
@@ -1745,11 +1924,11 @@
       ` : '';
 
     return `
-        <div class="activity-card currency-card" data-id="${item.id}">
+        <div class="activity-card currency-card" data-id="${escapeHtml(item.id)}">
           <div class="card-media-wrapper">
-            <img class="card-img" src="${escapeHtml(item.coverImage || (item.images || [])[0] || '')}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=800&q=80'" />
+            <img class="card-img" src="${escapeHtml(sanitizeImageUrl(item.coverImage || (item.images || [])[0] || ''))}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=800&q=80'" />
             <span class="card-badge-top-left ${item.feeFree ? 'badge-fee-zero' : ''}">${escapeHtml(item.badge || item.categoryLabel || '환전·ATM')}</span>
-            <button type="button" class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" aria-label="찜하기">
+            <button type="button" class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" aria-label="찜하기">
               ${isWish ? '♥' : '♡'}
             </button>
             ${userNote ? `<span class="card-user-note-badge" title="${escapeHtml(userNote)}">📝 메모</span>` : ''}
@@ -1762,7 +1941,7 @@
             <h3 class="card-title">${escapeHtml(item.nameKo || item.name)}</h3>
             <p class="card-name-vi">🇻🇳 ${escapeHtml(item.nameVi || '')}</p>
             <div class="card-meta-line">
-              <span class="rating">★ ${item.rating || '-'}</span>
+              <span class="rating">★ ${escapeHtml(item.rating || '-')}</span>
               <span class="reviews">(${(item.reviewCount || 0).toLocaleString()})</span>
               <span class="dot">·</span>
               <span class="hours">⏰ ${escapeHtml(item.openHours || '영업시간 미확인')}</span>
@@ -1781,8 +1960,8 @@
                 <span class="fee-sub">${escapeHtml(item.feePolicy || '')}</span>
               </div>
               <div class="currency-card-actions">
-                <a href="${escapeHtml(item.googleMapUrl || '')}" target="_blank" rel="noopener noreferrer" class="btn-currency-map" onclick="event.stopPropagation();" title="구글 지도로 보기">📍 지도</a>
-                <a href="${escapeHtml(item.googlePhotosUrl || item.googleMapUrl || '')}" target="_blank" rel="noopener noreferrer" class="btn-currency-photos" onclick="event.stopPropagation();" title="실시간 사진 보기">📸 사진</a>
+                <a href="${escapeHtml(sanitizeUrl(item.googleMapUrl || ''))}" target="_blank" rel="noopener noreferrer" class="btn-currency-map" title="구글 지도로 보기">📍 지도</a>
+                <a href="${escapeHtml(sanitizeUrl(item.googlePhotosUrl || item.googleMapUrl || ''))}" target="_blank" rel="noopener noreferrer" class="btn-currency-photos" title="실시간 사진 보기">📸 사진</a>
               </div>
             </div>
           </div>
@@ -1861,8 +2040,8 @@
     { id: 'currencyModalHighlightText', value: item => item.highlight || '' },
     { id: 'currencyModalDesc', value: item => item.description || '' },
     { id: 'currencyModalTip', value: item => item.localTip || '' },
-    { id: 'currencyModalPhotosBtn', as: 'href', value: item => item.googlePhotosUrl || item.googleMapUrl },
-    { id: 'currencyModalMapBtn', as: 'href', value: 'googleMapUrl' },
+    { id: 'currencyModalPhotosBtn', as: 'href', value: item => sanitizeUrl(item.googlePhotosUrl || item.googleMapUrl || '#') },
+    { id: 'currencyModalMapBtn', as: 'href', value: item => sanitizeUrl(item.googleMapUrl || '#') },
   ];
 
   function openCurrencyModal(item) {
@@ -2142,17 +2321,17 @@
   function hoteldiningCardTemplate(item) {
     const isWish = (state.hoteldiningWishlist || []).includes(item.id);
     const userNote = (state.hoteldiningNotes || {})[item.id];
-    const mainImg = item.coverImage || (item.images && item.images[0]) || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80';
+    const mainImg = sanitizeImageUrl(item.coverImage || (item.images && item.images[0]) || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80');
     const tagsHtml = (item.tags || []).slice(0, 3).map(tag => `<span class="card-tag-pill">${escapeHtml(tag)}</span>`).join('');
     const hotelShortName = item.hotelName ? item.hotelName.split('(')[0].trim() : '5성급 호텔';
 
     return `
-      <div class="activity-card hoteldining-card" data-id="${item.id}">
+      <div class="activity-card hoteldining-card" data-id="${escapeHtml(item.id)}">
         <div class="card-media-wrapper">
           <img class="card-img" src="${escapeHtml(mainImg)}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80'" />
           <span class="card-badge-top-left stay-badge-cat">${escapeHtml(item.categoryLabel || '호텔 다이닝')}</span>
           <span class="stay-badge-theme">${escapeHtml(item.badge || '추천')}</span>
-          <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+          <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" title="위시리스트 저장" aria-label="위시리스트 저장">
             ♥
           </button>
         </div>
@@ -2163,7 +2342,7 @@
           <div class="card-header-line">
             <span class="card-title">${escapeHtml(item.name)}</span>
             <span class="card-rating">
-              <span class="star">★</span> ${item.rating || 4.5} 
+              <span class="star">★</span> ${escapeHtml(item.rating || 4.5)} 
               <span class="card-review-count">(${Number(item.reviewCount || 0).toLocaleString()})</span>
             </span>
           </div>
@@ -2267,9 +2446,9 @@
     { id: 'hoteldiningModalPriceVnd', value: item => formatVND(item.avgPriceVnd) },
     { id: 'hoteldiningModalPriceKrw', value: item => `(${formatKRW(item.avgPriceVnd)})` },
     { id: 'hoteldiningModalPricePer', value: item => item.pricePer ? `/ ${item.pricePer}` : '/ 1인 기준' },
-    { id: 'hoteldiningModalMapLink', as: 'href', value: item => item.googleMapUrl || buildMapUrl(item) },
-    { id: 'hoteldiningModalPhotosLink', as: 'href', value: item => item.googlePhotosUrl || item.googleMapUrl || buildMapUrl(item) },
-    { id: 'hoteldiningModalOfficialLink', as: 'href', value: item => item.officialUrl || item.googleMapUrl || '#' }
+    { id: 'hoteldiningModalMapLink', as: 'href', value: item => sanitizeUrl(item.googleMapUrl || buildMapUrl(item)) },
+    { id: 'hoteldiningModalPhotosLink', as: 'href', value: item => sanitizeUrl(item.googlePhotosUrl || item.googleMapUrl || buildMapUrl(item)) },
+    { id: 'hoteldiningModalOfficialLink', as: 'href', value: item => sanitizeUrl(item.officialUrl || item.googleMapUrl || '#') }
   ];
 
   function openHotelDiningModal(item) {
@@ -2386,10 +2565,10 @@
     ).join('');
 
     return `
-      <div class="spa-card" data-id="${item.id}" tabindex="0" role="button" aria-label="${escapeHtml(item.nameKo || item.name)}">
+      <div class="spa-card" data-id="${escapeHtml(item.id)}" tabindex="0" role="button" aria-label="${escapeHtml(item.nameKo || item.name)}">
         <div class="card-media-wrapper">
-          <img class="card-img" src="${escapeHtml(item.coverImage || (item.images && item.images[0]) || '')}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" />
-          <button class="card-heart-btn ${isWishlisted ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 토글" aria-label="위시리스트">
+          <img class="card-img" src="${escapeHtml(sanitizeImageUrl(item.coverImage || (item.images && item.images[0]) || ''))}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" />
+          <button class="card-heart-btn ${isWishlisted ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" title="위시리스트 토글" aria-label="위시리스트">
             ${isWishlisted ? '♥' : '♡'}
           </button>
           <span class="card-badge-top-left">${escapeHtml(item.badge || '추천 스파')}</span>
@@ -2402,7 +2581,7 @@
           <h3 class="card-title">${escapeHtml(item.nameKo || item.name)}</h3>
           <p class="card-name-vi">🇻🇳 ${escapeHtml(item.nameVi || '')}</p>
           <div class="card-meta-line">
-            <span class="rating">★ ${item.rating || '-'}</span>
+            <span class="rating">★ ${escapeHtml(item.rating || '-')}</span>
             <span class="reviews">(${(item.reviewCount || 0).toLocaleString()})</span>
             <span class="dot">·</span>
             <span class="hours">⏰ ${escapeHtml(item.openHours || '영업시간 미확인')}</span>
@@ -2416,7 +2595,7 @@
           <p class="card-highlight-text">✨ ${escapeHtml(item.highlight || '')}</p>
 
           <div class="card-price-line">
-            <span class="price-main">${item.avgPriceVnd ? formatVND(item.avgPriceVnd) : (item.priceRangeVnd || '')}</span>
+            <span class="price-main">${item.avgPriceVnd ? formatVND(item.avgPriceVnd) : escapeHtml(item.priceRangeVnd || '')}</span>
             <span class="price-krw">(${item.avgPriceVnd ? formatKRW(item.avgPriceVnd) : ''})</span>
             <span class="price-sub">${escapeHtml(item.pricePer || '/ 90분 기준')}</span>
           </div>
@@ -2504,8 +2683,8 @@
     { id: 'spaModalAvgPrice', value: item => item.avgPriceVnd ? formatVND(item.avgPriceVnd) : '' },
     { id: 'spaModalAvgKrw', value: item => item.avgPriceVnd ? `(${formatKRW(item.avgPriceVnd)})` : '' },
     { id: 'spaModalPricePer', value: item => item.pricePer || '/ 90분 기준' },
-    { id: 'spaModalPhotosBtn', as: 'href', value: item => item.googlePhotosUrl || item.googleMapUrl },
-    { id: 'spaModalMapBtn', as: 'href', value: 'googleMapUrl' },
+    { id: 'spaModalPhotosBtn', as: 'href', value: item => sanitizeUrl(item.googlePhotosUrl || item.googleMapUrl || '#') },
+    { id: 'spaModalMapBtn', as: 'href', value: item => sanitizeUrl(item.googleMapUrl || buildMapUrl(item)) },
   ];
 
   function openSpaModal(item) {
@@ -2548,9 +2727,9 @@
             <strong>${escapeHtml(c.name || '')}</strong>
             ${c.description ? `<p class="course-desc">${escapeHtml(c.description)}</p>` : ''}
           </td>
-          <td class="course-time">${c.durationMin || '-'}분</td>
-          <td class="course-vnd">${(c.priceVnd || 0).toLocaleString()} VND</td>
-          <td class="course-krw">약 ${(c.priceKrw || Math.round((c.priceVnd || 0) * currentBenchmarkRate / 100)).toLocaleString()}원</td>
+          <td class="course-time">${escapeHtml(c.durationMin || '-')}분</td>
+          <td class="course-vnd">${escapeHtml(Number(c.priceVnd || 0).toLocaleString())} VND</td>
+          <td class="course-krw">약 ${escapeHtml(Number(c.priceKrw || Math.round((c.priceVnd || 0) * currentBenchmarkRate / 100)).toLocaleString())}원</td>
         </tr>
       `).join('');
     }
@@ -2865,7 +3044,7 @@
               <div class="customs-info-card customs-info-card-info">
                 <strong class="customs-info-label-info">💵 1인 면세 한도:</strong>
                 <ul class="customs-info-list">
-                  <li>기본 면세: 미화 <strong>${matrix.customsQuarantine.dutyFreeAllowance.basicAllowanceUsd}</strong></li>
+                  <li>기본 면세: 미화 <strong>${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.basicAllowanceUsd)}</strong></li>
                   <li>주류: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.alcoholLimit)}</li>
                   <li>담배: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.tobaccoLimit)}</li>
                   <li>향수: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.perfumeLimit)}</li>
@@ -2945,13 +3124,13 @@
                     <p class="hospital-address">📍 ${escapeHtml(h.addressVi)}</p>
                   </div>
                   <div class="hospital-hotline-box">
-                    <a href="tel:${h.hotline.replace(/\s+/g, '')}" class="hospital-hotline-btn">
+                    <a href="${escapeHtml(sanitizeUrl('tel:' + h.hotline.replace(/\s+/g, '')))}" class="hospital-hotline-btn">
                       <span>📞 진료 예약/문의: ${escapeHtml(h.hotline)}</span>
                     </a>
-                    <a href="tel:${h.emergency24h.replace(/\s+/g, '')}" class="hospital-hotline-btn hospital-hotline-btn-emergency">
+                    <a href="${escapeHtml(sanitizeUrl('tel:' + h.emergency24h.replace(/\s+/g, '')))}" class="hospital-hotline-btn hospital-hotline-btn-emergency">
                       <span>🚨 24시 응급실: ${escapeHtml(h.emergency24h)}</span>
                     </a>
-                    <a href="${h.googleMapUrl}" target="_blank" rel="noopener noreferrer" class="btn-secondary hospital-directions-link">
+                    <a href="${escapeHtml(sanitizeUrl(h.googleMapUrl))}" target="_blank" rel="noopener noreferrer" class="btn-secondary hospital-directions-link">
                       <span>🗺️ 구글 지도 길찾기</span>
                     </a>
                   </div>
@@ -2973,7 +3152,7 @@
             <div>
               ${emergency.insuranceGuide.steps.map(st => `
                 <div class="insurance-step-item">
-                  <div class="insurance-step-no">${st.stepNo}</div>
+                  <div class="insurance-step-no">${escapeHtml(st.stepNo)}</div>
                   <div>
                     <div class="insurance-step-title">${escapeHtml(st.nameKo)}</div>
                     <div class="insurance-step-desc">${escapeHtml(st.desc)}</div>
@@ -3005,9 +3184,9 @@
           <!-- Flashcards Responsive Grid -->
           <div class="flashcards-grid">
             ${flashcards.map(fc => `
-              <div class="flashcard-card" data-fc-id="${fc.id}">
+              <div class="flashcard-card" data-fc-id="${escapeHtml(fc.id)}">
                 <div class="flashcard-card-top">
-                  <span class="flashcard-card-icon">${fc.icon}</span>
+                  <span class="flashcard-card-icon">${escapeHtml(fc.icon || '🗣️')}</span>
                   <span class="flashcard-card-cat">${escapeHtml(fc.categoryLabel)}</span>
                 </div>
                 <h3 class="flashcard-card-ko">${escapeHtml(fc.ko)}</h3>
@@ -3015,7 +3194,7 @@
                 <div class="flashcard-card-pron">${escapeHtml(fc.pronunciation)}</div>
                 <div class="flashcard-card-purpose">🎯 ${escapeHtml(fc.purpose)}</div>
                 <div class="flashcard-card-actions">
-                  <button type="button" class="btn-flashcard-zoom" data-fc-zoom="${fc.id}">
+                  <button type="button" class="btn-flashcard-zoom" data-fc-zoom="${escapeHtml(fc.id)}">
                     <span>🔍 크게 보기</span>
                   </button>
                   <button type="button" class="btn-flashcard-card-copy" data-fc-copy="${escapeHtml(fc.vi)}">
@@ -3764,6 +3943,17 @@
       }
     });
 
+    // POS Simulator Choice Handlers
+    document.querySelectorAll('.btn-pos-choice').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.posChoice === 'vnd') {
+          alert('🎉 정답입니다! 현지 통화(VND) 결제로 추가 수수료 0원을 방어했습니다.');
+        } else if (btn.dataset.posChoice === 'krw') {
+          alert('⚠️ 주의! KRW 결제 시 3~8% 이중 환전 수수료가 발생합니다. 반드시 VND를 선택하세요!');
+        }
+      });
+    });
+
     // Initialize currency calculator
     initCurrencyCalculator();
   }
@@ -3823,6 +4013,8 @@
       state,
       resetStateFilters,
       escapeHtml,
+      sanitizeUrl,
+      sanitizeImageUrl,
       formatVND,
       formatKRW,
       formatVerbalVND,

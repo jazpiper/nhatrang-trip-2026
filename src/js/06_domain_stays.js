@@ -52,17 +52,17 @@
   function stayCardTemplate(item) {
     const isWish = (state.stayWishlist || []).includes(item.id);
     const userNote = (state.stayNotes || {})[item.id];
-    const mainImg = (item.photos && item.photos[0]) || 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80';
+    const mainImg = sanitizeImageUrl((item.photos && item.photos[0]) || 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80');
     const themeLabel = item.themeName ? item.themeName.split(' ')[0] : '추천 숙소';
     const amenitiesBadges = (item.amenities || []).slice(0, 3).map(a => `<span class="card-tag-pill">${escapeHtml(a)}</span>`).join('');
 
     return `
-        <div class="activity-card stay-card" data-id="${item.id}">
+        <div class="activity-card stay-card" data-id="${escapeHtml(item.id)}">
           <div class="card-media-wrapper">
-            <img class="card-img" src="${mainImg}" alt="${escapeHtml(item.nameKo)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80'" />
+            <img class="card-img" src="${escapeHtml(mainImg)}" alt="${escapeHtml(item.nameKo)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80'" />
             <span class="card-badge-top-left stay-badge-cat">${escapeHtml(item.category || '호텔')}</span>
             <span class="stay-badge-theme">${escapeHtml(themeLabel)}</span>
-            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" title="위시리스트 저장" aria-label="위시리스트 저장">
+            <button class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" title="위시리스트 저장" aria-label="위시리스트 저장">
               ♥
             </button>
           </div>
@@ -70,7 +70,7 @@
             <div class="card-header-line">
               <span class="card-title">${escapeHtml(item.nameKo)}</span>
               <span class="card-rating">
-                <span class="star">★</span> ${item.rating || 4.5} 
+                <span class="star">★</span> ${escapeHtml(item.rating || 4.5)} 
                 <span class="card-review-count">(${Number(item.reviewCount || 0).toLocaleString()})</span>
               </span>
             </div>
@@ -168,7 +168,7 @@
     { id: 'stayModalAvgPrice', value: item => formatVND(item.pricePerNightVnd) },
     { id: 'stayModalAvgKrw', value: item => `(${formatKRW(item.pricePerNightVnd)})` },
     { id: 'stayModalPricePer', value: () => '/ 1박 기준' },
-    { id: 'stayModalMapBtn', as: 'href', value: item => item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.nameKo) + ' Nha Trang')}` },
+    { id: 'stayModalMapBtn', as: 'href', value: item => sanitizeUrl(item.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((item.nameVi || item.nameKo) + ' Nha Trang')}`) },
   ];
 
   function openStayModal(item) {
@@ -195,7 +195,7 @@
     setBulletList('stayModalNearbyList', item.nearbySpots, fallback);
 
     const tripBtn = document.getElementById('stayModalTripBtn');
-    if (tripBtn) tripBtn.href = item.bookingUrl || item.mapUrl || '#';
+    if (tripBtn) tripBtn.href = sanitizeUrl(item.bookingUrl || item.mapUrl || '#');
 
     finishModalOpen('stays', item, modal);
   }

@@ -178,11 +178,11 @@
       ` : '';
 
     return `
-        <div class="activity-card currency-card" data-id="${item.id}">
+        <div class="activity-card currency-card" data-id="${escapeHtml(item.id)}">
           <div class="card-media-wrapper">
-            <img class="card-img" src="${escapeHtml(item.coverImage || (item.images || [])[0] || '')}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=800&q=80'" />
+            <img class="card-img" src="${escapeHtml(sanitizeImageUrl(item.coverImage || (item.images || [])[0] || ''))}" alt="${escapeHtml(item.nameKo || item.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=800&q=80'" />
             <span class="card-badge-top-left ${item.feeFree ? 'badge-fee-zero' : ''}">${escapeHtml(item.badge || item.categoryLabel || '환전·ATM')}</span>
-            <button type="button" class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${item.id}" aria-label="찜하기">
+            <button type="button" class="card-heart-btn ${isWish ? 'is-wishlisted' : ''}" data-id="${escapeHtml(item.id)}" aria-label="찜하기">
               ${isWish ? '♥' : '♡'}
             </button>
             ${userNote ? `<span class="card-user-note-badge" title="${escapeHtml(userNote)}">📝 메모</span>` : ''}
@@ -195,7 +195,7 @@
             <h3 class="card-title">${escapeHtml(item.nameKo || item.name)}</h3>
             <p class="card-name-vi">🇻🇳 ${escapeHtml(item.nameVi || '')}</p>
             <div class="card-meta-line">
-              <span class="rating">★ ${item.rating || '-'}</span>
+              <span class="rating">★ ${escapeHtml(item.rating || '-')}</span>
               <span class="reviews">(${(item.reviewCount || 0).toLocaleString()})</span>
               <span class="dot">·</span>
               <span class="hours">⏰ ${escapeHtml(item.openHours || '영업시간 미확인')}</span>
@@ -214,8 +214,8 @@
                 <span class="fee-sub">${escapeHtml(item.feePolicy || '')}</span>
               </div>
               <div class="currency-card-actions">
-                <a href="${escapeHtml(item.googleMapUrl || '')}" target="_blank" rel="noopener noreferrer" class="btn-currency-map" onclick="event.stopPropagation();" title="구글 지도로 보기">📍 지도</a>
-                <a href="${escapeHtml(item.googlePhotosUrl || item.googleMapUrl || '')}" target="_blank" rel="noopener noreferrer" class="btn-currency-photos" onclick="event.stopPropagation();" title="실시간 사진 보기">📸 사진</a>
+                <a href="${escapeHtml(sanitizeUrl(item.googleMapUrl || ''))}" target="_blank" rel="noopener noreferrer" class="btn-currency-map" title="구글 지도로 보기">📍 지도</a>
+                <a href="${escapeHtml(sanitizeUrl(item.googlePhotosUrl || item.googleMapUrl || ''))}" target="_blank" rel="noopener noreferrer" class="btn-currency-photos" title="실시간 사진 보기">📸 사진</a>
               </div>
             </div>
           </div>
@@ -294,8 +294,8 @@
     { id: 'currencyModalHighlightText', value: item => item.highlight || '' },
     { id: 'currencyModalDesc', value: item => item.description || '' },
     { id: 'currencyModalTip', value: item => item.localTip || '' },
-    { id: 'currencyModalPhotosBtn', as: 'href', value: item => item.googlePhotosUrl || item.googleMapUrl },
-    { id: 'currencyModalMapBtn', as: 'href', value: 'googleMapUrl' },
+    { id: 'currencyModalPhotosBtn', as: 'href', value: item => sanitizeUrl(item.googlePhotosUrl || item.googleMapUrl || '#') },
+    { id: 'currencyModalMapBtn', as: 'href', value: item => sanitizeUrl(item.googleMapUrl || '#') },
   ];
 
   function openCurrencyModal(item) {
