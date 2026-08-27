@@ -270,6 +270,166 @@ test('No inline alert() onclick handlers exist in index.html', () => {
   assert.ok(!indexHtml.includes('onclick="alert('), 'No inline onclick alert handlers');
 });
 
+
+console.log("\n--- Suite 5: Clipboard copyAddress & fallbackCopy Behavior ---");
+
+const { installDom, uninstallDom, makeElement } = require("./test-dom-stub.js");
+
+test("copyAddress with empty/falsy address is a no-op", () => {
+  const dom = installDom();
+  app.copyAddress("");
+  app.copyAddress(null);
+  app.copyAddress(undefined);
+  assert.strictEqual(dom.doc.body.children.length, 0, "No DOM elements or toasts should be created for empty address");
+  uninstallDom();
+});
+
+test("copyAddress uses navigator.clipboard.writeText when available and updates button state", async () => {
+  const dom = installDom();
+  let clipText = "";
+  Object.defineProperty(navigator, "clipboard", {
+    value: {
+      writeText: (txt) => {
+        clipText = txt;
+        return Promise.resolve();
+      }
+    },
+    configurable: true,
+    writable: true
+  });
+
+  const btn = makeElement("button");
+  btn.textContent = "복사";
+  app.copyAddress("123 Tran Phu", btn);
+
+  await new Promise(resolve => setTimeout(resolve, 10));
+
+  assert.strictEqual(clipText, "123 Tran Phu");
+  assert.strictEqual(btn.textContent, "✓ 복사완료");
+  const toastContainer = dom.doc.getElementById("toastContainer");
+  assert.ok(toastContainer, "Toast container should be created on success");
+  assert.ok(toastContainer.children[0].textContent.includes("베트남어 주소가 복사되었습니다"));
+  uninstallDom();
+});
+
+test("copyAddress falls back to fallbackCopy when navigator.clipboard.writeText rejects", async () => {
+  const dom = installDom();
+  Object.defineProperty(navigator, "clipboard", {
+    value: {
+      writeText: () => Promise.reject(new Error("Permission denied"))
+    },
+    configurable: true,
+    writable: true
+  });
+
+  let execCommandCalled = false;
+  dom.doc.execCommand = (cmd) => {
+    if (cmd === "copy") execCommandCalled = true;
+    return true;
+  };
+
+  const btn = makeElement("button");
+  btn.textContent = "복사";
+  app.copyAddress("456 Le Thanh Ton", btn);
+
+  await new Promise(resolve => setTimeout(resolve, 10));
+
+  assert.strictEqual(execCommandCalled, true, "execCommand should be called on clipboard promise rejection");
+  assert.strictEqual(btn.textContent, "✓ 복사완료");
+  uninstallDom();
+});
+
+test("copyAddress falls back to fallbackCopy when navigator.clipboard is undefined", () => {
+  const dom = installDom();
+  Object.defineProperty(navigator, "clipboard", {
+    value: undefined,
+    configurable: true,
+    writable: true
+  });
+
+  let execCommandCalled = false;
+  dom.doc.execCommand = (cmd) => {
+    if (cmd === "copy") execCommandCalled = true;
+    return true;
+  };
+
+  const btn = makeElement("button");
+  btn.textContent = "복사";
+  app.copyAddress("789 Nguyen Thien Thuat", btn);
+
+  assert.strictEqual(execCommandCalled, true, "execCommand should be called when clipboard API is missing");
+  assert.strictEqual(btn.textContent, "✓ 복사완료");
+  uninstallDom();
+});
+
+test("fallbackCopy creates fixed hidden textarea, executes copy command, calls callback, and removes element", () => {
+  const dom = installDom();
+  let createdElement = null;
+  let selectCalled = false;
+  let execCommandCalled = false;
+
+  const originalCreateElement = dom.doc.createElement;
+  dom.doc.createElement = (tag) => {
+    const el = originalCreateElement(tag);
+    if (tag === "textarea") {
+      createdElement = el;
+      el.select = () => { selectCalled = true; };
+    }
+    return el;
+  };
+
+  dom.doc.execCommand = (cmd) => {
+    if (cmd === "copy") execCommandCalled = true;
+    return true;
+  };
+
+  let callbackCalled = false;
+  app.fallbackCopy("39/17 Doan Tran Nghiep", () => { callbackCalled = true; });
+
+  assert.ok(createdElement, "textarea element should be created");
+  assert.strictEqual(createdElement.value, "39/17 Doan Tran Nghiep");
+  assert.strictEqual(createdElement.style.position, "fixed");
+  assert.strictEqual(createdElement.style.opacity, "0");
+  assert.strictEqual(selectCalled, true, "ta.select() should be called");
+  assert.strictEqual(execCommandCalled, true, "execCommand(\"copy\") should be called");
+  assert.strictEqual(callbackCalled, true, "callback should be invoked");
+  assert.strictEqual(dom.doc.body.children.length, 0, "textarea element should be removed from document body after copy");
+  uninstallDom();
+});
+
+test("fallbackCopy displays default toast notification when no callback is provided", () => {
+  const dom = installDom();
+  dom.doc.execCommand = (cmd) => true;
+
+  app.fallbackCopy("102 Nguyen Thi Minh Khai");
+
+  const toastContainer = dom.doc.getElementById("toastContainer");
+  assert.ok(toastContainer, "Toast container should be created");
+  assert.strictEqual(toastContainer.children[0].textContent, "📋 주소가 복사되었습니다!");
+  uninstallDom();
+});
+
+test("fallbackCopy triggers prompt fallback when execCommand throws an error", () => {
+  const dom = installDom();
+  dom.doc.execCommand = () => {
+    throw new Error("execCommand copy unsupported");
+  };
+
+  let promptMsg = "";
+  let promptText = "";
+  globalThis.prompt = (msg, text) => {
+    promptMsg = msg;
+    promptText = text;
+  };
+
+  app.fallbackCopy("55 Hung Vuong");
+
+  assert.strictEqual(promptMsg, "주소를 복사하세요:");
+  assert.strictEqual(promptText, "55 Hung Vuong");
+  assert.strictEqual(dom.doc.body.children.length, 0, "textarea element should be removed even when execCommand throws");
+  uninstallDom();
+});
+
 console.log(`\n========================================`);
 console.log(`Results: ${passed} / ${total} passed`);
 if (passed === total) {
