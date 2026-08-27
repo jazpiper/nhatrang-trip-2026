@@ -2824,15 +2824,8 @@
   // 걸쳐 전부 만들던 것을 섹션별 함수로 갈랐다. renderGuide는 카테고리 필터에
   // 따라 조립하고 이벤트를 바인딩하는 일만 한다.
 
-  /** 교통·그랩 가이드 섹션 (공항 이동, 택시 앱 비교, 근교 버스, 안전 수칙). */
-  function guideTransportHTML(transport) {
+  function guideAirportTableHTML(matrix) {
     return `
-        <section class="guide-section-block" id="transportGuidePanel">
-          <div class="guide-section-header">
-            <h2 class="guide-section-title">🚗 깜란공항 & 나트랑 시내 교통 완벽 가이드</h2>
-            <p class="guide-section-desc">공항 이동 요금표, 전기차 Xanh SM vs 그랩 vs 일반 택시 비교, 5대 사기 예방법</p>
-          </div>
-
           <!-- Airport Matrix Table -->
           <div class="airport-table-wrap">
             <table class="airport-table">
@@ -2847,7 +2840,7 @@
                 </tr>
               </thead>
               <tbody>
-                ${transport.airportMatrix.map(r => `
+                ${matrix.map(r => `
                   <tr>
                     <td><strong>${escapeHtml(r.routeKo)}</strong><div class="souv-name-vi">${escapeHtml(r.routeVi)}</div></td>
                     <td>${r.distanceKm}km<br><span class="label">(${escapeHtml(r.durationMins)})</span></td>
@@ -2859,60 +2852,66 @@
                 `).join('')}
               </tbody>
             </table>
-          </div>
+          </div>`;
+  }
 
+  function guideTaxiCompareHTML(comparison) {
+    return `
           <!-- 3-Way Taxi Comparison Grid -->
           <div class="taxi-compare-grid">
             <!-- Xanh SM EV -->
             <div class="taxi-compare-card taxi-card-accent-primary">
               <div class="taxi-card-header">
                 <div>
-                  <h3 class="taxi-card-name">⚡ ${escapeHtml(transport.taxiComparison.xanhSM.nameKo)}</h3>
-                  <div class="souv-name-vi">${escapeHtml(transport.taxiComparison.xanhSM.nameVi)}</div>
+                  <h3 class="taxi-card-name">⚡ ${escapeHtml(comparison.xanhSM.nameKo)}</h3>
+                  <div class="souv-name-vi">${escapeHtml(comparison.xanhSM.nameVi)}</div>
                 </div>
                 <span class="taxi-card-tag taxi-card-tag-primary">추천 1위</span>
               </div>
-              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(transport.taxiComparison.xanhSM.pros)}</div>
-              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(transport.taxiComparison.xanhSM.cons)}</div>
-              <div class="taxi-hotline">📞 콜센터: ${escapeHtml(transport.taxiComparison.xanhSM.hotline)}</div>
+              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(comparison.xanhSM.pros)}</div>
+              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(comparison.xanhSM.cons)}</div>
+              <div class="taxi-hotline">📞 콜센터: ${escapeHtml(comparison.xanhSM.hotline)}</div>
             </div>
 
             <!-- Grab -->
             <div class="taxi-compare-card taxi-card-accent-success">
               <div class="taxi-card-header">
                 <div>
-                  <h3 class="taxi-card-name">📱 ${escapeHtml(transport.taxiComparison.grab.nameKo)}</h3>
-                  <div class="souv-name-vi">${escapeHtml(transport.taxiComparison.grab.nameVi)}</div>
+                  <h3 class="taxi-card-name">📱 ${escapeHtml(comparison.grab.nameKo)}</h3>
+                  <div class="souv-name-vi">${escapeHtml(comparison.grab.nameVi)}</div>
                 </div>
                 <span class="taxi-card-tag taxi-card-tag-success">정찰제 앱</span>
               </div>
-              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(transport.taxiComparison.grab.pros)}</div>
-              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(transport.taxiComparison.grab.cons)}</div>
-              <div class="taxi-hotline">📲 예약: ${escapeHtml(transport.taxiComparison.grab.bookingMethod)}</div>
+              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(comparison.grab.pros)}</div>
+              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(comparison.grab.cons)}</div>
+              <div class="taxi-hotline">📲 예약: ${escapeHtml(comparison.grab.bookingMethod)}</div>
             </div>
 
             <!-- Traditional Taxis -->
             <div class="taxi-compare-card taxi-card-accent-neutral">
               <div class="taxi-card-header">
                 <div>
-                  <h3 class="taxi-card-name">🚕 ${escapeHtml(transport.taxiComparison.traditionalTaxis.nameKo)}</h3>
-                  <div class="souv-name-vi">${escapeHtml(transport.taxiComparison.traditionalTaxis.nameVi)}</div>
+                  <h3 class="taxi-card-name">🚕 ${escapeHtml(comparison.traditionalTaxis.nameKo)}</h3>
+                  <div class="souv-name-vi">${escapeHtml(comparison.traditionalTaxis.nameVi)}</div>
                 </div>
                 <span class="taxi-card-tag">호텔 대기</span>
               </div>
-              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(transport.taxiComparison.traditionalTaxis.pros)}</div>
-              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(transport.taxiComparison.traditionalTaxis.cons)}</div>
-              <div class="taxi-hotline">📞 ${escapeHtml(transport.taxiComparison.traditionalTaxis.hotline)}</div>
+              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(comparison.traditionalTaxis.pros)}</div>
+              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(comparison.traditionalTaxis.cons)}</div>
+              <div class="taxi-hotline">📞 ${escapeHtml(comparison.traditionalTaxis.hotline)}</div>
             </div>
-          </div>
+          </div>`;
+  }
 
+  function guideScamPreventionHTML(scamPrevention) {
+    return `
           <!-- Scam Prevention 5 Rules -->
           <div class="guide-block-spacer">
             <h3 class="guide-subsection-title guide-subsection-title-warn">
               🛡️ 현지 택시·교통 사기 예방 5대 수칙
             </h3>
             <div class="scam-checklist-grid">
-              ${transport.scamPrevention.map(s => `
+              ${scamPrevention.map(s => `
                 <div class="scam-card">
                   <h4 class="scam-title">⚠️ ${escapeHtml(s.titleKo)}</h4>
                   <p class="scam-warning">${escapeHtml(s.warningText)}</p>
@@ -2920,15 +2919,18 @@
                 </div>
               `).join('')}
             </div>
-          </div>
+          </div>`;
+  }
 
+  function guideIntercityBusHTML(intercityBuses) {
+    return `
           <!-- Intercity Bus Guide (Dalat & Mui Ne) -->
           <div class="guide-block-spacer">
             <h3 class="guide-subsection-title">
               🚌 근교 도시 시외버스 & 리무진 가이드 (달랏 & 무이네)
             </h3>
             <div class="intercity-bus-grid">
-              ${transport.intercityBuses.map(b => `
+              ${intercityBuses.map(b => `
                 <div class="intercity-bus-card">
                   <div class="intercity-bus-header-row">
                     <h4 class="intercity-bus-destination">📍 ${escapeHtml(b.destination)}</h4>
@@ -2949,22 +2951,40 @@
                 </div>
               `).join('')}
             </div>
-          </div>
+          </div>`;
+  }
 
+  function guideMotorbikeRentalHTML(motorbikeRental) {
+    return `
           <!-- Motorbike Rental Guide -->
           <div class="motorbike-guide-box">
             <h4 class="motorbike-guide-title">
               🛵 오토바이(스쿠터) 렌트 수칙 & 안전 가이드
             </h4>
             <div class="motorbike-guide-grid">
-              <div><strong>💰 1일 렌트비:</strong> ${escapeHtml(transport.motorbikeRental.pricePerDayVnd)}</div>
-              <div><strong>🛵 인기 기종:</strong> ${escapeHtml(transport.motorbikeRental.popularModels)}</div>
-              <div><strong>📑 보증금 원칙:</strong> ${escapeHtml(transport.motorbikeRental.depositRules)}</div>
-              <div><strong>🪖 면허 및 법규:</strong> ${escapeHtml(transport.motorbikeRental.legalRequirements)}</div>
-              <div><strong>⛽ 주유 팁:</strong> ${escapeHtml(transport.motorbikeRental.fuelType)}</div>
-              <div><strong>🛡️ 안전 수칙:</strong> ${escapeHtml(transport.motorbikeRental.safetyTip)}</div>
+              <div><strong>💰 1일 렌트비:</strong> ${escapeHtml(motorbikeRental.pricePerDayVnd)}</div>
+              <div><strong>🛵 인기 기종:</strong> ${escapeHtml(motorbikeRental.popularModels)}</div>
+              <div><strong>📑 보증금 원칙:</strong> ${escapeHtml(motorbikeRental.depositRules)}</div>
+              <div><strong>🪖 면허 및 법규:</strong> ${escapeHtml(motorbikeRental.legalRequirements)}</div>
+              <div><strong>⛽ 주유 팁:</strong> ${escapeHtml(motorbikeRental.fuelType)}</div>
+              <div><strong>🛡️ 안전 수칙:</strong> ${escapeHtml(motorbikeRental.safetyTip)}</div>
             </div>
+          </div>`;
+  }
+
+  /** 교통·그랩 가이드 섹션 (공항 이동, 택시 앱 비교, 근교 버스, 안전 수칙). */
+  function guideTransportHTML(transport) {
+    return `
+        <section class="guide-section-block" id="transportGuidePanel">
+          <div class="guide-section-header">
+            <h2 class="guide-section-title">🚗 깜란공항 & 나트랑 시내 교통 완벽 가이드</h2>
+            <p class="guide-section-desc">공항 이동 요금표, 전기차 Xanh SM vs 그랩 vs 일반 택시 비교, 5대 사기 예방법</p>
           </div>
+${guideAirportTableHTML(transport.airportMatrix)}
+${guideTaxiCompareHTML(transport.taxiComparison)}
+${guideScamPreventionHTML(transport.scamPrevention)}
+${guideIntercityBusHTML(transport.intercityBuses)}
+${guideMotorbikeRentalHTML(transport.motorbikeRental)}
         </section>
       `;
   }
