@@ -248,11 +248,6 @@
     return fallback;
   }
 
-  function getIntensityStars(level) {
-    const total = 5;
-    return '⚡'.repeat(Math.min(level || 3, total));
-  }
-
   function showToast(msg, duration = 2500) {
     let toastContainer = document.getElementById('toastContainer');
     if (!toastContainer) {
