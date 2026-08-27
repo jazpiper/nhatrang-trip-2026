@@ -125,6 +125,39 @@ test('escapeHtml sanitizes all dangerous HTML characters and attribute breakout 
   assert.strictEqual(app.escapeHtml(undefined), '');
 });
 
+test('openSpaModal escapes HTML in course dynamic fields (XSS Prevention)', () => {
+  const spaItem = {
+    id: 'spa-xss-test',
+    name: 'XSS Spa',
+    nameKo: 'XSS 스파',
+    categoryLabel: '스파',
+    courses: [
+      {
+        name: '<script>alert("xss-name")</script>',
+        durationMin: 60,
+        priceVnd: 500000,
+        priceKrw: 25000,
+        description: '<img src=x onerror=alert("xss-desc")>'
+      }
+    ]
+  };
+
+  const { installDom } = require('./test-dom-stub.js');
+  const dom = installDom();
+
+  try {
+    app.openSpaModal(spaItem);
+    const tbody = dom.doc.getElementById('spaModalCourseTableBody');
+    assert.ok(tbody, 'spaModalCourseTableBody must exist in DOM stub');
+    assert.ok(tbody.innerHTML.includes('&lt;script&gt;alert(&quot;xss-name&quot;)&lt;/script&gt;'), 'Course name must be HTML escaped');
+    assert.ok(tbody.innerHTML.includes('&lt;img src=x onerror=alert(&quot;xss-desc&quot;)&gt;'), 'Course description must be HTML escaped');
+    assert.ok(!tbody.innerHTML.includes('<script>'), 'Unescaped script tag must not exist');
+    assert.ok(!tbody.innerHTML.includes('<img src=x'), 'Unescaped img tag must not exist');
+  } finally {
+    dom.reset();
+  }
+});
+
 console.log('\n--- Suite 2: LocalStorage Defense & Prototype Pollution Prevention ---');
 
 test('Storage deserializer prevents Object prototype pollution and returns null-prototype dictionaries', () => {
