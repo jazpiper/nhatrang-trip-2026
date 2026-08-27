@@ -360,7 +360,7 @@
       const el = document.getElementById(f.id);
       if (!el) return;
       const v = typeof f.value === 'function' ? f.value(item) : item[f.value];
-      if (f.as === 'html') el.innerHTML = v == null ? '' : v;
+      if (f.as === 'html') el.innerHTML = v == null ? '' : escapeHtml(v);
       else if (f.as === 'src') el.src = sanitizeImageUrl(v == null ? '' : v);
       else if (f.as === 'href') el.href = sanitizeUrl(v == null ? '' : v);
       else el.textContent = v == null ? '' : v;
@@ -490,4 +490,3 @@
     }
     el.innerHTML = list.map(li => `<li><span class="bullet">✔</span> ${escapeHtml(li)}</li>`).join('');
   }
-

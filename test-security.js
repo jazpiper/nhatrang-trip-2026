@@ -125,6 +125,31 @@ test('escapeHtml sanitizes all dangerous HTML characters and attribute breakout 
   assert.strictEqual(app.escapeHtml(undefined), '');
 });
 
+test('applyModalFields sanitizes HTML content when as="html"', () => {
+  const dummyEl = { innerHTML: '', src: '', href: '', textContent: '' };
+  const originalGetElementById = global.document ? global.document.getElementById : undefined;
+
+  global.document = global.document || {};
+  global.document.getElementById = (id) => (id === 'testHtmlField' ? dummyEl : null);
+
+  try {
+    const item = { xssContent: '<img src=x onerror=alert(1)>' };
+    const fields = [{ id: 'testHtmlField', value: 'xssContent', as: 'html' }];
+
+    app.applyModalFields(item, fields);
+
+    assert.strictEqual(
+      dummyEl.innerHTML,
+      '&lt;img src=x onerror=alert(1)&gt;',
+      'applyModalFields must escape HTML payloads when as="html"'
+    );
+  } finally {
+    if (originalGetElementById) {
+      global.document.getElementById = originalGetElementById;
+    }
+  }
+});
+
 console.log('\n--- Suite 2: LocalStorage Defense & Prototype Pollution Prevention ---');
 
 test('Storage deserializer prevents Object prototype pollution and returns null-prototype dictionaries', () => {
