@@ -3629,37 +3629,34 @@
   }
 
   // --- 9. Tab Switching & UI Controller ---
-  function switchMainTab(tab) {
-    state.currentTab = tab;
-
+  function updateTabNavButtons(tab) {
     document.querySelectorAll('.nav-tab-btn, .mobile-tab-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tab);
     });
+  }
 
-    const domain = getDomain(tab);
-
-    // Toggle Category Bars
+  function updateDomainVisibility(tab) {
     DOMAINS.forEach(d => {
       const nav = document.getElementById(d.categoryNavId);
       if (nav) nav.style.display = d.key === tab ? 'block' : 'none';
-    });
 
-    // Toggle Tag Chips
-    DOMAINS.forEach(d => {
       const chips = document.getElementById(d.tagChipsId);
       if (chips) chips.style.display = d.key === tab ? 'flex' : 'none';
-    });
 
+      const section = document.getElementById(d.gridSectionId);
+      if (section) section.style.display = d.key === tab ? 'block' : 'none';
+    });
+  }
+
+  function updateHeroAndToolbarUI(domain) {
     const toolbarSection = document.querySelector('.toolbar-section');
     if (toolbarSection) toolbarSection.style.display = 'block';
 
     // 리스트/그리드 전환은 리스트를 쓰는 여섯 탭 전부에서 필요하다.
-    // (예전에는 activities 탭에서만 노출돼 나머지 탭에서 전환 수단이 없었다.)
     const viewToggleButtons = document.getElementById('viewToggleButtons');
     if (viewToggleButtons) viewToggleButtons.style.display = domain.showViewToggle ? 'flex' : 'none';
 
-    // 환전소/ATM에는 '가격'이 없어 avgPriceVnd가 전부 0이다. 가격 정렬을 그대로 두면
-    // 선택해도 순서가 안 바뀌어 고장으로 보이므로 그런 탭에서는 옵션 자체를 숨긴다.
+    // 환전소/ATM에는 '가격'이 없어 avgPriceVnd가 전부 0이다. 가격 정렬 옵션을 숨긴다.
     const hidePriceSort = !domain.hasPriceSort;
     const sortSelectEl = document.getElementById('sortSelect');
     if (sortSelectEl) {
@@ -3683,12 +3680,6 @@
     if (heroSubtitleDesc) heroSubtitleDesc.textContent = domain.heroSubtitle;
     if (heroTagsArea) heroTagsArea.innerHTML = domain.heroPills;
 
-    // Section display: 자기 탭의 gridSection만 block, 나머지는 전부 none.
-    DOMAINS.forEach(d => {
-      const section = document.getElementById(d.gridSectionId);
-      if (section) section.style.display = d.key === tab ? 'block' : 'none';
-    });
-
     // 영업시간 데이터가 있는 도메인에서만 "지금 영업중" 칩을 노출한다
     const openNowChip = document.getElementById('openNowChip');
     const hasHours = !!domain.hasOpenHours;
@@ -3703,7 +3694,9 @@
     const densityToggle = document.getElementById('densityToggleButtons');
     const showDensity = domain.showViewToggle && state.currentView === 'list';
     if (densityToggle) densityToggle.style.display = showDensity ? 'flex' : 'none';
+  }
 
+  function handleTabLazyLoadingAndRender(tab, domain) {
     // 지연 로딩 대상 탭은 데이터가 준비된 뒤에 렌더한다. 로드 중 다른 탭으로
     // 이동했으면(레이스) 렌더하지 않는다 — 그 탭의 switchMainTab이 알아서 한다.
     const lazy = LAZY_DATA[tab];
@@ -3717,6 +3710,15 @@
     }).catch(() => {
       if (state.currentTab === tab) showDataLoadError(tab, lazy.containerId);
     });
+  }
+
+  function switchMainTab(tab) {
+    state.currentTab = tab;
+    updateTabNavButtons(tab);
+    const domain = getDomain(tab);
+    updateDomainVisibility(tab);
+    updateHeroAndToolbarUI(domain);
+    handleTabLazyLoadingAndRender(tab, domain);
   }
 
   /** 뷰 모드는 다섯 탭 전체에 적용되고 다음 방문까지 유지된다. */
