@@ -909,4 +909,31 @@ if (strayHex.length > 0) {
 
 if (tokenFailed) process.exit(1);
 
+
+console.log('\n=== Suite 13: Unit Tests for getIntensityStars Helper ===');
+const assert = require('assert');
+assert.strictEqual(typeof currencyApp.getIntensityStars, 'function', 'getIntensityStars must be exported from js/app.js');
+
+// 1. Default & falsy fallbacks
+assert.strictEqual(currencyApp.getIntensityStars(), '⚡⚡⚡', 'Undefined level should default to 3 stars (⚡⚡⚡)');
+assert.strictEqual(currencyApp.getIntensityStars(null), '⚡⚡⚡', 'Null level should default to 3 stars (⚡⚡⚡)');
+assert.strictEqual(currencyApp.getIntensityStars(0), '⚡⚡⚡', '0 level (falsy) should default to 3 stars (⚡⚡⚡)');
+assert.strictEqual(currencyApp.getIntensityStars(NaN), '⚡⚡⚡', 'NaN level (falsy) should default to 3 stars (⚡⚡⚡)');
+
+// 2. Standard values (1, 3, 5)
+assert.strictEqual(currencyApp.getIntensityStars(1), '⚡', 'Level 1 should return 1 star (⚡)');
+assert.strictEqual(currencyApp.getIntensityStars(2), '⚡⚡', 'Level 2 should return 2 stars (⚡⚡)');
+assert.strictEqual(currencyApp.getIntensityStars(3), '⚡⚡⚡', 'Level 3 should return 3 stars (⚡⚡⚡)');
+assert.strictEqual(currencyApp.getIntensityStars(4), '⚡⚡⚡⚡', 'Level 4 should return 4 stars (⚡⚡⚡⚡)');
+assert.strictEqual(currencyApp.getIntensityStars(5), '⚡⚡⚡⚡⚡', 'Level 5 should return 5 stars (⚡⚡⚡⚡⚡)');
+
+// 3. Values exceeding cap of 5
+assert.strictEqual(currencyApp.getIntensityStars(6), '⚡⚡⚡⚡⚡', 'Level 6 should be capped at 5 stars (⚡⚡⚡⚡⚡)');
+assert.strictEqual(currencyApp.getIntensityStars(10), '⚡⚡⚡⚡⚡', 'Level 10 should be capped at 5 stars (⚡⚡⚡⚡⚡)');
+
+// 4. Negative values
+assert.throws(() => currencyApp.getIntensityStars(-1), RangeError, 'Negative level Math.min(-1, 5) -> -1 repeat should throw RangeError');
+
+console.log('  ✔ getIntensityStars helper unit tests passed (falsy fallbacks, normal ranges 1-5, capping at 5, negative RangeError)');
+
 console.log('\n✨ All Frontend Integration Suites Passed Perfectly! ✨');

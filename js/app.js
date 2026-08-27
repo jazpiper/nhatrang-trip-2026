@@ -4043,6 +4043,7 @@
       escapeHtml,
       sanitizeUrl,
       sanitizeImageUrl,
+      getIntensityStars,
       formatVND,
       formatKRW,
       formatVerbalVND,
