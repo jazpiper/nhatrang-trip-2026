@@ -4080,6 +4080,7 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
       renderSpa,
       renderShopping,
       renderCurrency,
+      renderCurrencyCardsList,
       // Modal openers — Phase 4 refactor target, snapshotted the same way.
       openActivityModal,
       openGourmetModal,
