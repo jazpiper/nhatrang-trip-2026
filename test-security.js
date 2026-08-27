@@ -158,6 +158,16 @@ test('openSpaModal escapes HTML in course dynamic fields (XSS Prevention)', () =
   }
 });
 
+test("guideFlashcardsHTML sanitizes malicious inputs in flashcard objects", () => {
+  const src = fs.readFileSync(path.resolve(__dirname, "src/js/10_domain_guide.js"), "utf8");
+  assert.ok(src.includes("data-fc-id=\"${escapeHtml(fc.id)}\""), "fc.id must be escaped in data attribute");
+  assert.ok(src.includes("${escapeHtml(fc.ko)}"), "fc.ko must be escaped");
+  assert.ok(src.includes("${escapeHtml(fc.vi)}"), "fc.vi must be escaped");
+  assert.ok(src.includes("${escapeHtml(fc.pronunciation)}"), "fc.pronunciation must be escaped");
+  assert.ok(src.includes("${escapeHtml(fc.purpose)}"), "fc.purpose must be escaped");
+  assert.ok(src.includes("data-fc-copy=\"${escapeHtml(fc.vi)}\""), "fc.vi in data attribute must be escaped");
+});
+
 console.log('\n--- Suite 2: LocalStorage Defense & Prototype Pollution Prevention ---');
 
 test('Storage deserializer prevents Object prototype pollution and returns null-prototype dictionaries', () => {
