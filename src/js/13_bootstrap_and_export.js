@@ -60,6 +60,7 @@
       formatVerbalVND,
       formatVerbalKRW,
       getFilteredActivities,
+      activitiesSearchMatch,
       getFilteredGourmets,
       getFilteredStays,
       getFilteredHotelDinings,
