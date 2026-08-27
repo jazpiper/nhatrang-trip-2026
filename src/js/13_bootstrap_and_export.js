@@ -59,6 +59,7 @@
       formatKRW,
       formatVerbalVND,
       formatVerbalKRW,
+      applyModalFields,
       getFilteredActivities,
       activitiesSearchMatch,
       getFilteredGourmets,
