@@ -231,6 +231,13 @@ if (missing > 0) {
   process.exit(1);
 }
 
+// Verify searchClearBtn ARIA accessibility
+if (!html.includes('id="searchClearBtn"') || !html.includes('aria-label="검색어 지우기"')) {
+  console.error('  ❌ searchClearBtn is missing aria-label="검색어 지우기"');
+  process.exit(1);
+}
+console.log('  ✔ Verified searchClearBtn has aria-label="검색어 지우기"');
+
 console.log('\n=== Suite 2: Script Loading Structure (eager data.js + lazy 6종) ===');
 // 로딩 구조가 2계층에서 eager/lazy 하이브리드로 바뀌었다 (js/app.js 섹션 8.7).
 // - data.js(액티비티 + DEFAULT_EXCHANGE_RATE)만 index.html에서 정적 로드하고,

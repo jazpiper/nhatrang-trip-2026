@@ -84,6 +84,14 @@
     });
   }
 
+  function updateSearchClearBtn() {
+    const searchInput = document.getElementById('searchInput');
+    const searchClearBtn = document.getElementById('searchClearBtn');
+    if (searchClearBtn && searchInput) {
+      searchClearBtn.style.display = searchInput.value ? 'block' : 'none';
+    }
+  }
+
   function updateHeroAndToolbarUI(domain) {
     const toolbarSection = document.querySelector('.toolbar-section');
     if (toolbarSection) toolbarSection.style.display = 'block';
@@ -112,6 +120,7 @@
     const heroTagsArea = document.getElementById('heroTagsArea');
 
     if (searchInput) searchInput.placeholder = domain.placeholder;
+    updateSearchClearBtn();
     if (heroTitle) heroTitle.textContent = domain.heroTitle;
     if (heroSubtitleDesc) heroSubtitleDesc.textContent = domain.heroSubtitle;
     if (heroTagsArea) heroTagsArea.innerHTML = domain.heroPills;
@@ -194,6 +203,7 @@
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('sortSelect');
     if (searchInput) searchInput.value = '';
+    updateSearchClearBtn();
     if (sortSelect) sortSelect.value = 'recommended';
 
     DOMAINS.forEach(d => {
@@ -265,11 +275,13 @@
       });
     });
 
-    // Search Input
+    // Search Input & Clear Button
     const searchInput = document.getElementById('searchInput');
+    const searchClearBtn = document.getElementById('searchClearBtn');
     if (searchInput) {
       let searchDebounce;
       searchInput.addEventListener('input', (e) => {
+        updateSearchClearBtn();
         clearTimeout(searchDebounce);
         searchDebounce = setTimeout(() => {
           state.searchQuery = e.target.value.trim();
@@ -278,10 +290,13 @@
       });
     }
 
-    const searchClearBtn = document.getElementById('searchClearBtn');
     if (searchClearBtn) {
       searchClearBtn.addEventListener('click', () => {
-        if (searchInput) searchInput.value = '';
+        if (searchInput) {
+          searchInput.value = '';
+          searchInput.focus();
+        }
+        updateSearchClearBtn();
         state.searchQuery = '';
         renderCurrentTab();
       });
