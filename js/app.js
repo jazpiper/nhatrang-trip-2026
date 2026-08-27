@@ -3769,8 +3769,20 @@
     showToast('필터가 모두 초기화되었습니다.');
   }
 
-  // --- 10. Event Listeners Initialization ---
-  function initEvents() {
+  // Helper modal functions
+  function openModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function initNavEvents() {
     // Nav Tabs — 상단 탭과 모바일 하단 탭바가 같은 핸들러를 쓴다
     document.querySelectorAll('.nav-tab-btn, .mobile-tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -3788,7 +3800,9 @@
         renderCurrentTab();
       });
     }
+  }
 
+  function initFilterEvents() {
     // Category Buttons
     DOMAINS.forEach(d => {
       document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(btn => {
@@ -3862,11 +3876,9 @@
 
     // Global reset-filters event listener
     window.addEventListener('reset-filters', resetFilters);
+  }
 
-    // Modals Close Events
-    const calcModal = document.getElementById('calcModal');
-    const guideModal = document.getElementById('guideModal');
-
+  function initDomainModalEvents() {
     DOMAINS.forEach(d => {
       const modalEl = document.getElementById(d.modalId);
       document.getElementById(d.modalCloseBtnId)?.addEventListener('click', d.closeModal);
@@ -3874,17 +3886,6 @@
         if (e.target === modalEl) d.closeModal();
       });
     });
-
-    function openModal(modalEl) {
-      if (!modalEl) return;
-      modalEl.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeModal(modalEl) {
-      if (!modalEl) return;
-      modalEl.classList.remove('active');
-      document.body.style.overflow = '';
-    }
 
     // Notes Auto-save Handlers
     document.addEventListener('input', (e) => {
@@ -3919,8 +3920,11 @@
         if (state[d.activeModalField]) copyAddress(state[d.activeModalField].addressVi, e.currentTarget);
       });
     });
+  }
 
-    // Calculator Modal
+  function initCalcModalEvents() {
+    const calcModal = document.getElementById('calcModal');
+
     document.getElementById('openCalcBtn')?.addEventListener('click', () => openModal(calcModal));
     document.getElementById('calcCloseBtn')?.addEventListener('click', () => closeModal(calcModal));
     calcModal?.addEventListener('click', (e) => {
@@ -3954,21 +3958,15 @@
         if (calcKrwInput) calcKrwInput.value = vnd ? Math.round(vnd * getRate()).toLocaleString() : '';
       });
     });
+  }
 
-    // Guide Modal
+  function initGuideModalEvents() {
+    const guideModal = document.getElementById('guideModal');
+
     document.getElementById('openGuideBtn')?.addEventListener('click', () => openModal(guideModal));
     document.getElementById('guideCloseBtn')?.addEventListener('click', () => closeModal(guideModal));
     guideModal?.addEventListener('click', (e) => {
       if (e.target === guideModal) closeModal(guideModal);
-    });
-
-    // ESC Key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        DOMAINS.forEach(d => d.closeModal());
-        closeModal(calcModal);
-        closeModal(guideModal);
-      }
     });
 
     // POS Simulator Choice Handlers
@@ -3981,11 +3979,34 @@
         }
       });
     });
+  }
+
+  function initGlobalKeyboardEvents() {
+    const calcModal = document.getElementById('calcModal');
+    const guideModal = document.getElementById('guideModal');
+
+    // ESC Key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        DOMAINS.forEach(d => d.closeModal());
+        closeModal(calcModal);
+        closeModal(guideModal);
+      }
+    });
+  }
+
+  // --- 10. Event Listeners Initialization ---
+  function initEvents() {
+    initNavEvents();
+    initFilterEvents();
+    initDomainModalEvents();
+    initCalcModalEvents();
+    initGuideModalEvents();
+    initGlobalKeyboardEvents();
 
     // Initialize currency calculator
     initCurrencyCalculator();
   }
-
   // --- 11. Initialization Entrypoint ---
   // 5개 모달이 공유하는 껍데기를 여기서 한 번만 만든다. 도메인 마크업은
   // index.html의 <template class="modal-tpl">에 그대로 있고, 이 함수는
