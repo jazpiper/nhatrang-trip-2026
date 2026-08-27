@@ -2745,7 +2745,7 @@
             <strong>${escapeHtml(c.name || '')}</strong>
             ${c.description ? `<p class="course-desc">${escapeHtml(c.description)}</p>` : ''}
           </td>
-          <td class="course-time">${escapeHtml(c.durationMin || '-')}분</td>
+          <td class="course-time">${escapeHtml(c.durationMin != null ? String(c.durationMin) : '-')}분</td>
           <td class="course-vnd">${escapeHtml(Number(c.priceVnd || 0).toLocaleString())} VND</td>
           <td class="course-krw">약 ${escapeHtml(Number(c.priceKrw || Math.round((c.priceVnd || 0) * currentBenchmarkRate / 100)).toLocaleString())}원</td>
         </tr>
