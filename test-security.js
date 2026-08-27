@@ -116,6 +116,22 @@ test('sanitizeImageUrl blocks script schemes, dangerous SVGs, and protocol-relat
   assert.strictEqual(app.sanitizeImageUrl('./images/thumb.jpg'), './images/thumb.jpg');
 });
 
+test('renderCurrencyCardsList escapes supportedCards items against XSS', () => {
+  const item = {
+    supportedCards: ['<script>alert("xss")</script>', 'NormalCard'],
+    feeFree: true
+  };
+  let outputHtml = '';
+  const mockEl = {
+    set innerHTML(val) {
+      outputHtml = val;
+    }
+  };
+  app.renderCurrencyCardsList(item, mockEl);
+  assert.ok(outputHtml.includes('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;'));
+  assert.ok(!outputHtml.includes('<script>'));
+});
+
 test('escapeHtml sanitizes all dangerous HTML characters and attribute breakout payloads', () => {
   assert.strictEqual(app.escapeHtml('<script>alert(1)</script>'), '&lt;script&gt;alert(1)&lt;/script&gt;');
   assert.strictEqual(app.escapeHtml('" onmouseover="alert(1)"'), '&quot; onmouseover=&quot;alert(1)&quot;');
