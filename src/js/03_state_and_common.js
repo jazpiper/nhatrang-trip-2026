@@ -380,14 +380,20 @@
     if (!state[d.wishField]) state[d.wishField] = [];
     const list = state[d.wishField];
     const idx = list.indexOf(id);
+    let toastMsg = '';
     if (idx > -1) {
       list.splice(idx, 1);
-      showToast(d.wishToastRemove);
+      toastMsg = d.wishToastRemove;
     } else {
       list.push(id);
-      showToast(d.wishToastAdd);
+      toastMsg = d.wishToastAdd;
     }
-    saveToStorage(d.wishKey, list);
+    const saved = saveToStorage(d.wishKey, list);
+    if (saved === false && hasStorage()) {
+      showToast('⚠️ 저장 공간 부족');
+    } else if (toastMsg) {
+      showToast(toastMsg);
+    }
     updateWishlistBadge();
   }
 

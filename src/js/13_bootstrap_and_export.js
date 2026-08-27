@@ -91,7 +91,14 @@
       closeFlashcardModal,
       getFilteredFlashcards,
       getFilteredSouvenirs,
-      getFilteredPharmacyMeds
+      getFilteredPharmacyMeds,
+      // Storage & View helpers
+      sanitizeStorageData,
+      loadFromStorage,
+      saveToStorage,
+      setViewMode,
+      setDensity,
+      toggleDomainWishlist
     };
   }
 })();

@@ -55,8 +55,8 @@
   }
 
   function activityCardTemplate(item) {
-    const isWish = state.wishlist.includes(item.id);
-    const userNote = state.notes[item.id];
+    const isWish = (state.wishlist || []).includes(item.id);
+    const userNote = (state.notes || {})[item.id];
     const tagBadges = (item.tags || []).slice(0, 3)
       .map(t => `<span class="card-tag-pill">${escapeHtml(activityTagLabel(t))}</span>`).join('');
 
@@ -118,8 +118,8 @@
       priceMain: formatVND(item.priceVnd),
       priceKrw: formatKRW(item.priceVnd),
       priceUnit: item.pricePer || '1인',
-      isWish: state.wishlist.includes(item.id),
-      note: state.notes[item.id],
+      isWish: (state.wishlist || []).includes(item.id),
+      note: (state.notes || {})[item.id],
       mapUrl: buildMapUrl(item)
     });
   }

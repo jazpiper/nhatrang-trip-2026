@@ -23,7 +23,14 @@
    * type confusion, and poisoned array/object properties.
    */
   function sanitizeStorageData(data, fallback) {
-    if (data === null || data === undefined) return fallback;
+    if (data === null || data === undefined) {
+      if (typeof fallback === 'object' && fallback !== null && !Array.isArray(fallback)) {
+        const cleanFallback = Object.create(null);
+        Object.assign(cleanFallback, fallback);
+        return cleanFallback;
+      }
+      return fallback;
+    }
 
     if (Array.isArray(fallback)) {
       if (!Array.isArray(data)) return fallback.slice();
@@ -34,8 +41,11 @@
     }
 
     if (typeof fallback === 'object' && fallback !== null) {
-      if (typeof data !== 'object' || data === null || Array.isArray(data)) return Object.assign({}, fallback);
       const cleanObj = Object.create(null);
+      if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+        Object.assign(cleanObj, fallback);
+        return cleanObj;
+      }
       const entries = Object.entries(data).slice(0, 500);
       for (const [k, v] of entries) {
         if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
@@ -46,7 +56,7 @@
           cleanObj[cleanKey] = String(v).slice(0, 5000);
         }
       }
-      return Object.assign({}, cleanObj);
+      return cleanObj;
     }
 
     if (typeof fallback === 'string') {
@@ -67,32 +77,34 @@
   }
 
   function loadFromStorage(key, fallback) {
-    if (!hasStorage()) return fallback;
+    if (!hasStorage()) return sanitizeStorageData(null, fallback);
     try {
       if (typeof key !== 'string' || !key.startsWith('nha_trang_')) {
         console.warn('Blocked reading from non-namespaced storage key:', key);
-        return fallback;
+        return sanitizeStorageData(null, fallback);
       }
       const raw = localStorage.getItem(key);
-      if (raw === null || raw === undefined) return fallback;
+      if (raw === null || raw === undefined) return sanitizeStorageData(null, fallback);
       const parsed = JSON.parse(raw);
       return sanitizeStorageData(parsed, fallback);
     } catch (e) {
       console.warn('LocalStorage load error for key "' + key + '":', e);
-      return fallback;
+      return sanitizeStorageData(null, fallback);
     }
   }
 
   function saveToStorage(key, val) {
-    if (!hasStorage()) return;
+    if (!hasStorage()) return false;
     try {
       if (typeof key !== 'string' || !key.startsWith('nha_trang_')) {
         console.warn('Blocked writing to non-namespaced storage key:', key);
-        return;
+        return false;
       }
       localStorage.setItem(key, JSON.stringify(val));
+      return true;
     } catch (e) {
       console.warn('LocalStorage save error for key "' + key + '":', e);
+      return false;
     }
   }
 
@@ -686,14 +698,20 @@
     if (!state[d.wishField]) state[d.wishField] = [];
     const list = state[d.wishField];
     const idx = list.indexOf(id);
+    let toastMsg = '';
     if (idx > -1) {
       list.splice(idx, 1);
-      showToast(d.wishToastRemove);
+      toastMsg = d.wishToastRemove;
     } else {
       list.push(id);
-      showToast(d.wishToastAdd);
+      toastMsg = d.wishToastAdd;
     }
-    saveToStorage(d.wishKey, list);
+    const saved = saveToStorage(d.wishKey, list);
+    if (saved === false && hasStorage()) {
+      showToast('⚠️ 저장 공간 부족');
+    } else if (toastMsg) {
+      showToast(toastMsg);
+    }
     updateWishlistBadge();
   }
 
@@ -848,8 +866,8 @@
   }
 
   function activityCardTemplate(item) {
-    const isWish = state.wishlist.includes(item.id);
-    const userNote = state.notes[item.id];
+    const isWish = (state.wishlist || []).includes(item.id);
+    const userNote = (state.notes || {})[item.id];
     const tagBadges = (item.tags || []).slice(0, 3)
       .map(t => `<span class="card-tag-pill">${escapeHtml(activityTagLabel(t))}</span>`).join('');
 
@@ -911,8 +929,8 @@
       priceMain: formatVND(item.priceVnd),
       priceKrw: formatKRW(item.priceVnd),
       priceUnit: item.pricePer || '1인',
-      isWish: state.wishlist.includes(item.id),
-      note: state.notes[item.id],
+      isWish: (state.wishlist || []).includes(item.id),
+      note: (state.notes || {})[item.id],
       mapUrl: buildMapUrl(item)
     });
   }
@@ -3703,6 +3721,7 @@
 
   /** 뷰 모드는 다섯 탭 전체에 적용되고 다음 방문까지 유지된다. */
   function setViewMode(mode) {
+    if (mode !== 'list' && mode !== 'grid') return;
     state.currentView = mode;
     saveToStorage('nha_trang_view', mode);
 
@@ -3719,6 +3738,7 @@
   }
 
   function setDensity(mode) {
+    if (mode !== 'tight' && mode !== 'comfy') return;
     state.density = mode;
     saveToStorage('nha_trang_density', mode);
 
@@ -3872,14 +3892,22 @@
         const matchesInput = d.noteInputIds.some(id => e.target.matches(`#${id}`));
         if (!matchesInput) return;
         if (!state[d.activeModalField]) return;
-        state[d.notesField][state[d.activeModalField].id] = e.target.value;
-        saveToStorage(d.notesKey, state[d.notesField]);
+        const val = typeof e.target.value === 'string' ? e.target.value.slice(0, 5000) : '';
+        if (!state[d.notesField]) state[d.notesField] = Object.create(null);
+        state[d.notesField][state[d.activeModalField].id] = val;
+        const saved = saveToStorage(d.notesKey, state[d.notesField]);
         let s = null;
         for (const statusId of d.noteStatusIds) {
           s = document.getElementById(statusId);
           if (s) break;
         }
-        if (s) s.textContent = '✓ 저장 완료';
+        if (s) {
+          if (saved === false && hasStorage()) {
+            s.textContent = '⚠️ 저장 공간 부족';
+          } else {
+            s.textContent = '✓ 저장 완료';
+          }
+        }
         d.render();
       });
     });
@@ -4051,7 +4079,14 @@
       closeFlashcardModal,
       getFilteredFlashcards,
       getFilteredSouvenirs,
-      getFilteredPharmacyMeds
+      getFilteredPharmacyMeds,
+      // Storage & View helpers
+      sanitizeStorageData,
+      loadFromStorage,
+      saveToStorage,
+      setViewMode,
+      setDensity,
+      toggleDomainWishlist
     };
   }
 })();

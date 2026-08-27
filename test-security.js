@@ -127,32 +127,50 @@ test('escapeHtml sanitizes all dangerous HTML characters and attribute breakout 
 
 console.log('\n--- Suite 2: LocalStorage Defense & Prototype Pollution Prevention ---');
 
-test('Storage deserializer prevents Object prototype pollution', () => {
+test('Storage deserializer prevents Object prototype pollution and returns null-prototype dictionaries', () => {
   const payload = JSON.stringify({
     '__proto__': { 'polluted': 'yes' },
     'constructor': { 'prototype': { 'polluted': 'yes' } },
-    'safeKey': 'safeValue'
+    'safeKey': 'safeValue',
+    'numKey': 123
   });
 
   // Verify Object prototype is clean beforehand
   assert.strictEqual(Object.prototype.polluted, undefined);
 
-  // Test sanitization
-  const parsed = JSON.parse(payload);
-  const clean = Object.create(null);
-  for (const [k, v] of Object.entries(parsed)) {
-    if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
-    clean[k] = v;
-  }
-
+  // Test sanitization using the exported function
+  const clean = app.sanitizeStorageData(JSON.parse(payload), {});
+  assert.strictEqual(Object.getPrototypeOf(clean), null);
   assert.strictEqual(clean.__proto__, undefined);
+  assert.strictEqual(clean.toString, undefined);
+  assert.strictEqual(clean.valueOf, undefined);
   assert.strictEqual(clean.safeKey, 'safeValue');
+  assert.strictEqual(clean.numKey, '123');
   assert.strictEqual(Object.prototype.polluted, undefined);
+
+  // Null/undefined input with object fallback also returns null-prototype object
+  const cleanFallback = app.sanitizeStorageData(null, { defaultKey: 'val' });
+  assert.strictEqual(Object.getPrototypeOf(cleanFallback), null);
+  assert.strictEqual(cleanFallback.toString, undefined);
+  assert.strictEqual(cleanFallback.defaultKey, 'val');
 });
 
-test('state view mode and density default to safe enum values', () => {
+test('state view mode and density default to safe enum values and reject invalid values', () => {
   assert.ok(['list', 'grid'].includes(app.state.currentView));
   assert.ok(['tight', 'comfy'].includes(app.state.density));
+
+  const origView = app.state.currentView;
+  app.setViewMode('invalid_mode');
+  assert.strictEqual(app.state.currentView, origView, 'Invalid view mode must be rejected');
+
+  const origDensity = app.state.density;
+  app.setDensity('invalid_density');
+  assert.strictEqual(app.state.density, origDensity, 'Invalid density must be rejected');
+});
+
+test('saveToStorage returns boolean and rejects non-namespaced keys', () => {
+  assert.strictEqual(app.saveToStorage('invalid_key', { a: 1 }), false);
+  assert.strictEqual(app.saveToStorage(12345, { a: 1 }), false);
 });
 
 console.log('\n--- Suite 3: Vercel HTTP Security Headers Hardening ---');
@@ -201,6 +219,18 @@ test('Permissions-Policy restricts dangerous hardware APIs', () => {
   assert.ok(perm.value.includes('camera=()'));
   assert.ok(perm.value.includes('microphone=()'));
   assert.ok(perm.value.includes('geolocation=()'));
+});
+
+test('Referrer-Policy header in vercel.json aligns with meta referrer tag in index.html', () => {
+  const headers = vercelConfig.headers[0].headers;
+  const referrerHeader = headers.find(h => h.key === 'Referrer-Policy');
+  assert.strictEqual(referrerHeader?.value, 'strict-origin-when-cross-origin');
+
+  const indexHtml = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8');
+  assert.ok(
+    indexHtml.includes('<meta name="referrer" content="strict-origin-when-cross-origin">'),
+    'index.html must have strict-origin-when-cross-origin meta tag'
+  );
 });
 
 console.log('\n--- Suite 4: Anchor Link Safety & Privacy Compliance ---');

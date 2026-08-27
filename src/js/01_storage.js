@@ -14,7 +14,14 @@
    * type confusion, and poisoned array/object properties.
    */
   function sanitizeStorageData(data, fallback) {
-    if (data === null || data === undefined) return fallback;
+    if (data === null || data === undefined) {
+      if (typeof fallback === 'object' && fallback !== null && !Array.isArray(fallback)) {
+        const cleanFallback = Object.create(null);
+        Object.assign(cleanFallback, fallback);
+        return cleanFallback;
+      }
+      return fallback;
+    }
 
     if (Array.isArray(fallback)) {
       if (!Array.isArray(data)) return fallback.slice();
@@ -25,8 +32,11 @@
     }
 
     if (typeof fallback === 'object' && fallback !== null) {
-      if (typeof data !== 'object' || data === null || Array.isArray(data)) return Object.assign({}, fallback);
       const cleanObj = Object.create(null);
+      if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+        Object.assign(cleanObj, fallback);
+        return cleanObj;
+      }
       const entries = Object.entries(data).slice(0, 500);
       for (const [k, v] of entries) {
         if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
@@ -37,7 +47,7 @@
           cleanObj[cleanKey] = String(v).slice(0, 5000);
         }
       }
-      return Object.assign({}, cleanObj);
+      return cleanObj;
     }
 
     if (typeof fallback === 'string') {
@@ -58,32 +68,34 @@
   }
 
   function loadFromStorage(key, fallback) {
-    if (!hasStorage()) return fallback;
+    if (!hasStorage()) return sanitizeStorageData(null, fallback);
     try {
       if (typeof key !== 'string' || !key.startsWith('nha_trang_')) {
         console.warn('Blocked reading from non-namespaced storage key:', key);
-        return fallback;
+        return sanitizeStorageData(null, fallback);
       }
       const raw = localStorage.getItem(key);
-      if (raw === null || raw === undefined) return fallback;
+      if (raw === null || raw === undefined) return sanitizeStorageData(null, fallback);
       const parsed = JSON.parse(raw);
       return sanitizeStorageData(parsed, fallback);
     } catch (e) {
       console.warn('LocalStorage load error for key "' + key + '":', e);
-      return fallback;
+      return sanitizeStorageData(null, fallback);
     }
   }
 
   function saveToStorage(key, val) {
-    if (!hasStorage()) return;
+    if (!hasStorage()) return false;
     try {
       if (typeof key !== 'string' || !key.startsWith('nha_trang_')) {
         console.warn('Blocked writing to non-namespaced storage key:', key);
-        return;
+        return false;
       }
       localStorage.setItem(key, JSON.stringify(val));
+      return true;
     } catch (e) {
       console.warn('LocalStorage save error for key "' + key + '":', e);
+      return false;
     }
   }
 

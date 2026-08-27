@@ -157,6 +157,7 @@
 
   /** 뷰 모드는 다섯 탭 전체에 적용되고 다음 방문까지 유지된다. */
   function setViewMode(mode) {
+    if (mode !== 'list' && mode !== 'grid') return;
     state.currentView = mode;
     saveToStorage('nha_trang_view', mode);
 
@@ -173,6 +174,7 @@
   }
 
   function setDensity(mode) {
+    if (mode !== 'tight' && mode !== 'comfy') return;
     state.density = mode;
     saveToStorage('nha_trang_density', mode);
 
@@ -326,14 +328,22 @@
         const matchesInput = d.noteInputIds.some(id => e.target.matches(`#${id}`));
         if (!matchesInput) return;
         if (!state[d.activeModalField]) return;
-        state[d.notesField][state[d.activeModalField].id] = e.target.value;
-        saveToStorage(d.notesKey, state[d.notesField]);
+        const val = typeof e.target.value === 'string' ? e.target.value.slice(0, 5000) : '';
+        if (!state[d.notesField]) state[d.notesField] = Object.create(null);
+        state[d.notesField][state[d.activeModalField].id] = val;
+        const saved = saveToStorage(d.notesKey, state[d.notesField]);
         let s = null;
         for (const statusId of d.noteStatusIds) {
           s = document.getElementById(statusId);
           if (s) break;
         }
-        if (s) s.textContent = '✓ 저장 완료';
+        if (s) {
+          if (saved === false && hasStorage()) {
+            s.textContent = '⚠️ 저장 공간 부족';
+          } else {
+            s.textContent = '✓ 저장 완료';
+          }
+        }
         d.render();
       });
     });
