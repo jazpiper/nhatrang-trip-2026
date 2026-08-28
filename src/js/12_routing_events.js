@@ -67,7 +67,9 @@
   // --- 9. Tab Switching & UI Controller ---
   function updateTabNavButtons(tab) {
     document.querySelectorAll('.nav-tab-btn, .mobile-tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tab);
+      const isActive = btn.dataset.tab === tab;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', String(isActive));
     });
   }
 
@@ -174,8 +176,14 @@
 
     const listBtn = document.getElementById('viewListBtn');
     const gridBtn = document.getElementById('viewGridBtn');
-    if (listBtn) listBtn.classList.toggle('active', mode === 'list');
-    if (gridBtn) gridBtn.classList.toggle('active', mode === 'grid');
+    if (listBtn) {
+      listBtn.classList.toggle('active', mode === 'list');
+      listBtn.setAttribute('aria-pressed', String(mode === 'list'));
+    }
+    if (gridBtn) {
+      gridBtn.classList.toggle('active', mode === 'grid');
+      gridBtn.setAttribute('aria-pressed', String(mode === 'grid'));
+    }
 
     const densityToggle = document.getElementById('densityToggleButtons');
     const showDensity = getDomain(state.currentTab).showViewToggle && mode === 'list';
@@ -191,8 +199,14 @@
 
     const tightBtn = document.getElementById('densityTightBtn');
     const comfyBtn = document.getElementById('densityComfyBtn');
-    if (tightBtn) tightBtn.classList.toggle('active', mode === 'tight');
-    if (comfyBtn) comfyBtn.classList.toggle('active', mode === 'comfy');
+    if (tightBtn) {
+      tightBtn.classList.toggle('active', mode === 'tight');
+      tightBtn.setAttribute('aria-pressed', String(mode === 'tight'));
+    }
+    if (comfyBtn) {
+      comfyBtn.classList.toggle('active', mode === 'comfy');
+      comfyBtn.setAttribute('aria-pressed', String(mode === 'comfy'));
+    }
 
     renderCurrentTab();
   }

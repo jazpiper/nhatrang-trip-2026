@@ -532,12 +532,19 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
         e.stopPropagation();
         const text = btn.dataset.fcCopy;
         if (text) {
+          const notifySuccess = () => {
+            showToast(`📋 베트남어가 복사되었습니다: "${text}"`);
+            const span = btn.querySelector('span') || btn;
+            const origText = span.textContent;
+            span.textContent = '✓ 복사 완료!';
+            setTimeout(() => { span.textContent = origText; }, 2000);
+          };
           if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(() => {
-              showToast(`📋 베트남어가 복사되었습니다: "${text}"`);
+            navigator.clipboard.writeText(text).then(notifySuccess).catch(() => {
+              fallbackCopy(text, notifySuccess);
             });
           } else {
-            fallbackCopy(text, () => showToast(`📋 베트남어가 복사되었습니다: "${text}"`));
+            fallbackCopy(text, notifySuccess);
           }
         }
       });
@@ -567,12 +574,19 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
     if (copyBtn) {
       copyBtn.onclick = () => {
         const textToCopy = fc.vi;
+        const notifySuccess = () => {
+          showToast(`📋 복사완료: "${textToCopy}"`);
+          const span = copyBtn.querySelector('span') || copyBtn;
+          const origText = span.textContent;
+          span.textContent = '✓ 복사 완료!';
+          setTimeout(() => { span.textContent = origText; }, 2000);
+        };
         if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(textToCopy).then(() => {
-            showToast(`📋 복사완료: "${textToCopy}"`);
+          navigator.clipboard.writeText(textToCopy).then(notifySuccess).catch(() => {
+            fallbackCopy(textToCopy, notifySuccess);
           });
         } else {
-          fallbackCopy(textToCopy, () => showToast(`📋 복사완료: "${textToCopy}"`));
+          fallbackCopy(textToCopy, notifySuccess);
         }
       };
     }

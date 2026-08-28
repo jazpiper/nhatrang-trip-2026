@@ -31,36 +31,36 @@
       </a>
 
       <!-- Center Tabs (Activities, Gourmet, Stays, Spa, Shopping, Currency) -->
-      <nav class="header-nav-tabs" aria-label="메인 카테고리">
-        <button class="nav-tab-btn active" data-tab="activities">
+      <nav class="header-nav-tabs" aria-label="메인 카테고리" role="tablist">
+        <button class="nav-tab-btn active" data-tab="activities" role="tab" aria-selected="true">
           <span>🤿 액티비티</span>
           <span class="tab-badge" data-count-for="activity">32</span>
         </button>
-        <button class="nav-tab-btn" data-tab="gourmet">
+        <button class="nav-tab-btn" data-tab="gourmet" role="tab" aria-selected="false">
           <span>🍜 맛집</span>
           <span class="tab-badge">113</span>
         </button>
-        <button class="nav-tab-btn" data-tab="stays">
+        <button class="nav-tab-btn" data-tab="stays" role="tab" aria-selected="false">
           <span>🏨 숙소</span>
           <span class="tab-badge">24</span>
         </button>
-        <button class="nav-tab-btn" data-tab="hoteldining">
+        <button class="nav-tab-btn" data-tab="hoteldining" role="tab" aria-selected="false">
           <span>🍽️ 호텔 다이닝</span>
           <span class="tab-badge" data-count-for="hoteldining">24</span>
         </button>
-        <button class="nav-tab-btn" data-tab="spa">
+        <button class="nav-tab-btn" data-tab="spa" role="tab" aria-selected="false">
           <span>💆 스파</span>
           <span class="tab-badge" data-count-for="spa">24</span>
         </button>
-        <button class="nav-tab-btn" data-tab="shopping">
+        <button class="nav-tab-btn" data-tab="shopping" role="tab" aria-selected="false">
           <span>🛍️ 쇼핑</span>
           <span class="tab-badge">18</span>
         </button>
-        <button class="nav-tab-btn" data-tab="currency">
+        <button class="nav-tab-btn" data-tab="currency" role="tab" aria-selected="false">
           <span>💱 환전</span>
           <span class="tab-badge">17</span>
         </button>
-        <button class="nav-tab-btn" data-tab="guide">
+        <button class="nav-tab-btn" data-tab="guide" role="tab" aria-selected="false">
           <span>💡 꿀팁 & 가이드</span>
           <span class="tab-badge" data-count-for="guide">4대 가이드</span>
         </button>
@@ -81,7 +81,7 @@
         </button>
 
         <!-- Wishlist Toggle -->
-        <button class="action-pill-btn wishlist-btn" id="wishlistToggleBtn" title="찜한 항목 모아보기">
+        <button class="action-pill-btn wishlist-btn" id="wishlistToggleBtn" title="찜한 항목 모아보기" aria-pressed="false">
           <span>♥</span>
           <span>찜</span>
           <span class="wishlist-count" id="wishlistCount">0</span>
@@ -473,18 +473,18 @@
           <option value="price-desc">가격 높은 순</option>
         </select>
 
-        <div id="viewToggleButtons">
-          <button class="view-toggle-btn active" id="viewListBtn" title="정보 위주 리스트 뷰">
+        <div id="viewToggleButtons" role="group" aria-label="보기 방식 선택">
+          <button class="view-toggle-btn active" id="viewListBtn" title="정보 위주 리스트 뷰" aria-label="리스트 뷰" aria-pressed="true">
             <span>☰</span> <span>리스트</span>
           </button>
-          <button class="view-toggle-btn" id="viewGridBtn" title="사진 위주 그리드 뷰">
+          <button class="view-toggle-btn" id="viewGridBtn" title="사진 위주 그리드 뷰" aria-label="그리드 뷰" aria-pressed="false">
             <span>▦</span> <span>그리드</span>
           </button>
         </div>
 
-        <div id="densityToggleButtons">
-          <button class="view-toggle-btn active" id="densityTightBtn" title="한 화면에 더 많이">밀집</button>
-          <button class="view-toggle-btn" id="densityComfyBtn" title="여유 있게">넉넉</button>
+        <div id="densityToggleButtons" role="group" aria-label="화면 밀도 선택">
+          <button class="view-toggle-btn active" id="densityTightBtn" title="한 화면에 더 많이" aria-label="밀집 보기" aria-pressed="true">밀집</button>
+          <button class="view-toggle-btn" id="densityComfyBtn" title="여유 있게" aria-label="넉넉하게 보기" aria-pressed="false">넉넉</button>
         </div>
       </div>
     </div>
