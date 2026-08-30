@@ -33,6 +33,7 @@
     buildModals();
     updateWishlistBadge();
     initEvents();
+    updateHeroAndToolbarUI(getDomain(state.currentTab));
     renderCards();
   }
 

@@ -119,7 +119,10 @@
     const heroSubtitleDesc = document.getElementById('heroSubtitleDesc');
     const heroTagsArea = document.getElementById('heroTagsArea');
 
-    if (searchInput) searchInput.placeholder = domain.placeholder;
+    if (searchInput) {
+      searchInput.placeholder = domain.placeholder;
+      searchInput.setAttribute('aria-label', domain.heroTitle + ' 검색');
+    }
     updateSearchClearBtn();
     if (heroTitle) heroTitle.textContent = domain.heroTitle;
     if (heroSubtitleDesc) heroSubtitleDesc.textContent = domain.heroSubtitle;
@@ -174,8 +177,14 @@
 
     const listBtn = document.getElementById('viewListBtn');
     const gridBtn = document.getElementById('viewGridBtn');
-    if (listBtn) listBtn.classList.toggle('active', mode === 'list');
-    if (gridBtn) gridBtn.classList.toggle('active', mode === 'grid');
+    if (listBtn) {
+      listBtn.classList.toggle('active', mode === 'list');
+      listBtn.setAttribute('aria-pressed', String(mode === 'list'));
+    }
+    if (gridBtn) {
+      gridBtn.classList.toggle('active', mode === 'grid');
+      gridBtn.setAttribute('aria-pressed', String(mode === 'grid'));
+    }
 
     const densityToggle = document.getElementById('densityToggleButtons');
     const showDensity = getDomain(state.currentTab).showViewToggle && mode === 'list';
@@ -287,6 +296,16 @@
           state.searchQuery = e.target.value.trim();
           renderCurrentTab();
         }, 200);
+      });
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && searchInput.value) {
+          e.stopPropagation();
+          searchInput.value = '';
+          updateSearchClearBtn();
+          state.searchQuery = '';
+          renderCurrentTab();
+          searchInput.blur();
+        }
       });
     }
 
