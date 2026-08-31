@@ -69,6 +69,8 @@
       getFilteredSpas,
       getFilteredShopping,
       getFilteredCurrency,
+      getFilteredCurations,
+      getFilteredCuration,
       // Renderers — exported for the snapshot harness (test-render-snapshot.js).
       // They resolve `document` at call time, so the harness can install a stub
       // AFTER requiring this file, which keeps the bootstrap above from running.
@@ -80,6 +82,7 @@
       renderShopping,
       renderCurrency,
       renderCurrencyCardsList,
+      renderCuration,
       // Modal openers — Phase 4 refactor target, snapshotted the same way.
       openActivityModal,
       openGourmetModal,

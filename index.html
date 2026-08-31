@@ -60,6 +60,10 @@
           <span>💱 환전</span>
           <span class="tab-badge">17</span>
         </button>
+        <button class="nav-tab-btn" data-tab="curation" role="tab" aria-selected="false">
+          <span>🎯 상황별 추천</span>
+          <span class="tab-badge" data-count-for="curation">4대 코스</span>
+        </button>
         <button class="nav-tab-btn" data-tab="guide" role="tab" aria-selected="false">
           <span>💡 꿀팁 & 가이드</span>
           <span class="tab-badge" data-count-for="guide">4대 가이드</span>
@@ -340,6 +344,32 @@
     </div>
   </nav>
 
+  <!-- Curation Scenario Sub Navigation Scroll Bar -->
+  <nav class="category-filter-section" id="curationCategoryNav" style="display: none;" aria-label="상황별 맞춤 코스 필터">
+    <div class="container category-scroll-container">
+      <button class="category-item-btn active" data-curcategory="all">
+        <span class="cat-icon">🎯</span>
+        <span>전체 추천 코스 (4대 코스)</span>
+      </button>
+      <button class="category-item-btn" data-curcategory="checkout">
+        <span class="cat-icon">✈️</span>
+        <span>마지막 날 체크아웃</span>
+      </button>
+      <button class="category-item-btn" data-curcategory="rainy">
+        <span class="cat-icon">🌧️</span>
+        <span>비 올 때 실내 힐링</span>
+      </button>
+      <button class="category-item-btn" data-curcategory="night">
+        <span class="cat-icon">🌙</span>
+        <span>심야 핫스팟 & 야간</span>
+      </button>
+      <button class="category-item-btn" data-curcategory="couple">
+        <span class="cat-icon">💑</span>
+        <span>커플/로맨틱 힐링</span>
+      </button>
+    </div>
+  </nav>
+
   <!-- Guide Hub Sub Navigation Scroll Bar -->
   <nav class="category-filter-section" id="guideCategoryNav" style="display: none;" aria-label="여행 꿀팁 & 생존 킷 카테고리">
     <div class="container category-scroll-container">
@@ -451,6 +481,15 @@
         <button class="tag-chip-btn" data-currtag="usd100">💵 100달러 신권 우대</button>
         <button class="tag-chip-btn" data-currtag="livebank_24h">🏧 24시간 LiveBank</button>
         <button class="tag-chip-btn" data-currtag="night_market">🌙 야시장/시내 인근</button>
+      </div>
+
+      <!-- Tag Filters for Curation Scenarios -->
+      <div class="tag-chips-wrapper" id="curationTagChips" style="display: none;">
+        <button class="tag-chip-btn active" data-curtag="all">전체</button>
+        <button class="tag-chip-btn" data-curtag="luggage">🧳 짐보관/공항샌딩</button>
+        <button class="tag-chip-btn" data-curtag="indoor">🌧️ 실내/머드온천</button>
+        <button class="tag-chip-btn" data-curtag="late">🌙 심야영업/클럽</button>
+        <button class="tag-chip-btn" data-curtag="sunset">🌅 선셋/파인다이닝</button>
       </div>
 
       <!-- Tag Filters for Guide Hub -->
@@ -706,6 +745,19 @@
 
       <!-- Currency Cards Grid Container -->
       <div class="cards-grid" id="currencyCardsGridContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Curation Scenario Grid Container Section -->
+  <main class="activities-section" id="curationGridSection" style="display: none;">
+    <div class="container">
+      <div class="results-info-bar">
+        <span id="curationResultCountText">나트랑 4대 맞춤 상황별 추천 코스</span>
+        <span>💡 시간대별 추천 동선, 실전 팁 및 검증된 장소 연동 정보를 확인하세요.</span>
+      </div>
+      <div class="cards-grid" id="curationCardsGridContainer">
         <!-- Rendered dynamically -->
       </div>
     </div>
@@ -1717,6 +1769,9 @@
     <button class="mobile-tab-btn" data-tab="currency">
       <span class="mt-icon">💱</span><span>환전</span>
     </button>
+    <button class="mobile-tab-btn" data-tab="curation">
+      <span class="mt-icon">🎯</span><span>추천</span>
+    </button>
     <button class="mobile-tab-btn" data-tab="guide">
       <span class="mt-icon">💡</span><span>가이드</span>
     </button>
@@ -1724,7 +1779,7 @@
 
   <!-- Scripts -->
   <!-- data.js(액티비티 + DEFAULT_EXCHANGE_RATE)만 정적 로드한다.
-       나머지 데이터 6종은 js/app.js의 LAZY_DATA가 탭 최초 진입 시 동적 로드한다 (섹션 8.7). -->
+       나머지 데이터 7종은 js/app.js의 LAZY_DATA가 탭 최초 진입 시 동적 로드한다 (섹션 8.7). -->
   <script src="./data.js"></script>
   <script src="./js/app.js"></script>
 </body>

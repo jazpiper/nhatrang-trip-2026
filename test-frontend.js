@@ -195,6 +195,12 @@ const requiredIds = [
   'calcVndHelperMain',
   'calcKrwHelperMain',
   'calcResetBtnMain',
+  // Curation Domain IDs
+  'curationCategoryNav',
+  'curationTagChips',
+  'curationGridSection',
+  'curationResultCountText',
+  'curationCardsGridContainer',
   // Guide Hub Domain IDs
   'guideCategoryNav',
   'guideTagChips',
@@ -273,6 +279,7 @@ const lazyFiles = [
   'spa-data.js',
   'shopping-data.js',
   'currency-data.js',
+  'curation-data.js',
   'guide-data.js'
 ];
 const appSrcForLazy = fs.readFileSync('js/app.js', 'utf8');
@@ -361,6 +368,14 @@ const requiredSelectors = [
   '.spa-amenity-pill',
   '.btn-spa-map',
   '.btn-spa-photos',
+  // Curation Selectors
+  '.curation-card',
+  '.curation-badge',
+  '.curation-timeline',
+  '.timeline-step',
+  '.timeline-time-badge',
+  '.timeline-place-card',
+  '.btn-curation-map',
   // Guide Hub Selectors
   '.guide-hub-container',
   '.guide-section-block',
@@ -699,6 +714,54 @@ for (const tag of guideNavTags) {
 }
 guideApp.resetStateFilters();
 
+console.log('\n=== Suite 9b: Curation Tab wired through the real js/app.js ===');
+const { NHA_TRANG_CURATIONS } = require('./curation-data.js');
+console.log(`  ✔ Loaded ${NHA_TRANG_CURATIONS.length} curation scenarios from curation-data.js`);
+
+global.NHA_TRANG_CURATIONS = NHA_TRANG_CURATIONS;
+
+let curationApp;
+try {
+  curationApp = require('./js/app.js');
+} catch (e) {
+  console.error('  ❌ js/app.js could not be loaded in Node for Curation:', e.message);
+  process.exit(1);
+}
+
+if (typeof curationApp.getFilteredCurations !== 'function') {
+  console.error('  ❌ js/app.js does not export getFilteredCurations');
+  process.exit(1);
+}
+console.log('  ✔ js/app.js exports getFilteredCurations for testing');
+
+const curNavBlock = html.slice(html.indexOf('id="curationCategoryNav"'), html.indexOf('id="guideCategoryNav"'));
+const curChipBlock = html.slice(html.indexOf('id="curationTagChips"'), html.indexOf('id="guideTagChips"'));
+const curNavCats = [...curNavBlock.matchAll(/data-curcategory="([^"]+)"/g)].map(m => m[1]);
+const curNavTags = [...curChipBlock.matchAll(/data-curtag="([^"]+)"/g)].map(m => m[1]);
+
+for (const cat of curNavCats) {
+  curationApp.resetStateFilters();
+  curationApp.state.curationCategory = cat;
+  const n = curationApp.getFilteredCurations().length;
+  if (n === 0) {
+    console.error(`  ❌ Curation category '${cat}' returns 0 results`);
+    process.exit(1);
+  }
+  console.log(`  ✔ Curation category '${cat}': ${n} courses matched`);
+}
+
+for (const tag of curNavTags) {
+  curationApp.resetStateFilters();
+  curationApp.state.curationTag = tag;
+  const n = curationApp.getFilteredCurations().length;
+  if (n === 0) {
+    console.error(`  ❌ Curation tag chip '${tag}' returns 0 results`);
+    process.exit(1);
+  }
+  console.log(`  ✔ Curation tag '${tag}': ${n} courses matched`);
+}
+curationApp.resetStateFilters();
+
 // Exchange rate must come from one constant, or the calculator and the card prices disagree.
 const dataSrc = fs.readFileSync('data.js', 'utf8');
 const rateMatch = dataSrc.match(/const DEFAULT_EXCHANGE_RATE\s*=\s*([\d.]+)/);
@@ -753,6 +816,21 @@ for (const domain of Object.keys(domainCounts)) {
     countSyncFailed = true;
   } else {
     console.log(`  ✔ Tab badge '${domain}': ${m[1]} matches dataset length`);
+  }
+}
+
+// Curation fixed badge verification
+{
+  const re = new RegExp(`data-tab="curation"[\\s\\S]*?<span class="tab-badge"[^>]*>([^<]+)<\\/span>`);
+  const m = html.match(re);
+  if (!m) {
+    console.error(`  ❌ Tab badge not found for domain 'curation' (data-tab="curation")`);
+    countSyncFailed = true;
+  } else if (m[1] !== '4대 코스') {
+    console.error(`  ❌ Tab badge for 'curation' reads '${m[1]}', expected '4대 코스'`);
+    countSyncFailed = true;
+  } else {
+    console.log(`  ✔ Tab badge 'curation': ${m[1]} matches expected '4대 코스'`);
   }
 }
 

@@ -30,6 +30,10 @@
     spaCategory: 'all',
     spaTag: 'all',
 
+    // Curation Filter State
+    curationCategory: 'all',
+    curationTag: 'all',
+
     // Guide Hub Filter State
     guideCategory: 'all',
     guideTag: 'all',
@@ -102,6 +106,8 @@
     state.shoppingTag = 'all';
     state.currencyCategory = 'all';
     state.currencyTag = 'all';
+    state.curationCategory = 'all';
+    state.curationTag = 'all';
     state.guideCategory = 'all';
     state.guideTag = 'all';
     state.searchQuery = '';

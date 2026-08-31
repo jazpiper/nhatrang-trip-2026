@@ -11,6 +11,7 @@
     spa: { src: './spa-data.js', containerId: 'spaCardsGridContainer', ready: () => typeof NHA_TRANG_SPAS !== 'undefined' },
     shopping: { src: './shopping-data.js', containerId: 'shoppingCardsGridContainer', ready: () => typeof NHA_TRANG_SHOPPING !== 'undefined' },
     currency: { src: './currency-data.js', containerId: 'currencyCardsGridContainer', ready: () => typeof NHA_TRANG_CURRENCY !== 'undefined' },
+    curation: { src: './curation-data.js', containerId: 'curationCardsGridContainer', ready: () => typeof NHA_TRANG_CURATIONS !== 'undefined' },
     guide: { src: './guide-data.js', containerId: 'guideCardsGridContainer', ready: () => typeof NHA_TRANG_GUIDE_HUB !== 'undefined' }
   };
 
