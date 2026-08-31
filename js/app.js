@@ -4063,8 +4063,16 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
     if (sortSelect) sortSelect.value = 'recommended';
 
     DOMAINS.forEach(d => {
-      document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => b.classList.toggle('active', b.dataset[d.catAttr] === 'all'));
-      document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => b.classList.toggle('active', b.dataset[d.tagAttr] === 'all'));
+      document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => {
+        const isActive = b.dataset[d.catAttr] === 'all';
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', String(isActive));
+      });
+      document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => {
+        const isActive = b.dataset[d.tagAttr] === 'all';
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', String(isActive));
+      });
     });
 
     updateWishlistBadge();
@@ -4111,8 +4119,11 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
     DOMAINS.forEach(d => {
       document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => {
+            const isActive = b === btn;
+            b.classList.toggle('active', isActive);
+            b.setAttribute('aria-pressed', String(isActive));
+          });
           state[d.catField] = btn.dataset[d.catAttr];
           d.render();
         });
@@ -4123,8 +4134,11 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
     DOMAINS.forEach(d => {
       document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => {
+            const isActive = b === btn;
+            b.classList.toggle('active', isActive);
+            b.setAttribute('aria-pressed', String(isActive));
+          });
           state[d.tagField] = btn.dataset[d.tagAttr];
           d.render();
         });
