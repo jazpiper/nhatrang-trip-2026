@@ -8,36 +8,36 @@
       </a>
 
       <!-- Center Tabs (Activities, Gourmet, Stays, Spa, Shopping, Currency) -->
-      <nav class="header-nav-tabs" aria-label="메인 카테고리">
-        <button class="nav-tab-btn active" data-tab="activities">
+      <nav class="header-nav-tabs" aria-label="메인 카테고리" role="tablist">
+        <button class="nav-tab-btn active" data-tab="activities" role="tab" aria-selected="true">
           <span>🤿 액티비티</span>
           <span class="tab-badge" data-count-for="activity">32</span>
         </button>
-        <button class="nav-tab-btn" data-tab="gourmet">
+        <button class="nav-tab-btn" data-tab="gourmet" role="tab" aria-selected="false">
           <span>🍜 맛집</span>
           <span class="tab-badge">113</span>
         </button>
-        <button class="nav-tab-btn" data-tab="stays">
+        <button class="nav-tab-btn" data-tab="stays" role="tab" aria-selected="false">
           <span>🏨 숙소</span>
           <span class="tab-badge">24</span>
         </button>
-        <button class="nav-tab-btn" data-tab="hoteldining">
+        <button class="nav-tab-btn" data-tab="hoteldining" role="tab" aria-selected="false">
           <span>🍽️ 호텔 다이닝</span>
           <span class="tab-badge" data-count-for="hoteldining">24</span>
         </button>
-        <button class="nav-tab-btn" data-tab="spa">
+        <button class="nav-tab-btn" data-tab="spa" role="tab" aria-selected="false">
           <span>💆 스파</span>
           <span class="tab-badge" data-count-for="spa">24</span>
         </button>
-        <button class="nav-tab-btn" data-tab="shopping">
+        <button class="nav-tab-btn" data-tab="shopping" role="tab" aria-selected="false">
           <span>🛍️ 쇼핑</span>
           <span class="tab-badge">18</span>
         </button>
-        <button class="nav-tab-btn" data-tab="currency">
+        <button class="nav-tab-btn" data-tab="currency" role="tab" aria-selected="false">
           <span>💱 환전</span>
           <span class="tab-badge">17</span>
         </button>
-        <button class="nav-tab-btn" data-tab="guide">
+        <button class="nav-tab-btn" data-tab="guide" role="tab" aria-selected="false">
           <span>💡 꿀팁 & 가이드</span>
           <span class="tab-badge" data-count-for="guide">4대 가이드</span>
         </button>
@@ -58,7 +58,7 @@
         </button>
 
         <!-- Wishlist Toggle -->
-        <button class="action-pill-btn wishlist-btn" id="wishlistToggleBtn" title="찜한 항목 모아보기">
+        <button class="action-pill-btn wishlist-btn" id="wishlistToggleBtn" title="찜한 항목 모아보기" aria-pressed="false">
           <span>♥</span>
           <span>찜</span>
           <span class="wishlist-count" id="wishlistCount">0</span>

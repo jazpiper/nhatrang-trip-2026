@@ -394,7 +394,10 @@
     const wishlistBtn = document.getElementById('wishlistToggleBtn');
     
     if (wishlistCount) wishlistCount.textContent = total;
-    if (wishlistBtn) wishlistBtn.classList.toggle('active', state.wishlistOnly);
+    if (wishlistBtn) {
+      wishlistBtn.classList.toggle('active', state.wishlistOnly);
+      wishlistBtn.setAttribute('aria-pressed', String(state.wishlistOnly));
+    }
   }
 
   function resetStateFilters() {
@@ -3291,12 +3294,19 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
         e.stopPropagation();
         const text = btn.dataset.fcCopy;
         if (text) {
+          const notifySuccess = () => {
+            showToast(`📋 베트남어가 복사되었습니다: "${text}"`);
+            const span = btn.querySelector('span') || btn;
+            const origText = span.textContent;
+            span.textContent = '✓ 복사 완료!';
+            setTimeout(() => { span.textContent = origText; }, 2000);
+          };
           if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(() => {
-              showToast(`📋 베트남어가 복사되었습니다: "${text}"`);
+            navigator.clipboard.writeText(text).then(notifySuccess).catch(() => {
+              fallbackCopy(text, notifySuccess);
             });
           } else {
-            fallbackCopy(text, () => showToast(`📋 베트남어가 복사되었습니다: "${text}"`));
+            fallbackCopy(text, notifySuccess);
           }
         }
       });
@@ -3326,12 +3336,19 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
     if (copyBtn) {
       copyBtn.onclick = () => {
         const textToCopy = fc.vi;
+        const notifySuccess = () => {
+          showToast(`📋 복사완료: "${textToCopy}"`);
+          const span = copyBtn.querySelector('span') || copyBtn;
+          const origText = span.textContent;
+          span.textContent = '✓ 복사 완료!';
+          setTimeout(() => { span.textContent = origText; }, 2000);
+        };
         if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(textToCopy).then(() => {
-            showToast(`📋 복사완료: "${textToCopy}"`);
+          navigator.clipboard.writeText(textToCopy).then(notifySuccess).catch(() => {
+            fallbackCopy(textToCopy, notifySuccess);
           });
         } else {
-          fallbackCopy(textToCopy, () => showToast(`📋 복사완료: "${textToCopy}"`));
+          fallbackCopy(textToCopy, notifySuccess);
         }
       };
     }
@@ -3645,7 +3662,9 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
   // --- 9. Tab Switching & UI Controller ---
   function updateTabNavButtons(tab) {
     document.querySelectorAll('.nav-tab-btn, .mobile-tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tab);
+      const isActive = btn.dataset.tab === tab;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', String(isActive));
     });
   }
 
@@ -3752,8 +3771,14 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
 
     const listBtn = document.getElementById('viewListBtn');
     const gridBtn = document.getElementById('viewGridBtn');
-    if (listBtn) listBtn.classList.toggle('active', mode === 'list');
-    if (gridBtn) gridBtn.classList.toggle('active', mode === 'grid');
+    if (listBtn) {
+      listBtn.classList.toggle('active', mode === 'list');
+      listBtn.setAttribute('aria-pressed', String(mode === 'list'));
+    }
+    if (gridBtn) {
+      gridBtn.classList.toggle('active', mode === 'grid');
+      gridBtn.setAttribute('aria-pressed', String(mode === 'grid'));
+    }
 
     const densityToggle = document.getElementById('densityToggleButtons');
     const showDensity = getDomain(state.currentTab).showViewToggle && mode === 'list';
@@ -3769,8 +3794,14 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
 
     const tightBtn = document.getElementById('densityTightBtn');
     const comfyBtn = document.getElementById('densityComfyBtn');
-    if (tightBtn) tightBtn.classList.toggle('active', mode === 'tight');
-    if (comfyBtn) comfyBtn.classList.toggle('active', mode === 'comfy');
+    if (tightBtn) {
+      tightBtn.classList.toggle('active', mode === 'tight');
+      tightBtn.setAttribute('aria-pressed', String(mode === 'tight'));
+    }
+    if (comfyBtn) {
+      comfyBtn.classList.toggle('active', mode === 'comfy');
+      comfyBtn.setAttribute('aria-pressed', String(mode === 'comfy'));
+    }
 
     renderCurrentTab();
   }
