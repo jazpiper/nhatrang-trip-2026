@@ -3716,7 +3716,10 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
     const heroSubtitleDesc = document.getElementById('heroSubtitleDesc');
     const heroTagsArea = document.getElementById('heroTagsArea');
 
-    if (searchInput) searchInput.placeholder = domain.placeholder;
+    if (searchInput) {
+      searchInput.placeholder = domain.placeholder;
+      searchInput.setAttribute('aria-label', domain.heroTitle + ' 검색');
+    }
     updateSearchClearBtn();
     if (heroTitle) heroTitle.textContent = domain.heroTitle;
     if (heroSubtitleDesc) heroSubtitleDesc.textContent = domain.heroSubtitle;
@@ -3896,6 +3899,16 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
           state.searchQuery = e.target.value.trim();
           renderCurrentTab();
         }, 200);
+      });
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && searchInput.value) {
+          e.stopPropagation();
+          searchInput.value = '';
+          updateSearchClearBtn();
+          state.searchQuery = '';
+          renderCurrentTab();
+          searchInput.blur();
+        }
       });
     }
 
@@ -4104,6 +4117,7 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
     buildModals();
     updateWishlistBadge();
     initEvents();
+    updateHeroAndToolbarUI(getDomain(state.currentTab));
     renderCards();
   }
 
