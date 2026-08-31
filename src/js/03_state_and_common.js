@@ -81,7 +81,10 @@
     const wishlistBtn = document.getElementById('wishlistToggleBtn');
     
     if (wishlistCount) wishlistCount.textContent = total;
-    if (wishlistBtn) wishlistBtn.classList.toggle('active', state.wishlistOnly);
+    if (wishlistBtn) {
+      wishlistBtn.classList.toggle('active', state.wishlistOnly);
+      wishlistBtn.setAttribute('aria-pressed', String(state.wishlistOnly));
+    }
   }
 
   function resetStateFilters() {

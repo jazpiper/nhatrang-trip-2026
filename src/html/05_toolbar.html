@@ -4,7 +4,7 @@
       <!-- Search Input -->
       <div class="search-capsule">
         <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="액티비티 검색 (예: 스노클링, 마사지, 인생샷, 아이리조트)..." />
+        <input type="text" id="searchInput" aria-label="🤿 액티비티 검색" placeholder="액티비티 검색 (예: 스노클링, 마사지, 인생샷, 아이리조트)..." />
         <button class="search-clear-btn" id="searchClearBtn" title="검색어 지우기" aria-label="검색어 지우기">✕</button>
       </div>
 
@@ -106,10 +106,10 @@
         </select>
 
         <div id="viewToggleButtons">
-          <button class="view-toggle-btn active" id="viewListBtn" title="정보 위주 리스트 뷰">
+          <button class="view-toggle-btn active" id="viewListBtn" title="정보 위주 리스트 뷰" aria-pressed="true">
             <span>☰</span> <span>리스트</span>
           </button>
-          <button class="view-toggle-btn" id="viewGridBtn" title="사진 위주 그리드 뷰">
+          <button class="view-toggle-btn" id="viewGridBtn" title="사진 위주 그리드 뷰" aria-pressed="false">
             <span>▦</span> <span>그리드</span>
           </button>
         </div>
