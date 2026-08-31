@@ -81,7 +81,7 @@
         </button>
 
         <!-- Wishlist Toggle -->
-        <button class="action-pill-btn wishlist-btn" id="wishlistToggleBtn" title="찜한 항목 모아보기">
+        <button class="action-pill-btn wishlist-btn" id="wishlistToggleBtn" title="찜한 항목 모아보기" aria-pressed="false">
           <span>♥</span>
           <span>찜</span>
           <span class="wishlist-count" id="wishlistCount">0</span>
@@ -474,17 +474,17 @@
         </select>
 
         <div id="viewToggleButtons">
-          <button class="view-toggle-btn active" id="viewListBtn" title="정보 위주 리스트 뷰">
+          <button class="view-toggle-btn active" id="viewListBtn" title="정보 위주 리스트 뷰" aria-pressed="true">
             <span>☰</span> <span>리스트</span>
           </button>
-          <button class="view-toggle-btn" id="viewGridBtn" title="사진 위주 그리드 뷰">
+          <button class="view-toggle-btn" id="viewGridBtn" title="사진 위주 그리드 뷰" aria-pressed="false">
             <span>▦</span> <span>그리드</span>
           </button>
         </div>
 
         <div id="densityToggleButtons">
-          <button class="view-toggle-btn active" id="densityTightBtn" title="한 화면에 더 많이">밀집</button>
-          <button class="view-toggle-btn" id="densityComfyBtn" title="여유 있게">넉넉</button>
+          <button class="view-toggle-btn active" id="densityTightBtn" title="한 화면에 더 많이" aria-pressed="true">밀집</button>
+          <button class="view-toggle-btn" id="densityComfyBtn" title="여유 있게" aria-pressed="false">넉넉</button>
         </div>
       </div>
     </div>

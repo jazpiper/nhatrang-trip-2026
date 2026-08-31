@@ -394,7 +394,10 @@
     const wishlistBtn = document.getElementById('wishlistToggleBtn');
     
     if (wishlistCount) wishlistCount.textContent = total;
-    if (wishlistBtn) wishlistBtn.classList.toggle('active', state.wishlistOnly);
+    if (wishlistBtn) {
+      wishlistBtn.classList.toggle('active', state.wishlistOnly);
+      wishlistBtn.setAttribute('aria-pressed', String(state.wishlistOnly));
+    }
   }
 
   function resetStateFilters() {
@@ -3752,8 +3755,14 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
 
     const listBtn = document.getElementById('viewListBtn');
     const gridBtn = document.getElementById('viewGridBtn');
-    if (listBtn) listBtn.classList.toggle('active', mode === 'list');
-    if (gridBtn) gridBtn.classList.toggle('active', mode === 'grid');
+    if (listBtn) {
+      listBtn.classList.toggle('active', mode === 'list');
+      listBtn.setAttribute('aria-pressed', String(mode === 'list'));
+    }
+    if (gridBtn) {
+      gridBtn.classList.toggle('active', mode === 'grid');
+      gridBtn.setAttribute('aria-pressed', String(mode === 'grid'));
+    }
 
     const densityToggle = document.getElementById('densityToggleButtons');
     const showDensity = getDomain(state.currentTab).showViewToggle && mode === 'list';
@@ -3769,8 +3778,14 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
 
     const tightBtn = document.getElementById('densityTightBtn');
     const comfyBtn = document.getElementById('densityComfyBtn');
-    if (tightBtn) tightBtn.classList.toggle('active', mode === 'tight');
-    if (comfyBtn) comfyBtn.classList.toggle('active', mode === 'comfy');
+    if (tightBtn) {
+      tightBtn.classList.toggle('active', mode === 'tight');
+      tightBtn.setAttribute('aria-pressed', String(mode === 'tight'));
+    }
+    if (comfyBtn) {
+      comfyBtn.classList.toggle('active', mode === 'comfy');
+      comfyBtn.setAttribute('aria-pressed', String(mode === 'comfy'));
+    }
 
     renderCurrentTab();
   }
