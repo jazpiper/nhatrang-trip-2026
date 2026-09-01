@@ -4063,8 +4063,14 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
     if (sortSelect) sortSelect.value = 'recommended';
 
     DOMAINS.forEach(d => {
-      document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => b.classList.toggle('active', b.dataset[d.catAttr] === 'all'));
-      document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => b.classList.toggle('active', b.dataset[d.tagAttr] === 'all'));
+      const nav = document.getElementById(d.categoryNavId);
+      if (nav) {
+        nav.querySelectorAll('.category-item-btn').forEach(b => b.classList.toggle('active', b.dataset[d.catAttr] === 'all'));
+      }
+      const chips = document.getElementById(d.tagChipsId);
+      if (chips) {
+        chips.querySelectorAll('.tag-chip-btn').forEach(b => b.classList.toggle('active', b.dataset[d.tagAttr] === 'all'));
+      }
     });
 
     updateWishlistBadge();
