@@ -269,7 +269,7 @@
   }
 
   function initFilterEvents() {
-    // Category Buttons
+    // Category & Tag Buttons
     DOMAINS.forEach(d => {
       document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(btn => {
         btn.addEventListener('click', () => {
@@ -279,10 +279,7 @@
           d.render();
         });
       });
-    });
 
-    // Tag Buttons
-    DOMAINS.forEach(d => {
       document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => b.classList.remove('active'));
@@ -366,6 +363,12 @@
       modalEl?.addEventListener('click', (e) => {
         if (e.target === modalEl) d.closeModal();
       });
+
+      if (d.copyAddressBtnId) {
+        document.getElementById(d.copyAddressBtnId)?.addEventListener('click', (e) => {
+          if (state[d.activeModalField]) copyAddress(state[d.activeModalField].addressVi, e.currentTarget);
+        });
+      }
     });
 
     // Notes Auto-save Handlers
@@ -391,14 +394,6 @@
           }
         }
         d.render();
-      });
-    });
-
-    // Copy Address Handlers
-    DOMAINS.forEach(d => {
-      if (!d.copyAddressBtnId) return;
-      document.getElementById(d.copyAddressBtnId)?.addEventListener('click', (e) => {
-        if (state[d.activeModalField]) copyAddress(state[d.activeModalField].addressVi, e.currentTarget);
       });
     });
   }
