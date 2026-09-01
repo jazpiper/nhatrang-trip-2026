@@ -2,11 +2,26 @@ name: Jules Autonomous Dev Pipeline
 
 on:
   issues:
-    types: [labeled]
+    types: [opened, labeled]
+  workflow_dispatch:
+    inputs:
+      task_title:
+        description: 'Task Title'
+        required: true
+        default: 'Jules Automated Task'
+      task_prompt:
+        description: 'Task Prompt (instructions for Jules)'
+        required: true
+        default: 'Perform general code cleanup and verify project consistency'
 
 jobs:
   run-jules:
-    if: github.event.label.name == 'jules-auto'
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' && (
+        github.event.label.name == 'jules-auto' ||
+        contains(github.event.issue.labels.*.name, 'jules-auto')
+      ))
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -29,13 +44,13 @@ jobs:
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
           JULES_REPO_SOURCE: "sources/github-${{ github.repository_owner }}-${{ github.event.repository.name }}"
-          TASK_PROMPT: "${{ github.event.issue.title }}\n\n${{ github.event.issue.body }}"
-          TASK_TITLE: "Issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}"
+          TASK_PROMPT: ${{ github.event.inputs.task_prompt || format('{0}\n\n{1}', github.event.issue.title, github.event.issue.body) }}
+          TASK_TITLE: ${{ github.event.inputs.task_title || format('Issue #{0}: {1}', github.event.issue.number, github.event.issue.title) }}
         run: |
           python .github/scripts/jules_trigger.py
 
       - name: Post Comment on Issue
-        if: always()
+        if: always() && github.event_name == 'issues'
         uses: actions/github-script@v7
         with:
           script: |
