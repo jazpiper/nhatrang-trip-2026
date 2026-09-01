@@ -3914,14 +3914,15 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
 
   function updateDomainVisibility(tab) {
     DOMAINS.forEach(d => {
+      const isMatch = d.key === tab;
       const nav = document.getElementById(d.categoryNavId);
-      if (nav) nav.style.display = d.key === tab ? 'block' : 'none';
+      if (nav) nav.style.display = isMatch ? 'block' : 'none';
 
       const chips = document.getElementById(d.tagChipsId);
-      if (chips) chips.style.display = d.key === tab ? 'flex' : 'none';
+      if (chips) chips.style.display = isMatch ? 'flex' : 'none';
 
       const section = document.getElementById(d.gridSectionId);
-      if (section) section.style.display = d.key === tab ? 'block' : 'none';
+      if (section) section.style.display = isMatch ? 'block' : 'none';
     });
   }
 
