@@ -43,9 +43,6 @@ jobs:
       - name: Trigger Jules API
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
-          JULES_REPO_SOURCE: "sources/github-${{ github.repository_owner }}-${{ github.event.repository.name }}"
-          TASK_PROMPT: ${{ github.event.inputs.task_prompt || format('{0}\n\n{1}', github.event.issue.title, github.event.issue.body) }}
-          TASK_TITLE: ${{ github.event.inputs.task_title || format('Issue #{0}: {1}', github.event.issue.number, github.event.issue.title) }}
         run: |
           python .github/scripts/jules_trigger.py
 
