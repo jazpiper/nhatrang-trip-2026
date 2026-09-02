@@ -384,29 +384,33 @@
     });
 
     // Notes Auto-save Handlers
+    const noteInputMap = new Map();
+    DOMAINS.forEach(d => {
+      (d.noteInputIds || []).forEach(id => noteInputMap.set(id, d));
+    });
+
     document.addEventListener('input', (e) => {
-      DOMAINS.forEach(d => {
-        const matchesInput = d.noteInputIds.some(id => e.target.matches(`#${id}`));
-        if (!matchesInput) return;
-        if (!state[d.activeModalField]) return;
-        const val = typeof e.target.value === 'string' ? e.target.value.slice(0, 5000) : '';
-        if (!state[d.notesField]) state[d.notesField] = Object.create(null);
-        state[d.notesField][state[d.activeModalField].id] = val;
-        const saved = saveToStorage(d.notesKey, state[d.notesField]);
-        let s = null;
-        for (const statusId of d.noteStatusIds) {
-          s = document.getElementById(statusId);
-          if (s) break;
+      if (!e.target || !e.target.id) return;
+      const d = noteInputMap.get(e.target.id);
+      if (!d) return;
+      if (!state[d.activeModalField]) return;
+      const val = typeof e.target.value === 'string' ? e.target.value.slice(0, 5000) : '';
+      if (!state[d.notesField]) state[d.notesField] = Object.create(null);
+      state[d.notesField][state[d.activeModalField].id] = val;
+      const saved = saveToStorage(d.notesKey, state[d.notesField]);
+      let s = null;
+      for (const statusId of d.noteStatusIds) {
+        s = document.getElementById(statusId);
+        if (s) break;
+      }
+      if (s) {
+        if (saved === false && hasStorage()) {
+          s.textContent = '⚠️ 저장 공간 부족';
+        } else {
+          s.textContent = '✓ 저장 완료';
         }
-        if (s) {
-          if (saved === false && hasStorage()) {
-            s.textContent = '⚠️ 저장 공간 부족';
-          } else {
-            s.textContent = '✓ 저장 완료';
-          }
-        }
-        d.render();
-      });
+      }
+      d.render();
     });
 
     // Copy Address Handlers
