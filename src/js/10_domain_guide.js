@@ -224,23 +224,9 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
       `;
   }
 
-  /** 롯데마트 기념품 시세표 섹션. 정찰가/시장 흥정가와 원화 환산을 나란히 둔다. */
-  function guideSouvenirMatrixHTML(matrix, souvenirs) {
-    return `
-        <section class="guide-section-block" id="souvenirsGuidePanel">
-          <div class="guide-section-header">
-            <div class="guide-header-flex-row">
-              <div>
-                <h2 class="guide-section-title">🛒 롯데마트 Top 30 쇼핑 시세표</h2>
-                <p class="guide-section-desc">정찰제 마트 공식가 vs 담시장·야시장 흥정 목표가 & 정품 구별법 (총 30개 품목)</p>
-              </div>
-              <span class="mini-tag mini-tag-info">
-                검색 일치: ${souvenirs.length}개 품목
-              </span>
-            </div>
-          </div>
-
-          <!-- 30 Souvenir Items Comparison Table -->
+  /** 30개 기념품 시세표 비교 테이블 HTML 생성 */
+  function guideSouvenirsTableHTML(souvenirs) {
+    return `<!-- 30 Souvenir Items Comparison Table -->
           <div class="souvenirs-matrix-wrap">
             <table class="souvenirs-table">
               <thead>
@@ -294,21 +280,27 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
                 }).join('')}
               </tbody>
             </table>
-          </div>
+          </div>`;
+  }
 
-          <!-- Bargaining Tips Callout Box -->
+  /** 시장 흥정 팁 콜아웃 박스 HTML 생성 */
+  function guideBargainingTipsHTML(bargainingTips) {
+    return `<!-- Bargaining Tips Callout Box -->
           <div class="bargaining-guide-box">
             <h3 class="guide-callout-title guide-callout-title-warn">
-              🏷️ ${escapeHtml(matrix.bargainingTips.marketName)} 실전 5단계 흥정 전략
+              🏷️ ${escapeHtml(bargainingTips.marketName)} 실전 5단계 흥정 전략
             </h3>
             <ul class="bargaining-tips-list">
-              ${matrix.bargainingTips.coreStrategy.map(st => `
+              ${bargainingTips.coreStrategy.map(st => `
                 <li>${escapeHtml(st)}</li>
               `).join('')}
             </ul>
-          </div>
+          </div>`;
+  }
 
-          <!-- Customs Quarantine Guide Box -->
+  /** 세관 및 농림축산검역 안내 박스 HTML 생성 */
+  function guideCustomsQuarantineHTML(customsQuarantine) {
+    return `<!-- Customs Quarantine Guide Box -->
           <div class="customs-guide-box">
             <h3 class="guide-callout-title guide-callout-title-info">
               ✈️ 대한민국 관세청 면세 한도 & 농림축산검역본부 반입 규정
@@ -317,16 +309,16 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
               <div class="customs-info-card customs-info-card-info">
                 <strong class="customs-info-label-info">💵 1인 면세 한도:</strong>
                 <ul class="customs-info-list">
-                  <li>기본 면세: 미화 <strong>${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.basicAllowanceUsd)}</strong></li>
-                  <li>주류: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.alcoholLimit)}</li>
-                  <li>담배: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.tobaccoLimit)}</li>
-                  <li>향수: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.perfumeLimit)}</li>
+                  <li>기본 면세: 미화 <strong>${escapeHtml(customsQuarantine.dutyFreeAllowance.basicAllowanceUsd)}</strong></li>
+                  <li>주류: ${escapeHtml(customsQuarantine.dutyFreeAllowance.alcoholLimit)}</li>
+                  <li>담배: ${escapeHtml(customsQuarantine.dutyFreeAllowance.tobaccoLimit)}</li>
+                  <li>향수: ${escapeHtml(customsQuarantine.dutyFreeAllowance.perfumeLimit)}</li>
                 </ul>
               </div>
               <div class="customs-info-card customs-info-card-danger">
                 <strong class="customs-info-label-danger">🚫 반입 전면 금지 (검역 과태료):</strong>
                 <ul class="customs-info-list customs-info-list-danger">
-                  ${matrix.customsQuarantine.prohibitedItems.map(p => `
+                  ${customsQuarantine.prohibitedItems.map(p => `
                     <li>${escapeHtml(p)}</li>
                   `).join('')}
                 </ul>
@@ -334,13 +326,36 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
               <div class="customs-info-card customs-info-card-success">
                 <strong class="customs-info-label-success">✅ 반입 가능 품목:</strong>
                 <ul class="customs-info-list customs-info-list-success">
-                  ${matrix.customsQuarantine.permittedItems.map(p => `
+                  ${customsQuarantine.permittedItems.map(p => `
                     <li>${escapeHtml(p)}</li>
                   `).join('')}
                 </ul>
               </div>
             </div>
+          </div>`;
+  }
+
+  /** 롯데마트 기념품 시세표 섹션. 정찰가/시장 흥정가와 원화 환산을 나란히 둔다. */
+  function guideSouvenirMatrixHTML(matrix, souvenirs) {
+    return `
+        <section class="guide-section-block" id="souvenirsGuidePanel">
+          <div class="guide-section-header">
+            <div class="guide-header-flex-row">
+              <div>
+                <h2 class="guide-section-title">🛒 롯데마트 Top 30 쇼핑 시세표</h2>
+                <p class="guide-section-desc">정찰제 마트 공식가 vs 담시장·야시장 흥정 목표가 & 정품 구별법 (총 30개 품목)</p>
+              </div>
+              <span class="mini-tag mini-tag-info">
+                검색 일치: ${souvenirs.length}개 품목
+              </span>
+            </div>
           </div>
+
+          ${guideSouvenirsTableHTML(souvenirs)}
+
+          ${guideBargainingTipsHTML(matrix.bargainingTips)}
+
+          ${guideCustomsQuarantineHTML(matrix.customsQuarantine)}
         </section>
       `;
   }
