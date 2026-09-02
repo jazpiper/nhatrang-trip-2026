@@ -132,30 +132,42 @@
       .replace(/'/g, '&#039;');
   }
 
+  const ENTITY_MAP = {
+    'colon': ':',
+    'sol': '/',
+    'bsol': '\\',
+    'tab': '',
+    'newline': '',
+    'amp': '&',
+    'quot': '"',
+    'apos': "'",
+    'lt': '<',
+    'gt': '>'
+  };
+
+  const ENTITY_REGEX = /&(?:(colon|sol|bsol|tab|newline|amp|quot|apos|lt|gt)|#x([0-9a-f]+)|#([0-9]+));?/gi;
+
   function decodeHtmlEntities(str) {
     if (!str || typeof str !== 'string') return '';
+    if (str.indexOf('&') === -1) return str;
+
     let decoded = str;
-    const namedMap = {
-      '&colon;': ':',
-      '&sol;': '/',
-      '&bsol;': '\\',
-      '&tab;': '',
-      '&newline;': '',
-      '&amp;': '&',
-      '&quot;': '"',
-      '&apos;': "'",
-      '&lt;': '<',
-      '&gt;': '>'
-    };
     for (let i = 0; i < 5; i++) {
+      if (decoded.indexOf('&') === -1) break;
       const prev = decoded;
-      decoded = decoded
-        .replace(/&(?:colon|sol|bsol|tab|newline|amp|quot|apos|lt|gt);?/gi, m => {
-          const key = m.toLowerCase().endsWith(';') ? m.toLowerCase() : m.toLowerCase() + ';';
-          return namedMap[key] !== undefined ? namedMap[key] : '';
-        })
-        .replace(/&#x([0-9a-f]+);?/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16) || 0))
-        .replace(/&#([0-9]+);?/g, (_, dec) => String.fromCharCode(parseInt(dec, 10) || 0));
+      decoded = decoded.replace(ENTITY_REGEX, (m, name, hex, dec) => {
+        if (name) {
+          const val = ENTITY_MAP[name.toLowerCase()];
+          return val !== undefined ? val : m;
+        }
+        if (hex) {
+          return String.fromCharCode(parseInt(hex, 16) || 0);
+        }
+        if (dec) {
+          return String.fromCharCode(parseInt(dec, 10) || 0);
+        }
+        return m;
+      });
       if (decoded === prev) break;
     }
     return decoded;
