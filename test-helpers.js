@@ -13,7 +13,9 @@
  * ============================================================================
  */
 
+const assert = require('assert');
 const { TestRunner } = require('./test-harness.js');
+const { installDom, uninstallDom } = require('./test-dom-stub.js');
 const app = require('./js/app.js');
 
 const runner = new TestRunner({
@@ -76,6 +78,64 @@ runner.test('formatVND handles floating point numbers correctly (e.g. 1234.56)',
 
 runner.test('formatVND handles negative numbers correctly (e.g. -5000)', () => {
   runner.assertEqual(app.formatVND(-5000), (-5000).toLocaleString() + ' VND');
+});
+
+
+runner.suite('fallbackCopy Error Path & Exception Handling');
+
+runner.test('fallbackCopy prompts user with address text when execCommand throws an error', () => {
+  const dom = installDom();
+  let promptCalledWith = null;
+  globalThis.prompt = (msg, text) => {
+    promptCalledWith = { msg, text };
+  };
+  document.execCommand = () => {
+    throw new Error('execCommand copy disabled or blocked');
+  };
+
+  app.fallbackCopy('https://maps.google.com/?q=NhaTrang', null);
+
+  assert.deepStrictEqual(promptCalledWith, {
+    msg: '주소를 복사하세요:',
+    text: 'https://maps.google.com/?q=NhaTrang'
+  });
+  runner.assertEqual(document.body.children.length, 0, 'Textarea element should be removed from DOM after error');
+  uninstallDom();
+});
+
+runner.suite('fallbackCopy Success Path');
+
+runner.test('fallbackCopy invokes callback when execCommand succeeds', () => {
+  const dom = installDom();
+  let callbackInvoked = false;
+  document.execCommand = (cmd) => {
+    if (cmd === 'copy') return true;
+    throw new Error('Unexpected command');
+  };
+
+  app.fallbackCopy('https://maps.google.com/?q=NhaTrang', () => {
+    callbackInvoked = true;
+  });
+
+  runner.assertEqual(callbackInvoked, true);
+  runner.assertEqual(document.body.children.length, 0, 'Textarea element should be removed from DOM after success');
+  uninstallDom();
+});
+
+runner.test('fallbackCopy displays default toast notification when no callback is provided', () => {
+  const dom = installDom();
+  document.execCommand = (cmd) => {
+    if (cmd === 'copy') return true;
+    throw new Error('Unexpected command');
+  };
+
+  app.fallbackCopy('https://maps.google.com/?q=NhaTrang');
+
+  const toastContainer = document.getElementById('toastContainer');
+  runner.assertTruthy(!!toastContainer, 'Toast container should be created');
+  runner.assertEqual(toastContainer.children.length, 1);
+  runner.assertEqual(toastContainer.children[0].textContent, '📋 주소가 복사되었습니다!');
+  uninstallDom();
 });
 
 runner.summary();
