@@ -144,9 +144,10 @@
     const tag = state[cfg.tagField];
     const q = state.searchQuery ? state.searchQuery.toLowerCase() : '';
     const wish = state[cfg.wishField] || [];
+    const wishSet = state.wishlistOnly ? (wish instanceof Set ? wish : new Set(wish)) : null;
 
     return cfg.source.filter(item => {
-      if (state.wishlistOnly && !wish.includes(item.id)) return false;
+      if (state.wishlistOnly && wishSet && !wishSet.has(item.id)) return false;
       if (cat && cat !== 'all' && !cfg.categoryMatch(item, cat)) return false;
       if (tag && tag !== 'all' && !cfg.tagMatch(item, tag)) return false;
       if (q && !cfg.searchMatch(item, q)) return false;
