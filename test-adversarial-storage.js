@@ -278,6 +278,26 @@ runChallenge('Collisions', 'Saving and reloading state containing prototype coll
 // ============================================================================
 console.log('\n--- SECTION 3: MALFORMED STORAGE PAYLOADS & TYPE CONFUSION ---');
 
+runChallenge('MalformedData', 'localStorage.getItem throwing exceptions is caught gracefully and returns sanitized fallback', () => {
+  const origGetItem = mockStorage.getItem;
+  try {
+    mockStorage.getItem = function() {
+      throw new Error('SecurityError: The operation is insecure.');
+    };
+
+    const fallbackObj = { defaultNote: 'fallback_value' };
+    const resultObj = app.loadFromStorage('nha_trang_notes', fallbackObj);
+    assert.strictEqual(resultObj.defaultNote, 'fallback_value');
+    assert.strictEqual(Object.getPrototypeOf(resultObj), null);
+
+    const fallbackArr = ['fallback_item'];
+    const resultArr = app.loadFromStorage('nha_trang_wishlist', fallbackArr);
+    assert.deepStrictEqual(resultArr, ['fallback_item']);
+  } finally {
+    mockStorage.getItem = origGetItem;
+  }
+});
+
 runChallenge('MalformedData', 'Corrupted JSON strings in storage fall back gracefully without uncaught exceptions', () => {
   const badJSONs = [
     '{ invalid json',
