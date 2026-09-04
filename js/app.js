@@ -4091,12 +4091,12 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
     if (sortSelect) sortSelect.value = 'recommended';
 
     DOMAINS.forEach(d => {
-      document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => {
+          catBtns.forEach(b => {
         const isActive = b.dataset[d.catAttr] === 'all';
         b.classList.toggle('active', isActive);
         b.setAttribute('aria-pressed', String(isActive));
       });
-      document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => {
+          tagBtns.forEach(b => {
         const isActive = b.dataset[d.tagAttr] === 'all';
         b.classList.toggle('active', isActive);
         b.setAttribute('aria-pressed', String(isActive));
@@ -4145,9 +4145,10 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
   function initFilterEvents() {
     // Category & Tag Buttons
     DOMAINS.forEach(d => {
-      document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(btn => {
+      const catBtns = document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`);
+      catBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => {
+          catBtns.forEach(b => {
             const isActive = b === btn;
             b.classList.toggle('active', isActive);
             b.setAttribute('aria-pressed', String(isActive));
@@ -4157,9 +4158,10 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
         });
       });
 
-      document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(btn => {
+      const tagBtns = document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`);
+      tagBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => {
+          tagBtns.forEach(b => {
             const isActive = b === btn;
             b.classList.toggle('active', isActive);
             b.setAttribute('aria-pressed', String(isActive));
