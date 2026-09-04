@@ -393,6 +393,36 @@ runChallenge('MalformedData', 'Non-namespaced keys are strictly rejected on both
 // ============================================================================
 console.log('\n--- SECTION 4: LOCALSTORAGE QUOTAEXCEEDEDERROR & UI RECOVERY ---');
 
+runChallenge('GenericError', 'saveToStorage returns false and logs warning when setItem throws a generic error', () => {
+  const origSetItem = mockStorage.setItem;
+  const origWarn = console.warn;
+  let warnLogged = false;
+  let loggedKeyMsg = '';
+  let loggedErr = null;
+
+  console.warn = (msg, err) => {
+    warnLogged = true;
+    loggedKeyMsg = msg;
+    loggedErr = err;
+  };
+
+  const genericErr = new Error('Generic storage failure');
+  mockStorage.setItem = () => {
+    throw genericErr;
+  };
+
+  try {
+    const result = app.saveToStorage('nha_trang_notes', { testKey: 'testVal' });
+    assert.strictEqual(result, false, 'saveToStorage must return false when setItem throws generic error');
+    assert.strictEqual(warnLogged, true, 'console.warn must be called on setItem generic error');
+    assert.ok(loggedKeyMsg.includes('nha_trang_notes'), 'Warning message must reference the storage key');
+    assert.strictEqual(loggedErr, genericErr, 'Logged error must match thrown error');
+  } finally {
+    mockStorage.setItem = origSetItem;
+    console.warn = origWarn;
+  }
+});
+
 runChallenge('QuotaExhaustion', 'saveToStorage returns false when localStorage throws QuotaExceededError', () => {
   mockStorage.quotaError = true;
 
