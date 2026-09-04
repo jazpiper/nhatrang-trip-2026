@@ -78,4 +78,78 @@ runner.test('formatVND handles negative numbers correctly (e.g. -5000)', () => {
   runner.assertEqual(app.formatVND(-5000), (-5000).toLocaleString() + ' VND');
 });
 
+
+runner.suite("decodeHtmlEntities Invalid and Falsy Inputs");
+
+runner.test("decodeHtmlEntities returns empty string for null/undefined/falsy", () => {
+  runner.assertEqual(app.decodeHtmlEntities(null), "");
+  runner.assertEqual(app.decodeHtmlEntities(undefined), "");
+  runner.assertEqual(app.decodeHtmlEntities(""), "");
+  runner.assertEqual(app.decodeHtmlEntities(0), "");
+  runner.assertEqual(app.decodeHtmlEntities(false), "");
+});
+
+runner.test("decodeHtmlEntities returns empty string for non-string inputs", () => {
+  runner.assertEqual(app.decodeHtmlEntities(123), "");
+  runner.assertEqual(app.decodeHtmlEntities({ key: "val" }), "");
+  runner.assertEqual(app.decodeHtmlEntities(["a", "b"]), "");
+});
+
+runner.suite("decodeHtmlEntities Plain Strings and Named Entities");
+
+runner.test("decodeHtmlEntities returns unchanged string if no ampersand present", () => {
+  runner.assertEqual(app.decodeHtmlEntities("Hello World 123!"), "Hello World 123!");
+});
+
+runner.test("decodeHtmlEntities decodes standard named entities", () => {
+  runner.assertEqual(app.decodeHtmlEntities("&amp;"), "&");
+  runner.assertEqual(app.decodeHtmlEntities("&lt;"), "<");
+  runner.assertEqual(app.decodeHtmlEntities("&gt;"), ">");
+  runner.assertEqual(app.decodeHtmlEntities("&quot;"), "\"");
+  runner.assertEqual(app.decodeHtmlEntities("&apos;"), "'");
+  runner.assertEqual(app.decodeHtmlEntities("&colon;"), ":");
+  runner.assertEqual(app.decodeHtmlEntities("&sol;"), "/");
+  runner.assertEqual(app.decodeHtmlEntities("&bsol;"), "\\");
+});
+
+runner.test("decodeHtmlEntities decodes whitespace named entities tab/newline to empty string", () => {
+  runner.assertEqual(app.decodeHtmlEntities("a&tab;b"), "ab");
+  runner.assertEqual(app.decodeHtmlEntities("a&newline;b"), "ab");
+});
+
+runner.test("decodeHtmlEntities handles case-insensitivity and optional trailing semicolons", () => {
+  runner.assertEqual(app.decodeHtmlEntities("&AMP;"), "&");
+  runner.assertEqual(app.decodeHtmlEntities("&Lt;"), "<");
+  runner.assertEqual(app.decodeHtmlEntities("&quot"), "\"");
+  runner.assertEqual(app.decodeHtmlEntities("&colon"), ":");
+});
+
+runner.suite("decodeHtmlEntities Numeric Entities and Edge Cases");
+
+runner.test("decodeHtmlEntities decodes decimal numeric entities", () => {
+  runner.assertEqual(app.decodeHtmlEntities("&#38;"), "&");
+  runner.assertEqual(app.decodeHtmlEntities("&#60;"), "<");
+  runner.assertEqual(app.decodeHtmlEntities("&#62;"), ">");
+  runner.assertEqual(app.decodeHtmlEntities("&#58;"), ":");
+});
+
+runner.test("decodeHtmlEntities decodes hexadecimal numeric entities", () => {
+  runner.assertEqual(app.decodeHtmlEntities("&#x26;"), "&");
+  runner.assertEqual(app.decodeHtmlEntities("&#X3C;"), "<");
+  runner.assertEqual(app.decodeHtmlEntities("&#x3E;"), ">");
+  runner.assertEqual(app.decodeHtmlEntities("&#x3A;"), ":");
+});
+
+runner.test("decodeHtmlEntities handles recursive / multi-pass entity decoding", () => {
+  runner.assertEqual(app.decodeHtmlEntities("&amp;amp;"), "&");
+  runner.assertEqual(app.decodeHtmlEntities("&amp;lt;"), "<");
+  runner.assertEqual(app.decodeHtmlEntities("&#38;#60;"), "<");
+});
+
+runner.test("decodeHtmlEntities preserves unmapped or invalid entity patterns", () => {
+  runner.assertEqual(app.decodeHtmlEntities("&unknown;"), "&unknown;");
+  runner.assertEqual(app.decodeHtmlEntities("&123;"), "&123;");
+  runner.assertEqual(app.decodeHtmlEntities("foo & bar"), "foo & bar");
+});
+
 runner.summary();

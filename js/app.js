@@ -4423,6 +4423,7 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
       state,
       resetStateFilters,
       escapeHtml,
+      decodeHtmlEntities,
       sanitizeUrl,
       sanitizeImageUrl,
       formatVND,
