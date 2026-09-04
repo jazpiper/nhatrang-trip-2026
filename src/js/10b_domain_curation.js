@@ -54,10 +54,6 @@
     });
   }
 
-  function getFilteredCuration() {
-    return getFilteredCurations();
-  }
-
   function getDomainEmoji(domain) {
     const emojis = {
       spa: '💆',
