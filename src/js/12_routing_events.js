@@ -280,9 +280,10 @@
   function initFilterEvents() {
     // Category & Tag Buttons
     DOMAINS.forEach(d => {
-      document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(btn => {
+      const categoryBtns = document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`);
+      categoryBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => {
+          categoryBtns.forEach(b => {
             const isActive = b === btn;
             b.classList.toggle('active', isActive);
             b.setAttribute('aria-pressed', String(isActive));
@@ -292,9 +293,10 @@
         });
       });
 
-      document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(btn => {
+      const tagChipBtns = document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`);
+      tagChipBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => {
+          tagChipBtns.forEach(b => {
             const isActive = b === btn;
             b.classList.toggle('active', isActive);
             b.setAttribute('aria-pressed', String(isActive));
