@@ -2825,10 +2825,13 @@
 
     const q = (state.searchQuery || '').trim().toLowerCase();
     if (q) {
-      const tokens = q.split(/\s+/).filter(Boolean);
+      const tokens = q.indexOf(' ') !== -1 ? q.split(/\s+/).filter(Boolean) : [q];
       list = list.filter(med => {
-        const text = `${med.brandName} ${med.activeIngredient} ${med.category} ${med.symptom} ${med.dosageKo} ${med.boxPhotoTip}`.toLowerCase();
-        return tokens.every(t => text.includes(t));
+        const text = (med.brandName + ' ' + med.activeIngredient + ' ' + med.category + ' ' + med.symptom + ' ' + med.dosageKo + ' ' + med.boxPhotoTip).toLowerCase();
+        for (let i = 0; i < tokens.length; i++) {
+          if (!text.includes(tokens[i])) return false;
+        }
+        return true;
       });
     }
 
