@@ -4469,6 +4469,7 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
       getFilteredSouvenirs,
       getFilteredPharmacyMeds,
       // Clipboard & UI helpers
+      showToast,
       copyAddress,
       fallbackCopy,
       // Storage & View helpers
