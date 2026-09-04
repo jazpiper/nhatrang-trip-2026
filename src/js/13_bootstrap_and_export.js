@@ -101,6 +101,7 @@
       getFilteredPharmacyMeds,
       // Clipboard & UI helpers
       copyAddress,
+      copyTextToClipboard,
       fallbackCopy,
       // Storage & View helpers
       sanitizeStorageData,

@@ -185,12 +185,19 @@
       }
     };
 
+    copyTextToClipboard(addressText, notifySuccess);
+  }
+
+
+
+  function copyTextToClipboard(text, callback) {
+    if (!text) return;
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(addressText).then(notifySuccess).catch(() => {
-        fallbackCopy(addressText, notifySuccess);
+      navigator.clipboard.writeText(text).then(callback).catch(() => {
+        fallbackCopy(text, callback);
       });
     } else {
-      fallbackCopy(addressText, notifySuccess);
+      fallbackCopy(text, callback);
     }
   }
 

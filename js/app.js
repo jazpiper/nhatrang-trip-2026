@@ -296,12 +296,19 @@
       }
     };
 
+    copyTextToClipboard(addressText, notifySuccess);
+  }
+
+
+
+  function copyTextToClipboard(text, callback) {
+    if (!text) return;
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(addressText).then(notifySuccess).catch(() => {
-        fallbackCopy(addressText, notifySuccess);
+      navigator.clipboard.writeText(text).then(callback).catch(() => {
+        fallbackCopy(text, callback);
       });
     } else {
-      fallbackCopy(addressText, notifySuccess);
+      fallbackCopy(text, callback);
     }
   }
 
@@ -3334,13 +3341,7 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
             span.textContent = '✓ 복사 완료!';
             setTimeout(() => { span.textContent = origText; }, 2000);
           };
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(notifySuccess).catch(() => {
-              fallbackCopy(text, notifySuccess);
-            });
-          } else {
-            fallbackCopy(text, notifySuccess);
-          }
+          copyTextToClipboard(text, notifySuccess);
         }
       });
     });
@@ -3376,13 +3377,7 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
           span.textContent = '✓ 복사 완료!';
           setTimeout(() => { span.textContent = origText; }, 2000);
         };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(textToCopy).then(notifySuccess).catch(() => {
-            fallbackCopy(textToCopy, notifySuccess);
-          });
-        } else {
-          fallbackCopy(textToCopy, notifySuccess);
-        }
+        copyTextToClipboard(textToCopy, notifySuccess);
       };
     }
 
@@ -4470,6 +4465,7 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
       getFilteredPharmacyMeds,
       // Clipboard & UI helpers
       copyAddress,
+      copyTextToClipboard,
       fallbackCopy,
       // Storage & View helpers
       sanitizeStorageData,

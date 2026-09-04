@@ -78,4 +78,85 @@ runner.test('formatVND handles negative numbers correctly (e.g. -5000)', () => {
   runner.assertEqual(app.formatVND(-5000), (-5000).toLocaleString() + ' VND');
 });
 
+
+
+runner.suite("copyTextToClipboard Helper Tests");
+
+runner.test("copyTextToClipboard exists as exported function", () => {
+  runner.assertEqual(typeof app.copyTextToClipboard, "function");
+});
+
+runner.test("copyTextToClipboard does nothing if text is empty or falsy", () => {
+  let called = false;
+  app.copyTextToClipboard("", () => { called = true; });
+  app.copyTextToClipboard(null, () => { called = true; });
+  runner.assertEqual(called, false);
+});
+
+runner.test("copyTextToClipboard invokes navigator.clipboard.writeText if available", async () => {
+  let writtenText = null;
+  let callbackCalled = false;
+
+  // Backup navigator
+  const origNav = global.navigator;
+  global.navigator = {
+    clipboard: {
+      writeText: (txt) => {
+        writtenText = txt;
+        return Promise.resolve();
+      }
+    }
+  };
+
+  app.copyTextToClipboard("Hello World", () => { callbackCalled = true; });
+
+  // wait for promise tick
+  await new Promise(r => setTimeout(r, 10));
+
+  runner.assertEqual(writtenText, "Hello World");
+  runner.assertEqual(callbackCalled, true);
+
+  // Restore navigator
+  global.navigator = origNav;
+});
+
+runner.test("copyTextToClipboard falls back to fallbackCopy if writeText rejects", async () => {
+  let callbackCalled = false;
+  const origNav = global.navigator;
+  const origDocument = global.document;
+
+  global.navigator = {
+    clipboard: {
+      writeText: () => Promise.reject(new Error("Permission denied"))
+    }
+  };
+
+  let createdElement = null;
+  global.document = {
+    createElement: (tag) => {
+      createdElement = {
+        value: "",
+        style: {},
+        select: () => {},
+        remove: () => {}
+      };
+      return createdElement;
+    },
+    body: {
+      appendChild: () => {}
+    },
+    execCommand: () => true
+  };
+
+  app.copyTextToClipboard("Fallback Text", () => { callbackCalled = true; });
+
+  await new Promise(r => setTimeout(r, 10));
+
+  runner.assertEqual(createdElement.value, "Fallback Text");
+  runner.assertEqual(callbackCalled, true);
+
+  global.navigator = origNav;
+  global.document = origDocument;
+});
+
 runner.summary();

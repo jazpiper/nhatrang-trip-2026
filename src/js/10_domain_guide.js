@@ -554,13 +554,7 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
             span.textContent = '✓ 복사 완료!';
             setTimeout(() => { span.textContent = origText; }, 2000);
           };
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(notifySuccess).catch(() => {
-              fallbackCopy(text, notifySuccess);
-            });
-          } else {
-            fallbackCopy(text, notifySuccess);
-          }
+          copyTextToClipboard(text, notifySuccess);
         }
       });
     });
@@ -596,13 +590,7 @@ ${guideMotorbikeRentalHTML(transport.motorbikeRental)}
           span.textContent = '✓ 복사 완료!';
           setTimeout(() => { span.textContent = origText; }, 2000);
         };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(textToCopy).then(notifySuccess).catch(() => {
-            fallbackCopy(textToCopy, notifySuccess);
-          });
-        } else {
-          fallbackCopy(textToCopy, notifySuccess);
-        }
+        copyTextToClipboard(textToCopy, notifySuccess);
       };
     }
 
