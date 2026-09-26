@@ -132,30 +132,42 @@
       .replace(/'/g, '&#039;');
   }
 
+  const ENTITY_MAP = {
+    'colon': ':',
+    'sol': '/',
+    'bsol': '\\',
+    'tab': '',
+    'newline': '',
+    'amp': '&',
+    'quot': '"',
+    'apos': "'",
+    'lt': '<',
+    'gt': '>'
+  };
+
+  const ENTITY_REGEX = /&(?:(colon|sol|bsol|tab|newline|amp|quot|apos|lt|gt)|#x([0-9a-f]+)|#([0-9]+));?/gi;
+
   function decodeHtmlEntities(str) {
     if (!str || typeof str !== 'string') return '';
+    if (str.indexOf('&') === -1) return str;
+
     let decoded = str;
-    const namedMap = {
-      '&colon;': ':',
-      '&sol;': '/',
-      '&bsol;': '\\',
-      '&tab;': '',
-      '&newline;': '',
-      '&amp;': '&',
-      '&quot;': '"',
-      '&apos;': "'",
-      '&lt;': '<',
-      '&gt;': '>'
-    };
     for (let i = 0; i < 5; i++) {
+      if (decoded.indexOf('&') === -1) break;
       const prev = decoded;
-      decoded = decoded
-        .replace(/&(?:colon|sol|bsol|tab|newline|amp|quot|apos|lt|gt);?/gi, m => {
-          const key = m.toLowerCase().endsWith(';') ? m.toLowerCase() : m.toLowerCase() + ';';
-          return namedMap[key] !== undefined ? namedMap[key] : '';
-        })
-        .replace(/&#x([0-9a-f]+);?/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16) || 0))
-        .replace(/&#([0-9]+);?/g, (_, dec) => String.fromCharCode(parseInt(dec, 10) || 0));
+      decoded = decoded.replace(ENTITY_REGEX, (m, name, hex, dec) => {
+        if (name) {
+          const val = ENTITY_MAP[name.toLowerCase()];
+          return val !== undefined ? val : m;
+        }
+        if (hex) {
+          return String.fromCharCode(parseInt(hex, 16) || 0);
+        }
+        if (dec) {
+          return String.fromCharCode(parseInt(dec, 10) || 0);
+        }
+        return m;
+      });
       if (decoded === prev) break;
     }
     return decoded;
@@ -246,11 +258,6 @@
     }
 
     return fallback;
-  }
-
-  function getIntensityStars(level) {
-    const total = 5;
-    return '⚡'.repeat(Math.min(level || 3, total));
   }
 
   function showToast(msg, duration = 2500) {
@@ -348,6 +355,10 @@
     spaCategory: 'all',
     spaTag: 'all',
 
+    // Curation Filter State
+    curationCategory: 'all',
+    curationTag: 'all',
+
     // Guide Hub Filter State
     guideCategory: 'all',
     guideTag: 'all',
@@ -399,7 +410,10 @@
     const wishlistBtn = document.getElementById('wishlistToggleBtn');
     
     if (wishlistCount) wishlistCount.textContent = total;
-    if (wishlistBtn) wishlistBtn.classList.toggle('active', state.wishlistOnly);
+    if (wishlistBtn) {
+      wishlistBtn.classList.toggle('active', state.wishlistOnly);
+      wishlistBtn.setAttribute('aria-pressed', String(state.wishlistOnly));
+    }
   }
 
   function resetStateFilters() {
@@ -417,6 +431,8 @@
     state.shoppingTag = 'all';
     state.currencyCategory = 'all';
     state.currencyTag = 'all';
+    state.curationCategory = 'all';
+    state.curationTag = 'all';
     state.guideCategory = 'all';
     state.guideTag = 'all';
     state.searchQuery = '';
@@ -678,7 +694,7 @@
       const el = document.getElementById(f.id);
       if (!el) return;
       const v = typeof f.value === 'function' ? f.value(item) : item[f.value];
-      if (f.as === 'html') el.innerHTML = v == null ? '' : v;
+      if (f.as === 'html') el.innerHTML = v == null ? '' : escapeHtml(v);
       else if (f.as === 'src') el.src = sanitizeImageUrl(v == null ? '' : v);
       else if (f.as === 'href') el.href = sanitizeUrl(v == null ? '' : v);
       else el.textContent = v == null ? '' : v;
@@ -808,7 +824,6 @@
     }
     el.innerHTML = list.map(li => `<li><span class="bullet">✔</span> ${escapeHtml(li)}</li>`).join('');
   }
-
   // --- 4. Activities Domain Logic ---
   function activitiesTagMatch(item, tag) {
     const tagMap = {
@@ -2745,7 +2760,7 @@
             <strong>${escapeHtml(c.name || '')}</strong>
             ${c.description ? `<p class="course-desc">${escapeHtml(c.description)}</p>` : ''}
           </td>
-          <td class="course-time">${escapeHtml(c.durationMin || '-')}분</td>
+          <td class="course-time">${escapeHtml(c.durationMin != null ? String(c.durationMin) : '-')}분</td>
           <td class="course-vnd">${escapeHtml(Number(c.priceVnd || 0).toLocaleString())} VND</td>
           <td class="course-krw">약 ${escapeHtml(Number(c.priceKrw || Math.round((c.priceVnd || 0) * currentBenchmarkRate / 100)).toLocaleString())}원</td>
         </tr>
@@ -2824,15 +2839,8 @@
   // 걸쳐 전부 만들던 것을 섹션별 함수로 갈랐다. renderGuide는 카테고리 필터에
   // 따라 조립하고 이벤트를 바인딩하는 일만 한다.
 
-  /** 교통·그랩 가이드 섹션 (공항 이동, 택시 앱 비교, 근교 버스, 안전 수칙). */
-  function guideTransportHTML(transport) {
+  function guideAirportTableHTML(matrix) {
     return `
-        <section class="guide-section-block" id="transportGuidePanel">
-          <div class="guide-section-header">
-            <h2 class="guide-section-title">🚗 깜란공항 & 나트랑 시내 교통 완벽 가이드</h2>
-            <p class="guide-section-desc">공항 이동 요금표, 전기차 Xanh SM vs 그랩 vs 일반 택시 비교, 5대 사기 예방법</p>
-          </div>
-
           <!-- Airport Matrix Table -->
           <div class="airport-table-wrap">
             <table class="airport-table">
@@ -2847,7 +2855,7 @@
                 </tr>
               </thead>
               <tbody>
-                ${transport.airportMatrix.map(r => `
+                ${matrix.map(r => `
                   <tr>
                     <td><strong>${escapeHtml(r.routeKo)}</strong><div class="souv-name-vi">${escapeHtml(r.routeVi)}</div></td>
                     <td>${r.distanceKm}km<br><span class="label">(${escapeHtml(r.durationMins)})</span></td>
@@ -2859,60 +2867,66 @@
                 `).join('')}
               </tbody>
             </table>
-          </div>
+          </div>`;
+  }
 
+  function guideTaxiCompareHTML(comparison) {
+    return `
           <!-- 3-Way Taxi Comparison Grid -->
           <div class="taxi-compare-grid">
             <!-- Xanh SM EV -->
             <div class="taxi-compare-card taxi-card-accent-primary">
               <div class="taxi-card-header">
                 <div>
-                  <h3 class="taxi-card-name">⚡ ${escapeHtml(transport.taxiComparison.xanhSM.nameKo)}</h3>
-                  <div class="souv-name-vi">${escapeHtml(transport.taxiComparison.xanhSM.nameVi)}</div>
+                  <h3 class="taxi-card-name">⚡ ${escapeHtml(comparison.xanhSM.nameKo)}</h3>
+                  <div class="souv-name-vi">${escapeHtml(comparison.xanhSM.nameVi)}</div>
                 </div>
                 <span class="taxi-card-tag taxi-card-tag-primary">추천 1위</span>
               </div>
-              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(transport.taxiComparison.xanhSM.pros)}</div>
-              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(transport.taxiComparison.xanhSM.cons)}</div>
-              <div class="taxi-hotline">📞 콜센터: ${escapeHtml(transport.taxiComparison.xanhSM.hotline)}</div>
+              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(comparison.xanhSM.pros)}</div>
+              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(comparison.xanhSM.cons)}</div>
+              <div class="taxi-hotline">📞 콜센터: ${escapeHtml(comparison.xanhSM.hotline)}</div>
             </div>
 
             <!-- Grab -->
             <div class="taxi-compare-card taxi-card-accent-success">
               <div class="taxi-card-header">
                 <div>
-                  <h3 class="taxi-card-name">📱 ${escapeHtml(transport.taxiComparison.grab.nameKo)}</h3>
-                  <div class="souv-name-vi">${escapeHtml(transport.taxiComparison.grab.nameVi)}</div>
+                  <h3 class="taxi-card-name">📱 ${escapeHtml(comparison.grab.nameKo)}</h3>
+                  <div class="souv-name-vi">${escapeHtml(comparison.grab.nameVi)}</div>
                 </div>
                 <span class="taxi-card-tag taxi-card-tag-success">정찰제 앱</span>
               </div>
-              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(transport.taxiComparison.grab.pros)}</div>
-              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(transport.taxiComparison.grab.cons)}</div>
-              <div class="taxi-hotline">📲 예약: ${escapeHtml(transport.taxiComparison.grab.bookingMethod)}</div>
+              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(comparison.grab.pros)}</div>
+              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(comparison.grab.cons)}</div>
+              <div class="taxi-hotline">📲 예약: ${escapeHtml(comparison.grab.bookingMethod)}</div>
             </div>
 
             <!-- Traditional Taxis -->
             <div class="taxi-compare-card taxi-card-accent-neutral">
               <div class="taxi-card-header">
                 <div>
-                  <h3 class="taxi-card-name">🚕 ${escapeHtml(transport.taxiComparison.traditionalTaxis.nameKo)}</h3>
-                  <div class="souv-name-vi">${escapeHtml(transport.taxiComparison.traditionalTaxis.nameVi)}</div>
+                  <h3 class="taxi-card-name">🚕 ${escapeHtml(comparison.traditionalTaxis.nameKo)}</h3>
+                  <div class="souv-name-vi">${escapeHtml(comparison.traditionalTaxis.nameVi)}</div>
                 </div>
                 <span class="taxi-card-tag">호텔 대기</span>
               </div>
-              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(transport.taxiComparison.traditionalTaxis.pros)}</div>
-              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(transport.taxiComparison.traditionalTaxis.cons)}</div>
-              <div class="taxi-hotline">📞 ${escapeHtml(transport.taxiComparison.traditionalTaxis.hotline)}</div>
+              <div class="taxi-pros"><strong>장점:</strong> ${escapeHtml(comparison.traditionalTaxis.pros)}</div>
+              <div class="taxi-cons"><strong>단점:</strong> ${escapeHtml(comparison.traditionalTaxis.cons)}</div>
+              <div class="taxi-hotline">📞 ${escapeHtml(comparison.traditionalTaxis.hotline)}</div>
             </div>
-          </div>
+          </div>`;
+  }
 
+  function guideScamPreventionHTML(scamPrevention) {
+    return `
           <!-- Scam Prevention 5 Rules -->
           <div class="guide-block-spacer">
             <h3 class="guide-subsection-title guide-subsection-title-warn">
               🛡️ 현지 택시·교통 사기 예방 5대 수칙
             </h3>
             <div class="scam-checklist-grid">
-              ${transport.scamPrevention.map(s => `
+              ${scamPrevention.map(s => `
                 <div class="scam-card">
                   <h4 class="scam-title">⚠️ ${escapeHtml(s.titleKo)}</h4>
                   <p class="scam-warning">${escapeHtml(s.warningText)}</p>
@@ -2920,15 +2934,18 @@
                 </div>
               `).join('')}
             </div>
-          </div>
+          </div>`;
+  }
 
+  function guideIntercityBusHTML(intercityBuses) {
+    return `
           <!-- Intercity Bus Guide (Dalat & Mui Ne) -->
           <div class="guide-block-spacer">
             <h3 class="guide-subsection-title">
               🚌 근교 도시 시외버스 & 리무진 가이드 (달랏 & 무이네)
             </h3>
             <div class="intercity-bus-grid">
-              ${transport.intercityBuses.map(b => `
+              ${intercityBuses.map(b => `
                 <div class="intercity-bus-card">
                   <div class="intercity-bus-header-row">
                     <h4 class="intercity-bus-destination">📍 ${escapeHtml(b.destination)}</h4>
@@ -2949,43 +2966,47 @@
                 </div>
               `).join('')}
             </div>
-          </div>
+          </div>`;
+  }
 
+  function guideMotorbikeRentalHTML(motorbikeRental) {
+    return `
           <!-- Motorbike Rental Guide -->
           <div class="motorbike-guide-box">
             <h4 class="motorbike-guide-title">
               🛵 오토바이(스쿠터) 렌트 수칙 & 안전 가이드
             </h4>
             <div class="motorbike-guide-grid">
-              <div><strong>💰 1일 렌트비:</strong> ${escapeHtml(transport.motorbikeRental.pricePerDayVnd)}</div>
-              <div><strong>🛵 인기 기종:</strong> ${escapeHtml(transport.motorbikeRental.popularModels)}</div>
-              <div><strong>📑 보증금 원칙:</strong> ${escapeHtml(transport.motorbikeRental.depositRules)}</div>
-              <div><strong>🪖 면허 및 법규:</strong> ${escapeHtml(transport.motorbikeRental.legalRequirements)}</div>
-              <div><strong>⛽ 주유 팁:</strong> ${escapeHtml(transport.motorbikeRental.fuelType)}</div>
-              <div><strong>🛡️ 안전 수칙:</strong> ${escapeHtml(transport.motorbikeRental.safetyTip)}</div>
+              <div><strong>💰 1일 렌트비:</strong> ${escapeHtml(motorbikeRental.pricePerDayVnd)}</div>
+              <div><strong>🛵 인기 기종:</strong> ${escapeHtml(motorbikeRental.popularModels)}</div>
+              <div><strong>📑 보증금 원칙:</strong> ${escapeHtml(motorbikeRental.depositRules)}</div>
+              <div><strong>🪖 면허 및 법규:</strong> ${escapeHtml(motorbikeRental.legalRequirements)}</div>
+              <div><strong>⛽ 주유 팁:</strong> ${escapeHtml(motorbikeRental.fuelType)}</div>
+              <div><strong>🛡️ 안전 수칙:</strong> ${escapeHtml(motorbikeRental.safetyTip)}</div>
             </div>
+          </div>`;
+  }
+
+  /** 교통·그랩 가이드 섹션 (공항 이동, 택시 앱 비교, 근교 버스, 안전 수칙). */
+  function guideTransportHTML(transport) {
+    return `
+        <section class="guide-section-block" id="transportGuidePanel">
+          <div class="guide-section-header">
+            <h2 class="guide-section-title">🚗 깜란공항 & 나트랑 시내 교통 완벽 가이드</h2>
+            <p class="guide-section-desc">공항 이동 요금표, 전기차 Xanh SM vs 그랩 vs 일반 택시 비교, 5대 사기 예방법</p>
           </div>
+${guideAirportTableHTML(transport.airportMatrix)}
+${guideTaxiCompareHTML(transport.taxiComparison)}
+${guideScamPreventionHTML(transport.scamPrevention)}
+${guideIntercityBusHTML(transport.intercityBuses)}
+${guideMotorbikeRentalHTML(transport.motorbikeRental)}
         </section>
       `;
   }
 
-  /** 롯데마트 기념품 시세표 섹션. 정찰가/시장 흥정가와 원화 환산을 나란히 둔다. */
-  function guideSouvenirMatrixHTML(matrix, souvenirs) {
-    return `
-        <section class="guide-section-block" id="souvenirsGuidePanel">
-          <div class="guide-section-header">
-            <div class="guide-header-flex-row">
-              <div>
-                <h2 class="guide-section-title">🛒 롯데마트 Top 30 쇼핑 시세표</h2>
-                <p class="guide-section-desc">정찰제 마트 공식가 vs 담시장·야시장 흥정 목표가 & 정품 구별법 (총 30개 품목)</p>
-              </div>
-              <span class="mini-tag mini-tag-info">
-                검색 일치: ${souvenirs.length}개 품목
-              </span>
-            </div>
-          </div>
-
-          <!-- 30 Souvenir Items Comparison Table -->
+  /** 30개 기념품 시세표 비교 테이블 HTML 생성 */
+  function guideSouvenirsTableHTML(souvenirs) {
+    return `<!-- 30 Souvenir Items Comparison Table -->
           <div class="souvenirs-matrix-wrap">
             <table class="souvenirs-table">
               <thead>
@@ -3039,21 +3060,27 @@
                 }).join('')}
               </tbody>
             </table>
-          </div>
+          </div>`;
+  }
 
-          <!-- Bargaining Tips Callout Box -->
+  /** 시장 흥정 팁 콜아웃 박스 HTML 생성 */
+  function guideBargainingTipsHTML(bargainingTips) {
+    return `<!-- Bargaining Tips Callout Box -->
           <div class="bargaining-guide-box">
             <h3 class="guide-callout-title guide-callout-title-warn">
-              🏷️ ${escapeHtml(matrix.bargainingTips.marketName)} 실전 5단계 흥정 전략
+              🏷️ ${escapeHtml(bargainingTips.marketName)} 실전 5단계 흥정 전략
             </h3>
             <ul class="bargaining-tips-list">
-              ${matrix.bargainingTips.coreStrategy.map(st => `
+              ${bargainingTips.coreStrategy.map(st => `
                 <li>${escapeHtml(st)}</li>
               `).join('')}
             </ul>
-          </div>
+          </div>`;
+  }
 
-          <!-- Customs Quarantine Guide Box -->
+  /** 세관 및 농림축산검역 안내 박스 HTML 생성 */
+  function guideCustomsQuarantineHTML(customsQuarantine) {
+    return `<!-- Customs Quarantine Guide Box -->
           <div class="customs-guide-box">
             <h3 class="guide-callout-title guide-callout-title-info">
               ✈️ 대한민국 관세청 면세 한도 & 농림축산검역본부 반입 규정
@@ -3062,16 +3089,16 @@
               <div class="customs-info-card customs-info-card-info">
                 <strong class="customs-info-label-info">💵 1인 면세 한도:</strong>
                 <ul class="customs-info-list">
-                  <li>기본 면세: 미화 <strong>${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.basicAllowanceUsd)}</strong></li>
-                  <li>주류: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.alcoholLimit)}</li>
-                  <li>담배: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.tobaccoLimit)}</li>
-                  <li>향수: ${escapeHtml(matrix.customsQuarantine.dutyFreeAllowance.perfumeLimit)}</li>
+                  <li>기본 면세: 미화 <strong>${escapeHtml(customsQuarantine.dutyFreeAllowance.basicAllowanceUsd)}</strong></li>
+                  <li>주류: ${escapeHtml(customsQuarantine.dutyFreeAllowance.alcoholLimit)}</li>
+                  <li>담배: ${escapeHtml(customsQuarantine.dutyFreeAllowance.tobaccoLimit)}</li>
+                  <li>향수: ${escapeHtml(customsQuarantine.dutyFreeAllowance.perfumeLimit)}</li>
                 </ul>
               </div>
               <div class="customs-info-card customs-info-card-danger">
                 <strong class="customs-info-label-danger">🚫 반입 전면 금지 (검역 과태료):</strong>
                 <ul class="customs-info-list customs-info-list-danger">
-                  ${matrix.customsQuarantine.prohibitedItems.map(p => `
+                  ${customsQuarantine.prohibitedItems.map(p => `
                     <li>${escapeHtml(p)}</li>
                   `).join('')}
                 </ul>
@@ -3079,13 +3106,36 @@
               <div class="customs-info-card customs-info-card-success">
                 <strong class="customs-info-label-success">✅ 반입 가능 품목:</strong>
                 <ul class="customs-info-list customs-info-list-success">
-                  ${matrix.customsQuarantine.permittedItems.map(p => `
+                  ${customsQuarantine.permittedItems.map(p => `
                     <li>${escapeHtml(p)}</li>
                   `).join('')}
                 </ul>
               </div>
             </div>
+          </div>`;
+  }
+
+  /** 롯데마트 기념품 시세표 섹션. 정찰가/시장 흥정가와 원화 환산을 나란히 둔다. */
+  function guideSouvenirMatrixHTML(matrix, souvenirs) {
+    return `
+        <section class="guide-section-block" id="souvenirsGuidePanel">
+          <div class="guide-section-header">
+            <div class="guide-header-flex-row">
+              <div>
+                <h2 class="guide-section-title">🛒 롯데마트 Top 30 쇼핑 시세표</h2>
+                <p class="guide-section-desc">정찰제 마트 공식가 vs 담시장·야시장 흥정 목표가 & 정품 구별법 (총 30개 품목)</p>
+              </div>
+              <span class="mini-tag mini-tag-info">
+                검색 일치: ${souvenirs.length}개 품목
+              </span>
+            </div>
           </div>
+
+          ${guideSouvenirsTableHTML(souvenirs)}
+
+          ${guideBargainingTipsHTML(matrix.bargainingTips)}
+
+          ${guideCustomsQuarantineHTML(matrix.customsQuarantine)}
         </section>
       `;
   }
@@ -3277,12 +3327,19 @@
         e.stopPropagation();
         const text = btn.dataset.fcCopy;
         if (text) {
+          const notifySuccess = () => {
+            showToast(`📋 베트남어가 복사되었습니다: "${text}"`);
+            const span = btn.querySelector('span') || btn;
+            const origText = span.textContent;
+            span.textContent = '✓ 복사 완료!';
+            setTimeout(() => { span.textContent = origText; }, 2000);
+          };
           if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(() => {
-              showToast(`📋 베트남어가 복사되었습니다: "${text}"`);
+            navigator.clipboard.writeText(text).then(notifySuccess).catch(() => {
+              fallbackCopy(text, notifySuccess);
             });
           } else {
-            fallbackCopy(text, () => showToast(`📋 베트남어가 복사되었습니다: "${text}"`));
+            fallbackCopy(text, notifySuccess);
           }
         }
       });
@@ -3312,12 +3369,19 @@
     if (copyBtn) {
       copyBtn.onclick = () => {
         const textToCopy = fc.vi;
+        const notifySuccess = () => {
+          showToast(`📋 복사완료: "${textToCopy}"`);
+          const span = copyBtn.querySelector('span') || copyBtn;
+          const origText = span.textContent;
+          span.textContent = '✓ 복사 완료!';
+          setTimeout(() => { span.textContent = origText; }, 2000);
+        };
         if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(textToCopy).then(() => {
-            showToast(`📋 복사완료: "${textToCopy}"`);
+          navigator.clipboard.writeText(textToCopy).then(notifySuccess).catch(() => {
+            fallbackCopy(textToCopy, notifySuccess);
           });
         } else {
-          fallbackCopy(textToCopy, () => showToast(`📋 복사완료: "${textToCopy}"`));
+          fallbackCopy(textToCopy, notifySuccess);
         }
       };
     }
@@ -3335,6 +3399,217 @@
 
   function closeFlashcardModal() { closeDomainModal('guide'); }
 
+  // --- 8.5 Curation Scenario Domain ---
+  function getFilteredCurations() {
+    if (typeof NHA_TRANG_CURATIONS === 'undefined' || !NHA_TRANG_CURATIONS) {
+      return [];
+    }
+
+    const cat = state.curationCategory;
+    const tag = state.curationTag;
+    const q = state.searchQuery ? state.searchQuery.toLowerCase() : '';
+
+    return NHA_TRANG_CURATIONS.filter(item => {
+      // 1. Category Filter
+      if (cat && cat !== 'all') {
+        const itemCat = item.scenarioKey || item.category;
+        if (itemCat !== cat) return false;
+      }
+
+      // 2. Tag Filter
+      if (tag && tag !== 'all') {
+        const allTagText = [
+          ...(item.tags || []),
+          ...(item.highlights || []),
+          ...(item.keyTips || []),
+          item.summary || '',
+          item.title || ''
+        ].join(' ').toLowerCase();
+
+        if (tag === 'luggage' && !(allTagText.includes('짐보관') || allTagText.includes('공항') || allTagText.includes('샌딩') || allTagText.includes('체크아웃'))) return false;
+        if (tag === 'indoor' && !(allTagText.includes('실내') || allTagText.includes('머드') || allTagText.includes('온천') || allTagText.includes('우천') || allTagText.includes('애프터눈티'))) return false;
+        if (tag === 'late' && !(allTagText.includes('심야') || allTagText.includes('야간') || allTagText.includes('클럽') || allTagText.includes('루프탑') || allTagText.includes('야식'))) return false;
+        if (tag === 'sunset' && !(allTagText.includes('선셋') || allTagText.includes('커플') || allTagText.includes('크루즈') || allTagText.includes('파인다이닝') || allTagText.includes('오션뷰'))) return false;
+      }
+
+      // 3. Search Query
+      if (q) {
+        const inTitle = textIncludes(item.title, q) || textIncludes(item.titleEn, q);
+        const inSummary = textIncludes(item.summary, q);
+        const inTarget = textIncludes(item.targetAudience, q);
+        const inTags = (item.tags || []).some(t => textIncludes(t, q));
+        const inHighlights = (item.highlights || []).some(h => textIncludes(h, q));
+        const inTips = (item.keyTips || []).some(t => textIncludes(t, q));
+        const inTimeline = (item.timeline || []).some(step => {
+          const inStep = textIncludes(step.title, q) || textIncludes(step.actionGuide, q) || textIncludes(step.location, q);
+          const inPlaces = (step.places || step.recommendedPlaces || []).some(p => textIncludes(p.name, q) || textIncludes(p.highlight, q));
+          return inStep || inPlaces;
+        });
+
+        if (!inTitle && !inSummary && !inTarget && !inTags && !inHighlights && !inTips && !inTimeline) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }
+
+  function getFilteredCuration() {
+    return getFilteredCurations();
+  }
+
+  function getDomainEmoji(domain) {
+    const emojis = {
+      spa: '💆',
+      gourmet: '🍜',
+      shopping: '🛍️',
+      hoteldining: '🍽️',
+      activities: '⛵',
+      stays: '🏨',
+      currency: '💱'
+    };
+    return emojis[domain] || '📍';
+  }
+
+  function renderCurationTimelineStep(step) {
+    const places = step.places || step.recommendedPlaces || [];
+    const stepNo = step.stepNo || step.step;
+    const transit = step.transitTime || step.duration || '';
+    const actionDesc = step.actionGuide || step.description || '';
+
+    const placesHtml = places.length > 0 ? `
+      <div class="timeline-places-grid">
+        ${places.map(place => {
+          const safeMapUrl = sanitizeUrl(place.mapUrl || place.googleMapUrl || buildMapUrl(place));
+          const emoji = getDomainEmoji(place.domain);
+          const ratingText = place.rating
+            ? `<span class="timeline-place-rating"><span class="star">★</span> ${escapeHtml(place.rating)}</span>`
+            : '';
+          const reviewCountText = place.reviewCount
+            ? `<span>(${Number(place.reviewCount).toLocaleString()})</span>`
+            : '';
+          const categoryOrHours = place.categoryLabel || place.hours || '';
+
+          return `
+            <div class="timeline-place-card">
+              <div class="timeline-place-thumb">${emoji}</div>
+              <div class="timeline-place-info">
+                <span class="timeline-place-name" title="${escapeHtml(place.name)}">${escapeHtml(place.name)}</span>
+                <div class="timeline-place-sub">
+                  ${ratingText}
+                  ${reviewCountText}
+                  ${categoryOrHours ? `<span>·</span><span>${escapeHtml(categoryOrHours)}</span>` : ''}
+                </div>
+              </div>
+              <div class="timeline-place-actions">
+                <a class="btn-curation-map" href="${escapeHtml(safeMapUrl)}" target="_blank" rel="noopener noreferrer" title="구글 지도에서 보기">지도 ↗</a>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    ` : '';
+
+    return `
+      <div class="timeline-step">
+        <div class="timeline-node">${stepNo}</div>
+        <div class="timeline-step-header">
+          <span class="timeline-time-badge">${escapeHtml(step.time)}</span>
+          <h4 class="timeline-step-title">${escapeHtml(step.title)}</h4>
+          ${transit ? `<span class="timeline-transit-badge">🚗 ${escapeHtml(transit)}</span>` : ''}
+        </div>
+        <p class="timeline-step-desc">${escapeHtml(actionDesc)}</p>
+        ${placesHtml}
+      </div>
+    `;
+  }
+
+  function renderCurationCard(course) {
+    const keyClass = course.scenarioKey || course.category || 'checkout';
+    const keyTips = course.keyTips || course.highlights || [];
+    const timeline = course.timeline || [];
+
+    const tipsHtml = keyTips.length > 0 ? `
+      <div class="curation-tip-box">
+        <div class="curation-tip-title">💡 핵심 실전 꿀팁 & 동선 가이드</div>
+        <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px;">
+          ${keyTips.map(t => `<li>${escapeHtml(t)}</li>`).join('')}
+        </ul>
+      </div>
+    ` : '';
+
+    return `
+      <article class="curation-card" data-id="${escapeHtml(course.id)}">
+        <div class="curation-header">
+          <div class="curation-header-top">
+            <span class="curation-badge ${escapeHtml(keyClass)}">${escapeHtml(course.iconEmoji || '🎯')} ${escapeHtml(course.badge)}</span>
+            <span class="curation-badge" style="background: var(--color-bg-subtle); color: var(--color-text-secondary);">⏱️ ${escapeHtml(course.duration || course.durationEstimate)}</span>
+          </div>
+          <h3 class="curation-title">${escapeHtml(course.title)}</h3>
+          <p class="curation-summary">${escapeHtml(course.summary)}</p>
+        </div>
+
+        <div class="curation-meta-grid">
+          <div class="curation-meta-item">
+            <span class="curation-meta-label">추천 대상:</span>
+            <span class="curation-meta-value">${escapeHtml(course.targetAudience || '자유여행자')}</span>
+          </div>
+          <div class="curation-meta-item">
+            <span class="curation-meta-label">예상 경비:</span>
+            <span class="curation-meta-value">${escapeHtml(course.estimatedCostKrw || course.estimatedCostVnd || course.budgetEstimate)}</span>
+          </div>
+          <div class="curation-meta-item">
+            <span class="curation-meta-label">추천 교통:</span>
+            <span class="curation-meta-value">${escapeHtml(course.recommendedTransport || '그랩 및 도보')}</span>
+          </div>
+          <div class="curation-meta-item">
+            <span class="curation-meta-label">소요 시간:</span>
+            <span class="curation-meta-value">${escapeHtml(course.duration || course.durationEstimate)}</span>
+          </div>
+        </div>
+
+        ${tipsHtml}
+
+        <div class="curation-timeline">
+          ${timeline.map(renderCurationTimelineStep).join('')}
+        </div>
+      </article>
+    `;
+  }
+
+  function renderCuration() {
+    const container = document.getElementById('curationCardsGridContainer');
+    const countEl = document.getElementById('curationResultCountText');
+    if (!container) return;
+
+    const list = getFilteredCurations();
+    if (countEl) {
+      countEl.innerHTML = `총 <strong>${list.length}</strong>개의 맞춤 상황별 추천 코스`;
+    }
+
+    if (list.length === 0) {
+      container.className = 'empty-state-wrap';
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🎯</div>
+          <h3>조건에 맞는 상황별 코스가 없습니다</h3>
+          <p>검색어나 필터 조건을 변경해 보세요.</p>
+          <button class="btn-reset-filters" id="curationResetFiltersBtn">필터 초기화</button>
+        </div>
+      `;
+      const resetBtn = document.getElementById('curationResetFiltersBtn');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          window.dispatchEvent(new CustomEvent('reset-filters'));
+        });
+      }
+      return;
+    }
+
+    container.className = 'curation-container';
+    container.innerHTML = list.map(renderCurationCard).join('');
+  }
   // --- 8.6 Domain Registry ---
   // 7개 도메인의 배선 차이를 한 테이블로 모은다. 탭을 추가할 때 손댈 곳을
   // 줄이는 것이 목적이며, 렌더/필터/모달 로직은 각 도메인 섹션에 그대로 있다.
@@ -3525,6 +3800,32 @@
         `
     },
     {
+      key: 'curation',
+      render: () => renderCuration(),
+      categoryNavId: 'curationCategoryNav', tagChipsId: 'curationTagChips',
+      catAttr: 'curcategory', tagAttr: 'curtag',
+      catField: 'curationCategory', tagField: 'curationTag',
+      notesField: null, notesKey: null,
+      wishField: null, wishKey: null,
+      wishToastAdd: null, wishToastRemove: null,
+      modalHeartBtnId: null,
+      hasOpenHours: false, hasPriceSort: false, showViewToggle: false,
+      activeModalField: null,
+      modalId: null, modalCloseBtnId: null, closeModal: () => {},
+      noteInputIds: [], noteStatusIds: [],
+      copyAddressBtnId: null,
+      gridSectionId: 'curationGridSection',
+      placeholder: '상황별 코스, 장소, 키워드 검색 (예: 체크아웃, 머드온천, 세일링클럽, 선셋크루즈)...',
+      heroTitle: '나트랑 맞춤 상황별 추천 코스 🎯',
+      heroSubtitle: '마지막 날 체크아웃 투어부터 우천 실내, 심야 핫스팟, 커플 힐링 코스 큐레이션',
+      heroPills: `
+          <span class="hero-stat-pill"><span class="icon">✈️</span> 밤 11시 비행기 체크아웃 투어</span>
+          <span class="hero-stat-pill"><span class="icon">🌧️</span> 우천 대비 100% 실내 힐링 코스</span>
+          <span class="hero-stat-pill"><span class="icon">🌙</span> 밤 10시 이후 심야 핫스팟 02시</span>
+          <span class="hero-stat-pill"><span class="icon">💑</span> 커플 & 로맨틱 파인다이닝 크루즈</span>
+        `
+    },
+    {
       key: 'guide',
       render: () => renderGuide(),
       categoryNavId: 'guideCategoryNav', tagChipsId: 'guideTagChips',
@@ -3575,6 +3876,7 @@
     spa: { src: './spa-data.js', containerId: 'spaCardsGridContainer', ready: () => typeof NHA_TRANG_SPAS !== 'undefined' },
     shopping: { src: './shopping-data.js', containerId: 'shoppingCardsGridContainer', ready: () => typeof NHA_TRANG_SHOPPING !== 'undefined' },
     currency: { src: './currency-data.js', containerId: 'currencyCardsGridContainer', ready: () => typeof NHA_TRANG_CURRENCY !== 'undefined' },
+    curation: { src: './curation-data.js', containerId: 'curationCardsGridContainer', ready: () => typeof NHA_TRANG_CURATIONS !== 'undefined' },
     guide: { src: './guide-data.js', containerId: 'guideCardsGridContainer', ready: () => typeof NHA_TRANG_GUIDE_HUB !== 'undefined' }
   };
 
@@ -3629,37 +3931,45 @@
   }
 
   // --- 9. Tab Switching & UI Controller ---
-  function switchMainTab(tab) {
-    state.currentTab = tab;
-
+  function updateTabNavButtons(tab) {
     document.querySelectorAll('.nav-tab-btn, .mobile-tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tab);
+      const isActive = btn.dataset.tab === tab;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', String(isActive));
     });
+  }
 
-    const domain = getDomain(tab);
-
-    // Toggle Category Bars
+  function updateDomainVisibility(tab) {
     DOMAINS.forEach(d => {
+      const isMatch = d.key === tab;
       const nav = document.getElementById(d.categoryNavId);
-      if (nav) nav.style.display = d.key === tab ? 'block' : 'none';
-    });
+      if (nav) nav.style.display = isMatch ? 'block' : 'none';
 
-    // Toggle Tag Chips
-    DOMAINS.forEach(d => {
       const chips = document.getElementById(d.tagChipsId);
-      if (chips) chips.style.display = d.key === tab ? 'flex' : 'none';
-    });
+      if (chips) chips.style.display = isMatch ? 'flex' : 'none';
 
+      const section = document.getElementById(d.gridSectionId);
+      if (section) section.style.display = isMatch ? 'block' : 'none';
+    });
+  }
+
+  function updateSearchClearBtn() {
+    const searchInput = document.getElementById('searchInput');
+    const searchClearBtn = document.getElementById('searchClearBtn');
+    if (searchClearBtn && searchInput) {
+      searchClearBtn.style.display = searchInput.value ? 'block' : 'none';
+    }
+  }
+
+  function updateHeroAndToolbarUI(domain) {
     const toolbarSection = document.querySelector('.toolbar-section');
     if (toolbarSection) toolbarSection.style.display = 'block';
 
     // 리스트/그리드 전환은 리스트를 쓰는 여섯 탭 전부에서 필요하다.
-    // (예전에는 activities 탭에서만 노출돼 나머지 탭에서 전환 수단이 없었다.)
     const viewToggleButtons = document.getElementById('viewToggleButtons');
     if (viewToggleButtons) viewToggleButtons.style.display = domain.showViewToggle ? 'flex' : 'none';
 
-    // 환전소/ATM에는 '가격'이 없어 avgPriceVnd가 전부 0이다. 가격 정렬을 그대로 두면
-    // 선택해도 순서가 안 바뀌어 고장으로 보이므로 그런 탭에서는 옵션 자체를 숨긴다.
+    // 환전소/ATM에는 '가격'이 없어 avgPriceVnd가 전부 0이다. 가격 정렬 옵션을 숨긴다.
     const hidePriceSort = !domain.hasPriceSort;
     const sortSelectEl = document.getElementById('sortSelect');
     if (sortSelectEl) {
@@ -3678,16 +3988,14 @@
     const heroSubtitleDesc = document.getElementById('heroSubtitleDesc');
     const heroTagsArea = document.getElementById('heroTagsArea');
 
-    if (searchInput) searchInput.placeholder = domain.placeholder;
+    if (searchInput) {
+      searchInput.placeholder = domain.placeholder;
+      searchInput.setAttribute('aria-label', domain.heroTitle + ' 검색');
+    }
+    updateSearchClearBtn();
     if (heroTitle) heroTitle.textContent = domain.heroTitle;
     if (heroSubtitleDesc) heroSubtitleDesc.textContent = domain.heroSubtitle;
     if (heroTagsArea) heroTagsArea.innerHTML = domain.heroPills;
-
-    // Section display: 자기 탭의 gridSection만 block, 나머지는 전부 none.
-    DOMAINS.forEach(d => {
-      const section = document.getElementById(d.gridSectionId);
-      if (section) section.style.display = d.key === tab ? 'block' : 'none';
-    });
 
     // 영업시간 데이터가 있는 도메인에서만 "지금 영업중" 칩을 노출한다
     const openNowChip = document.getElementById('openNowChip');
@@ -3703,7 +4011,9 @@
     const densityToggle = document.getElementById('densityToggleButtons');
     const showDensity = domain.showViewToggle && state.currentView === 'list';
     if (densityToggle) densityToggle.style.display = showDensity ? 'flex' : 'none';
+  }
 
+  function handleTabLazyLoadingAndRender(tab, domain) {
     // 지연 로딩 대상 탭은 데이터가 준비된 뒤에 렌더한다. 로드 중 다른 탭으로
     // 이동했으면(레이스) 렌더하지 않는다 — 그 탭의 switchMainTab이 알아서 한다.
     const lazy = LAZY_DATA[tab];
@@ -3719,6 +4029,15 @@
     });
   }
 
+  function switchMainTab(tab) {
+    state.currentTab = tab;
+    updateTabNavButtons(tab);
+    const domain = getDomain(tab);
+    updateDomainVisibility(tab);
+    updateHeroAndToolbarUI(domain);
+    handleTabLazyLoadingAndRender(tab, domain);
+  }
+
   /** 뷰 모드는 다섯 탭 전체에 적용되고 다음 방문까지 유지된다. */
   function setViewMode(mode) {
     if (mode !== 'list' && mode !== 'grid') return;
@@ -3727,8 +4046,14 @@
 
     const listBtn = document.getElementById('viewListBtn');
     const gridBtn = document.getElementById('viewGridBtn');
-    if (listBtn) listBtn.classList.toggle('active', mode === 'list');
-    if (gridBtn) gridBtn.classList.toggle('active', mode === 'grid');
+    if (listBtn) {
+      listBtn.classList.toggle('active', mode === 'list');
+      listBtn.setAttribute('aria-pressed', String(mode === 'list'));
+    }
+    if (gridBtn) {
+      gridBtn.classList.toggle('active', mode === 'grid');
+      gridBtn.setAttribute('aria-pressed', String(mode === 'grid'));
+    }
 
     const densityToggle = document.getElementById('densityToggleButtons');
     const showDensity = getDomain(state.currentTab).showViewToggle && mode === 'list';
@@ -3744,8 +4069,14 @@
 
     const tightBtn = document.getElementById('densityTightBtn');
     const comfyBtn = document.getElementById('densityComfyBtn');
-    if (tightBtn) tightBtn.classList.toggle('active', mode === 'tight');
-    if (comfyBtn) comfyBtn.classList.toggle('active', mode === 'comfy');
+    if (tightBtn) {
+      tightBtn.classList.toggle('active', mode === 'tight');
+      tightBtn.setAttribute('aria-pressed', String(mode === 'tight'));
+    }
+    if (comfyBtn) {
+      comfyBtn.classList.toggle('active', mode === 'comfy');
+      comfyBtn.setAttribute('aria-pressed', String(mode === 'comfy'));
+    }
 
     renderCurrentTab();
   }
@@ -3756,11 +4087,20 @@
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('sortSelect');
     if (searchInput) searchInput.value = '';
+    updateSearchClearBtn();
     if (sortSelect) sortSelect.value = 'recommended';
 
     DOMAINS.forEach(d => {
-      document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => b.classList.toggle('active', b.dataset[d.catAttr] === 'all'));
-      document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => b.classList.toggle('active', b.dataset[d.tagAttr] === 'all'));
+      document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => {
+        const isActive = b.dataset[d.catAttr] === 'all';
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', String(isActive));
+      });
+      document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => {
+        const isActive = b.dataset[d.tagAttr] === 'all';
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', String(isActive));
+      });
     });
 
     updateWishlistBadge();
@@ -3769,8 +4109,20 @@
     showToast('필터가 모두 초기화되었습니다.');
   }
 
-  // --- 10. Event Listeners Initialization ---
-  function initEvents() {
+  // Helper modal functions
+  function openModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function initNavEvents() {
     // Nav Tabs — 상단 탭과 모바일 하단 탭바가 같은 핸들러를 쓴다
     document.querySelectorAll('.nav-tab-btn, .mobile-tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -3788,48 +4140,68 @@
         renderCurrentTab();
       });
     }
+  }
 
-    // Category Buttons
+  function initFilterEvents() {
+    // Category & Tag Buttons
     DOMAINS.forEach(d => {
       document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => {
+            const isActive = b === btn;
+            b.classList.toggle('active', isActive);
+            b.setAttribute('aria-pressed', String(isActive));
+          });
           state[d.catField] = btn.dataset[d.catAttr];
           d.render();
         });
       });
-    });
 
-    // Tag Buttons
-    DOMAINS.forEach(d => {
       document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => {
+            const isActive = b === btn;
+            b.classList.toggle('active', isActive);
+            b.setAttribute('aria-pressed', String(isActive));
+          });
           state[d.tagField] = btn.dataset[d.tagAttr];
           d.render();
         });
       });
     });
 
-    // Search Input
+    // Search Input & Clear Button
     const searchInput = document.getElementById('searchInput');
+    const searchClearBtn = document.getElementById('searchClearBtn');
     if (searchInput) {
       let searchDebounce;
       searchInput.addEventListener('input', (e) => {
+        updateSearchClearBtn();
         clearTimeout(searchDebounce);
         searchDebounce = setTimeout(() => {
           state.searchQuery = e.target.value.trim();
           renderCurrentTab();
         }, 200);
       });
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && searchInput.value) {
+          e.stopPropagation();
+          searchInput.value = '';
+          updateSearchClearBtn();
+          state.searchQuery = '';
+          renderCurrentTab();
+          searchInput.blur();
+        }
+      });
     }
 
-    const searchClearBtn = document.getElementById('searchClearBtn');
     if (searchClearBtn) {
       searchClearBtn.addEventListener('click', () => {
-        if (searchInput) searchInput.value = '';
+        if (searchInput) {
+          searchInput.value = '';
+          searchInput.focus();
+        }
+        updateSearchClearBtn();
         state.searchQuery = '';
         renderCurrentTab();
       });
@@ -3862,65 +4234,57 @@
 
     // Global reset-filters event listener
     window.addEventListener('reset-filters', resetFilters);
+  }
 
-    // Modals Close Events
-    const calcModal = document.getElementById('calcModal');
-    const guideModal = document.getElementById('guideModal');
-
+  function initDomainModalEvents() {
     DOMAINS.forEach(d => {
       const modalEl = document.getElementById(d.modalId);
       document.getElementById(d.modalCloseBtnId)?.addEventListener('click', d.closeModal);
       modalEl?.addEventListener('click', (e) => {
         if (e.target === modalEl) d.closeModal();
       });
-    });
 
-    function openModal(modalEl) {
-      if (!modalEl) return;
-      modalEl.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeModal(modalEl) {
-      if (!modalEl) return;
-      modalEl.classList.remove('active');
-      document.body.style.overflow = '';
-    }
+      if (d.copyAddressBtnId) {
+        document.getElementById(d.copyAddressBtnId)?.addEventListener('click', (e) => {
+          if (state[d.activeModalField]) copyAddress(state[d.activeModalField].addressVi, e.currentTarget);
+        });
+      }
+    });
 
     // Notes Auto-save Handlers
-    document.addEventListener('input', (e) => {
-      DOMAINS.forEach(d => {
-        const matchesInput = d.noteInputIds.some(id => e.target.matches(`#${id}`));
-        if (!matchesInput) return;
-        if (!state[d.activeModalField]) return;
-        const val = typeof e.target.value === 'string' ? e.target.value.slice(0, 5000) : '';
-        if (!state[d.notesField]) state[d.notesField] = Object.create(null);
-        state[d.notesField][state[d.activeModalField].id] = val;
-        const saved = saveToStorage(d.notesKey, state[d.notesField]);
-        let s = null;
-        for (const statusId of d.noteStatusIds) {
-          s = document.getElementById(statusId);
-          if (s) break;
-        }
-        if (s) {
-          if (saved === false && hasStorage()) {
-            s.textContent = '⚠️ 저장 공간 부족';
-          } else {
-            s.textContent = '✓ 저장 완료';
-          }
-        }
-        d.render();
-      });
-    });
-
-    // Copy Address Handlers
+    const noteInputMap = new Map();
     DOMAINS.forEach(d => {
-      if (!d.copyAddressBtnId) return;
-      document.getElementById(d.copyAddressBtnId)?.addEventListener('click', (e) => {
-        if (state[d.activeModalField]) copyAddress(state[d.activeModalField].addressVi, e.currentTarget);
-      });
+      (d.noteInputIds || []).forEach(id => noteInputMap.set(id, d));
     });
 
-    // Calculator Modal
+    document.addEventListener('input', (e) => {
+      if (!e.target || !e.target.id) return;
+      const d = noteInputMap.get(e.target.id);
+      if (!d) return;
+      if (!state[d.activeModalField]) return;
+      const val = typeof e.target.value === 'string' ? e.target.value.slice(0, 5000) : '';
+      if (!state[d.notesField]) state[d.notesField] = Object.create(null);
+      state[d.notesField][state[d.activeModalField].id] = val;
+      const saved = saveToStorage(d.notesKey, state[d.notesField]);
+      let s = null;
+      for (const statusId of d.noteStatusIds) {
+        s = document.getElementById(statusId);
+        if (s) break;
+      }
+      if (s) {
+        if (saved === false && hasStorage()) {
+          s.textContent = '⚠️ 저장 공간 부족';
+        } else {
+          s.textContent = '✓ 저장 완료';
+        }
+      }
+      d.render();
+    });
+  }
+
+  function initCalcModalEvents() {
+    const calcModal = document.getElementById('calcModal');
+
     document.getElementById('openCalcBtn')?.addEventListener('click', () => openModal(calcModal));
     document.getElementById('calcCloseBtn')?.addEventListener('click', () => closeModal(calcModal));
     calcModal?.addEventListener('click', (e) => {
@@ -3954,21 +4318,15 @@
         if (calcKrwInput) calcKrwInput.value = vnd ? Math.round(vnd * getRate()).toLocaleString() : '';
       });
     });
+  }
 
-    // Guide Modal
+  function initGuideModalEvents() {
+    const guideModal = document.getElementById('guideModal');
+
     document.getElementById('openGuideBtn')?.addEventListener('click', () => openModal(guideModal));
     document.getElementById('guideCloseBtn')?.addEventListener('click', () => closeModal(guideModal));
     guideModal?.addEventListener('click', (e) => {
       if (e.target === guideModal) closeModal(guideModal);
-    });
-
-    // ESC Key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        DOMAINS.forEach(d => d.closeModal());
-        closeModal(calcModal);
-        closeModal(guideModal);
-      }
     });
 
     // POS Simulator Choice Handlers
@@ -3981,11 +4339,34 @@
         }
       });
     });
+  }
+
+  function initGlobalKeyboardEvents() {
+    const calcModal = document.getElementById('calcModal');
+    const guideModal = document.getElementById('guideModal');
+
+    // ESC Key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        DOMAINS.forEach(d => d.closeModal());
+        closeModal(calcModal);
+        closeModal(guideModal);
+      }
+    });
+  }
+
+  // --- 10. Event Listeners Initialization ---
+  function initEvents() {
+    initNavEvents();
+    initFilterEvents();
+    initDomainModalEvents();
+    initCalcModalEvents();
+    initGuideModalEvents();
+    initGlobalKeyboardEvents();
 
     // Initialize currency calculator
     initCurrencyCalculator();
   }
-
   // --- 11. Initialization Entrypoint ---
   // 5개 모달이 공유하는 껍데기를 여기서 한 번만 만든다. 도메인 마크업은
   // index.html의 <template class="modal-tpl">에 그대로 있고, 이 함수는
@@ -4021,6 +4402,7 @@
     buildModals();
     updateWishlistBadge();
     initEvents();
+    updateHeroAndToolbarUI(getDomain(state.currentTab));
     renderCards();
   }
 
@@ -4047,13 +4429,17 @@
       formatKRW,
       formatVerbalVND,
       formatVerbalKRW,
+      applyModalFields,
       getFilteredActivities,
+      activitiesSearchMatch,
       getFilteredGourmets,
       getFilteredStays,
       getFilteredHotelDinings,
       getFilteredSpas,
       getFilteredShopping,
       getFilteredCurrency,
+      getFilteredCurations,
+      getFilteredCuration,
       // Renderers — exported for the snapshot harness (test-render-snapshot.js).
       // They resolve `document` at call time, so the harness can install a stub
       // AFTER requiring this file, which keeps the bootstrap above from running.
@@ -4064,6 +4450,8 @@
       renderSpa,
       renderShopping,
       renderCurrency,
+      renderCurrencyCardsList,
+      renderCuration,
       // Modal openers — Phase 4 refactor target, snapshotted the same way.
       openActivityModal,
       openGourmetModal,
@@ -4080,6 +4468,9 @@
       getFilteredFlashcards,
       getFilteredSouvenirs,
       getFilteredPharmacyMeds,
+      // Clipboard & UI helpers
+      copyAddress,
+      fallbackCopy,
       // Storage & View helpers
       sanitizeStorageData,
       loadFromStorage,

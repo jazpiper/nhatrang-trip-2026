@@ -11,6 +11,7 @@
     spa: { src: './spa-data.js', containerId: 'spaCardsGridContainer', ready: () => typeof NHA_TRANG_SPAS !== 'undefined' },
     shopping: { src: './shopping-data.js', containerId: 'shoppingCardsGridContainer', ready: () => typeof NHA_TRANG_SHOPPING !== 'undefined' },
     currency: { src: './currency-data.js', containerId: 'currencyCardsGridContainer', ready: () => typeof NHA_TRANG_CURRENCY !== 'undefined' },
+    curation: { src: './curation-data.js', containerId: 'curationCardsGridContainer', ready: () => typeof NHA_TRANG_CURATIONS !== 'undefined' },
     guide: { src: './guide-data.js', containerId: 'guideCardsGridContainer', ready: () => typeof NHA_TRANG_GUIDE_HUB !== 'undefined' }
   };
 
@@ -65,37 +66,45 @@
   }
 
   // --- 9. Tab Switching & UI Controller ---
-  function switchMainTab(tab) {
-    state.currentTab = tab;
-
+  function updateTabNavButtons(tab) {
     document.querySelectorAll('.nav-tab-btn, .mobile-tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tab);
+      const isActive = btn.dataset.tab === tab;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', String(isActive));
     });
+  }
 
-    const domain = getDomain(tab);
-
-    // Toggle Category Bars
+  function updateDomainVisibility(tab) {
     DOMAINS.forEach(d => {
+      const isMatch = d.key === tab;
       const nav = document.getElementById(d.categoryNavId);
-      if (nav) nav.style.display = d.key === tab ? 'block' : 'none';
-    });
+      if (nav) nav.style.display = isMatch ? 'block' : 'none';
 
-    // Toggle Tag Chips
-    DOMAINS.forEach(d => {
       const chips = document.getElementById(d.tagChipsId);
-      if (chips) chips.style.display = d.key === tab ? 'flex' : 'none';
-    });
+      if (chips) chips.style.display = isMatch ? 'flex' : 'none';
 
+      const section = document.getElementById(d.gridSectionId);
+      if (section) section.style.display = isMatch ? 'block' : 'none';
+    });
+  }
+
+  function updateSearchClearBtn() {
+    const searchInput = document.getElementById('searchInput');
+    const searchClearBtn = document.getElementById('searchClearBtn');
+    if (searchClearBtn && searchInput) {
+      searchClearBtn.style.display = searchInput.value ? 'block' : 'none';
+    }
+  }
+
+  function updateHeroAndToolbarUI(domain) {
     const toolbarSection = document.querySelector('.toolbar-section');
     if (toolbarSection) toolbarSection.style.display = 'block';
 
     // 리스트/그리드 전환은 리스트를 쓰는 여섯 탭 전부에서 필요하다.
-    // (예전에는 activities 탭에서만 노출돼 나머지 탭에서 전환 수단이 없었다.)
     const viewToggleButtons = document.getElementById('viewToggleButtons');
     if (viewToggleButtons) viewToggleButtons.style.display = domain.showViewToggle ? 'flex' : 'none';
 
-    // 환전소/ATM에는 '가격'이 없어 avgPriceVnd가 전부 0이다. 가격 정렬을 그대로 두면
-    // 선택해도 순서가 안 바뀌어 고장으로 보이므로 그런 탭에서는 옵션 자체를 숨긴다.
+    // 환전소/ATM에는 '가격'이 없어 avgPriceVnd가 전부 0이다. 가격 정렬 옵션을 숨긴다.
     const hidePriceSort = !domain.hasPriceSort;
     const sortSelectEl = document.getElementById('sortSelect');
     if (sortSelectEl) {
@@ -114,16 +123,14 @@
     const heroSubtitleDesc = document.getElementById('heroSubtitleDesc');
     const heroTagsArea = document.getElementById('heroTagsArea');
 
-    if (searchInput) searchInput.placeholder = domain.placeholder;
+    if (searchInput) {
+      searchInput.placeholder = domain.placeholder;
+      searchInput.setAttribute('aria-label', domain.heroTitle + ' 검색');
+    }
+    updateSearchClearBtn();
     if (heroTitle) heroTitle.textContent = domain.heroTitle;
     if (heroSubtitleDesc) heroSubtitleDesc.textContent = domain.heroSubtitle;
     if (heroTagsArea) heroTagsArea.innerHTML = domain.heroPills;
-
-    // Section display: 자기 탭의 gridSection만 block, 나머지는 전부 none.
-    DOMAINS.forEach(d => {
-      const section = document.getElementById(d.gridSectionId);
-      if (section) section.style.display = d.key === tab ? 'block' : 'none';
-    });
 
     // 영업시간 데이터가 있는 도메인에서만 "지금 영업중" 칩을 노출한다
     const openNowChip = document.getElementById('openNowChip');
@@ -139,7 +146,9 @@
     const densityToggle = document.getElementById('densityToggleButtons');
     const showDensity = domain.showViewToggle && state.currentView === 'list';
     if (densityToggle) densityToggle.style.display = showDensity ? 'flex' : 'none';
+  }
 
+  function handleTabLazyLoadingAndRender(tab, domain) {
     // 지연 로딩 대상 탭은 데이터가 준비된 뒤에 렌더한다. 로드 중 다른 탭으로
     // 이동했으면(레이스) 렌더하지 않는다 — 그 탭의 switchMainTab이 알아서 한다.
     const lazy = LAZY_DATA[tab];
@@ -155,6 +164,15 @@
     });
   }
 
+  function switchMainTab(tab) {
+    state.currentTab = tab;
+    updateTabNavButtons(tab);
+    const domain = getDomain(tab);
+    updateDomainVisibility(tab);
+    updateHeroAndToolbarUI(domain);
+    handleTabLazyLoadingAndRender(tab, domain);
+  }
+
   /** 뷰 모드는 다섯 탭 전체에 적용되고 다음 방문까지 유지된다. */
   function setViewMode(mode) {
     if (mode !== 'list' && mode !== 'grid') return;
@@ -163,8 +181,14 @@
 
     const listBtn = document.getElementById('viewListBtn');
     const gridBtn = document.getElementById('viewGridBtn');
-    if (listBtn) listBtn.classList.toggle('active', mode === 'list');
-    if (gridBtn) gridBtn.classList.toggle('active', mode === 'grid');
+    if (listBtn) {
+      listBtn.classList.toggle('active', mode === 'list');
+      listBtn.setAttribute('aria-pressed', String(mode === 'list'));
+    }
+    if (gridBtn) {
+      gridBtn.classList.toggle('active', mode === 'grid');
+      gridBtn.setAttribute('aria-pressed', String(mode === 'grid'));
+    }
 
     const densityToggle = document.getElementById('densityToggleButtons');
     const showDensity = getDomain(state.currentTab).showViewToggle && mode === 'list';
@@ -180,8 +204,14 @@
 
     const tightBtn = document.getElementById('densityTightBtn');
     const comfyBtn = document.getElementById('densityComfyBtn');
-    if (tightBtn) tightBtn.classList.toggle('active', mode === 'tight');
-    if (comfyBtn) comfyBtn.classList.toggle('active', mode === 'comfy');
+    if (tightBtn) {
+      tightBtn.classList.toggle('active', mode === 'tight');
+      tightBtn.setAttribute('aria-pressed', String(mode === 'tight'));
+    }
+    if (comfyBtn) {
+      comfyBtn.classList.toggle('active', mode === 'comfy');
+      comfyBtn.setAttribute('aria-pressed', String(mode === 'comfy'));
+    }
 
     renderCurrentTab();
   }
@@ -192,11 +222,20 @@
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('sortSelect');
     if (searchInput) searchInput.value = '';
+    updateSearchClearBtn();
     if (sortSelect) sortSelect.value = 'recommended';
 
     DOMAINS.forEach(d => {
-      document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => b.classList.toggle('active', b.dataset[d.catAttr] === 'all'));
-      document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => b.classList.toggle('active', b.dataset[d.tagAttr] === 'all'));
+      document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => {
+        const isActive = b.dataset[d.catAttr] === 'all';
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', String(isActive));
+      });
+      document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => {
+        const isActive = b.dataset[d.tagAttr] === 'all';
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', String(isActive));
+      });
     });
 
     updateWishlistBadge();
@@ -205,8 +244,20 @@
     showToast('필터가 모두 초기화되었습니다.');
   }
 
-  // --- 10. Event Listeners Initialization ---
-  function initEvents() {
+  // Helper modal functions
+  function openModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function initNavEvents() {
     // Nav Tabs — 상단 탭과 모바일 하단 탭바가 같은 핸들러를 쓴다
     document.querySelectorAll('.nav-tab-btn, .mobile-tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -224,48 +275,68 @@
         renderCurrentTab();
       });
     }
+  }
 
-    // Category Buttons
+  function initFilterEvents() {
+    // Category & Tag Buttons
     DOMAINS.forEach(d => {
       document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          document.querySelectorAll(`#${d.categoryNavId} .category-item-btn`).forEach(b => {
+            const isActive = b === btn;
+            b.classList.toggle('active', isActive);
+            b.setAttribute('aria-pressed', String(isActive));
+          });
           state[d.catField] = btn.dataset[d.catAttr];
           d.render();
         });
       });
-    });
 
-    // Tag Buttons
-    DOMAINS.forEach(d => {
       document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          document.querySelectorAll(`#${d.tagChipsId} .tag-chip-btn`).forEach(b => {
+            const isActive = b === btn;
+            b.classList.toggle('active', isActive);
+            b.setAttribute('aria-pressed', String(isActive));
+          });
           state[d.tagField] = btn.dataset[d.tagAttr];
           d.render();
         });
       });
     });
 
-    // Search Input
+    // Search Input & Clear Button
     const searchInput = document.getElementById('searchInput');
+    const searchClearBtn = document.getElementById('searchClearBtn');
     if (searchInput) {
       let searchDebounce;
       searchInput.addEventListener('input', (e) => {
+        updateSearchClearBtn();
         clearTimeout(searchDebounce);
         searchDebounce = setTimeout(() => {
           state.searchQuery = e.target.value.trim();
           renderCurrentTab();
         }, 200);
       });
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && searchInput.value) {
+          e.stopPropagation();
+          searchInput.value = '';
+          updateSearchClearBtn();
+          state.searchQuery = '';
+          renderCurrentTab();
+          searchInput.blur();
+        }
+      });
     }
 
-    const searchClearBtn = document.getElementById('searchClearBtn');
     if (searchClearBtn) {
       searchClearBtn.addEventListener('click', () => {
-        if (searchInput) searchInput.value = '';
+        if (searchInput) {
+          searchInput.value = '';
+          searchInput.focus();
+        }
+        updateSearchClearBtn();
         state.searchQuery = '';
         renderCurrentTab();
       });
@@ -298,65 +369,57 @@
 
     // Global reset-filters event listener
     window.addEventListener('reset-filters', resetFilters);
+  }
 
-    // Modals Close Events
-    const calcModal = document.getElementById('calcModal');
-    const guideModal = document.getElementById('guideModal');
-
+  function initDomainModalEvents() {
     DOMAINS.forEach(d => {
       const modalEl = document.getElementById(d.modalId);
       document.getElementById(d.modalCloseBtnId)?.addEventListener('click', d.closeModal);
       modalEl?.addEventListener('click', (e) => {
         if (e.target === modalEl) d.closeModal();
       });
-    });
 
-    function openModal(modalEl) {
-      if (!modalEl) return;
-      modalEl.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeModal(modalEl) {
-      if (!modalEl) return;
-      modalEl.classList.remove('active');
-      document.body.style.overflow = '';
-    }
+      if (d.copyAddressBtnId) {
+        document.getElementById(d.copyAddressBtnId)?.addEventListener('click', (e) => {
+          if (state[d.activeModalField]) copyAddress(state[d.activeModalField].addressVi, e.currentTarget);
+        });
+      }
+    });
 
     // Notes Auto-save Handlers
-    document.addEventListener('input', (e) => {
-      DOMAINS.forEach(d => {
-        const matchesInput = d.noteInputIds.some(id => e.target.matches(`#${id}`));
-        if (!matchesInput) return;
-        if (!state[d.activeModalField]) return;
-        const val = typeof e.target.value === 'string' ? e.target.value.slice(0, 5000) : '';
-        if (!state[d.notesField]) state[d.notesField] = Object.create(null);
-        state[d.notesField][state[d.activeModalField].id] = val;
-        const saved = saveToStorage(d.notesKey, state[d.notesField]);
-        let s = null;
-        for (const statusId of d.noteStatusIds) {
-          s = document.getElementById(statusId);
-          if (s) break;
-        }
-        if (s) {
-          if (saved === false && hasStorage()) {
-            s.textContent = '⚠️ 저장 공간 부족';
-          } else {
-            s.textContent = '✓ 저장 완료';
-          }
-        }
-        d.render();
-      });
-    });
-
-    // Copy Address Handlers
+    const noteInputMap = new Map();
     DOMAINS.forEach(d => {
-      if (!d.copyAddressBtnId) return;
-      document.getElementById(d.copyAddressBtnId)?.addEventListener('click', (e) => {
-        if (state[d.activeModalField]) copyAddress(state[d.activeModalField].addressVi, e.currentTarget);
-      });
+      (d.noteInputIds || []).forEach(id => noteInputMap.set(id, d));
     });
 
-    // Calculator Modal
+    document.addEventListener('input', (e) => {
+      if (!e.target || !e.target.id) return;
+      const d = noteInputMap.get(e.target.id);
+      if (!d) return;
+      if (!state[d.activeModalField]) return;
+      const val = typeof e.target.value === 'string' ? e.target.value.slice(0, 5000) : '';
+      if (!state[d.notesField]) state[d.notesField] = Object.create(null);
+      state[d.notesField][state[d.activeModalField].id] = val;
+      const saved = saveToStorage(d.notesKey, state[d.notesField]);
+      let s = null;
+      for (const statusId of d.noteStatusIds) {
+        s = document.getElementById(statusId);
+        if (s) break;
+      }
+      if (s) {
+        if (saved === false && hasStorage()) {
+          s.textContent = '⚠️ 저장 공간 부족';
+        } else {
+          s.textContent = '✓ 저장 완료';
+        }
+      }
+      d.render();
+    });
+  }
+
+  function initCalcModalEvents() {
+    const calcModal = document.getElementById('calcModal');
+
     document.getElementById('openCalcBtn')?.addEventListener('click', () => openModal(calcModal));
     document.getElementById('calcCloseBtn')?.addEventListener('click', () => closeModal(calcModal));
     calcModal?.addEventListener('click', (e) => {
@@ -390,21 +453,15 @@
         if (calcKrwInput) calcKrwInput.value = vnd ? Math.round(vnd * getRate()).toLocaleString() : '';
       });
     });
+  }
 
-    // Guide Modal
+  function initGuideModalEvents() {
+    const guideModal = document.getElementById('guideModal');
+
     document.getElementById('openGuideBtn')?.addEventListener('click', () => openModal(guideModal));
     document.getElementById('guideCloseBtn')?.addEventListener('click', () => closeModal(guideModal));
     guideModal?.addEventListener('click', (e) => {
       if (e.target === guideModal) closeModal(guideModal);
-    });
-
-    // ESC Key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        DOMAINS.forEach(d => d.closeModal());
-        closeModal(calcModal);
-        closeModal(guideModal);
-      }
     });
 
     // POS Simulator Choice Handlers
@@ -417,8 +474,31 @@
         }
       });
     });
+  }
+
+  function initGlobalKeyboardEvents() {
+    const calcModal = document.getElementById('calcModal');
+    const guideModal = document.getElementById('guideModal');
+
+    // ESC Key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        DOMAINS.forEach(d => d.closeModal());
+        closeModal(calcModal);
+        closeModal(guideModal);
+      }
+    });
+  }
+
+  // --- 10. Event Listeners Initialization ---
+  function initEvents() {
+    initNavEvents();
+    initFilterEvents();
+    initDomainModalEvents();
+    initCalcModalEvents();
+    initGuideModalEvents();
+    initGlobalKeyboardEvents();
 
     // Initialize currency calculator
     initCurrencyCalculator();
   }
-

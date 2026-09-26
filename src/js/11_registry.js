@@ -188,6 +188,32 @@
         `
     },
     {
+      key: 'curation',
+      render: () => renderCuration(),
+      categoryNavId: 'curationCategoryNav', tagChipsId: 'curationTagChips',
+      catAttr: 'curcategory', tagAttr: 'curtag',
+      catField: 'curationCategory', tagField: 'curationTag',
+      notesField: null, notesKey: null,
+      wishField: null, wishKey: null,
+      wishToastAdd: null, wishToastRemove: null,
+      modalHeartBtnId: null,
+      hasOpenHours: false, hasPriceSort: false, showViewToggle: false,
+      activeModalField: null,
+      modalId: null, modalCloseBtnId: null, closeModal: () => {},
+      noteInputIds: [], noteStatusIds: [],
+      copyAddressBtnId: null,
+      gridSectionId: 'curationGridSection',
+      placeholder: '상황별 코스, 장소, 키워드 검색 (예: 체크아웃, 머드온천, 세일링클럽, 선셋크루즈)...',
+      heroTitle: '나트랑 맞춤 상황별 추천 코스 🎯',
+      heroSubtitle: '마지막 날 체크아웃 투어부터 우천 실내, 심야 핫스팟, 커플 힐링 코스 큐레이션',
+      heroPills: `
+          <span class="hero-stat-pill"><span class="icon">✈️</span> 밤 11시 비행기 체크아웃 투어</span>
+          <span class="hero-stat-pill"><span class="icon">🌧️</span> 우천 대비 100% 실내 힐링 코스</span>
+          <span class="hero-stat-pill"><span class="icon">🌙</span> 밤 10시 이후 심야 핫스팟 02시</span>
+          <span class="hero-stat-pill"><span class="icon">💑</span> 커플 & 로맨틱 파인다이닝 크루즈</span>
+        `
+    },
+    {
       key: 'guide',
       render: () => renderGuide(),
       categoryNavId: 'guideCategoryNav', tagChipsId: 'guideTagChips',

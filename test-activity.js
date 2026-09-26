@@ -335,6 +335,62 @@ runner.test('test-frontend.js exists and is available', () => {
   assert.ok(fs.existsSync(path.resolve(__dirname, 'test-frontend.js')), 'test-frontend.js must exist');
 });
 
+
+// ==========================================
+// 11. Search Matching Unit Tests & Missing Field Edge Cases
+// ==========================================
+runner.suite('Search Matching Unit Tests & Edge Cases (activitiesSearchMatch)');
+
+const { activitiesSearchMatch } = require('./js/app.js');
+
+runner.test('activitiesSearchMatch handles empty and whitespace queries gracefully', () => {
+  const item = { title: '스노클링 투어', tags: ['해양스포츠'] };
+  assert.strictEqual(activitiesSearchMatch(item, ''), true, 'Empty search query should match everything');
+});
+
+runner.test('activitiesSearchMatch matches across all string search fields', () => {
+  const item = {
+    title: '빈원더스 테마파크',
+    titleEn: 'VinWonders Nha Trang',
+    location: '혼똠 섬',
+    highlight: '베트남 최대 테마파크',
+    googleMapQuery: 'VinWonders Cable Car'
+  };
+  assert.strictEqual(activitiesSearchMatch(item, '빈원더스'), true, 'Matches title');
+  assert.strictEqual(activitiesSearchMatch(item, 'vinwonders'), true, 'Matches titleEn case-insensitively');
+  assert.strictEqual(activitiesSearchMatch(item, '혼똠'), true, 'Matches location');
+  assert.strictEqual(activitiesSearchMatch(item, '테마파크'), true, 'Matches highlight');
+  assert.strictEqual(activitiesSearchMatch(item, 'cable car'), true, 'Matches googleMapQuery');
+});
+
+runner.test('activitiesSearchMatch matches elements in tags array', () => {
+  const item = { title: '호핑투어', tags: ['스노클링', '선셋', '바다'] };
+  assert.strictEqual(activitiesSearchMatch(item, '선셋'), true, 'Matches item in tags array');
+  assert.strictEqual(activitiesSearchMatch(item, '파라세일링'), false, 'Returns false when tag is not present');
+});
+
+runner.test('activitiesSearchMatch evaluates extra fallback logic (description/highlight and categoryLabel/category)', () => {
+  const itemDesc = { title: '투어', description: '아름다운 야경 감상' };
+  assert.strictEqual(activitiesSearchMatch(itemDesc, '야경'), true, 'Matches description via extra fallback when highlight is missing');
+
+  const itemCat = { title: '투어', category: 'hopping' };
+  assert.strictEqual(activitiesSearchMatch(itemCat, 'hopping'), true, 'Matches category via extra fallback when categoryLabel is missing');
+});
+
+runner.test('activitiesSearchMatch safe handling of objects with missing/null/undefined fields', () => {
+  assert.strictEqual(activitiesSearchMatch({}, 'test'), false, 'Handles empty object without throwing');
+  assert.strictEqual(activitiesSearchMatch({ title: null, tags: null }, 'test'), false, 'Handles null fields without throwing');
+  assert.strictEqual(activitiesSearchMatch({ title: undefined, tags: undefined }, 'test'), false, 'Handles undefined fields without throwing');
+  assert.strictEqual(activitiesSearchMatch({ titleEn: null, description: null }, 'test'), false, 'Handles null titleEn and description without throwing');
+});
+
+runner.test('activitiesSearchMatch verified against real dataset items', () => {
+  const sampleAct = activities[0];
+  assert.ok(sampleAct, 'Dataset has activities');
+  assert.strictEqual(activitiesSearchMatch(sampleAct, sampleAct.title), true, 'Matches real dataset item title');
+  assert.strictEqual(activitiesSearchMatch(sampleAct, 'non_existent_random_query_xyz'), false, 'Does not match non-existent query');
+});
+
 // Run all and exit with appropriate code
 const passed = runner.summary();
 process.exit(passed ? 0 : 1);

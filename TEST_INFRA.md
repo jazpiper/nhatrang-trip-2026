@@ -22,7 +22,7 @@
 - **Invocation**: `node test-currency.js && node test-frontend.js`
 - **Pass/Fail Semantics**: Exit code 0 on 100% pass; non-zero on assertion failure.
 
-## 12-Suite Test Matrix for `test-currency.js`:
+## 13-Suite Test Matrix for `test-currency.js`:
 1. Suite 1: File Loading & Dual Export Verification (`window.NHA_TRANG_CURRENCY` & `module.exports`).
 2. Suite 2: Dataset Count (17 Places) & Category Distribution.
 3. Suite 3: Unique Kebab-Case IDs (`/^[a-z0-9-]+$/`).

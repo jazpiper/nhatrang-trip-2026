@@ -63,9 +63,9 @@ function makeElement(tag = 'div', id = '') {
     querySelector: () => null,
     addEventListener: () => {},
     removeEventListener: () => {},
-    appendChild: child => { el.children.push(child); return child; },
-    removeChild: child => { el.children = el.children.filter(c => c !== child); return child; },
-    remove: () => {},
+    appendChild: child => { child.parentNode = el; el.children.push(child); return child; },
+    removeChild: child => { child.parentNode = null; el.children = el.children.filter(c => c !== child); return child; },
+    remove: function() { if (this.parentNode) this.parentNode.removeChild(this); },
     closest: () => null,
     matches: () => false,
     focus: () => {},
@@ -110,6 +110,7 @@ function installDom() {
     dispatchEvent: () => true
   };
 
+  globalThis.prompt = (msg, defaultVal) => defaultVal;
   const win = {
     addEventListener: () => {},
     removeEventListener: () => {},
@@ -141,6 +142,7 @@ function installDom() {
 }
 
 function uninstallDom() {
+  delete globalThis.prompt;
   Date.prototype.getHours = originalGetHours;
   Date.prototype.getMinutes = originalGetMinutes;
 

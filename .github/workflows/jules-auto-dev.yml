@@ -1,0 +1,59 @@
+name: Jules Autonomous Dev Pipeline
+
+on:
+  issues:
+    types: [opened, labeled]
+  workflow_dispatch:
+    inputs:
+      task_title:
+        description: 'Task Title'
+        required: true
+        default: 'Jules Automated Task'
+      task_prompt:
+        description: 'Task Prompt (instructions for Jules)'
+        required: true
+        default: 'Perform general code cleanup and verify project consistency'
+
+jobs:
+  run-jules:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' && (
+        github.event.label.name == 'jules-auto' ||
+        contains(github.event.issue.labels.*.name, 'jules-auto')
+      ))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Trigger Jules API
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+        run: |
+          python .github/scripts/jules_trigger.py
+
+      - name: Post Comment on Issue
+        if: always() && github.event_name == 'issues'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🤖 **Jules 에이전트 작업 완료**: 개발 세션이 완료되어 신규 PR이 생성되었습니다. CI 테스트 검증 후 자동 승인/머지 파이프라인이 진행됩니다.'
+            })

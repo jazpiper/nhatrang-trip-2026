@@ -30,6 +30,10 @@
     spaCategory: 'all',
     spaTag: 'all',
 
+    // Curation Filter State
+    curationCategory: 'all',
+    curationTag: 'all',
+
     // Guide Hub Filter State
     guideCategory: 'all',
     guideTag: 'all',
@@ -81,7 +85,10 @@
     const wishlistBtn = document.getElementById('wishlistToggleBtn');
     
     if (wishlistCount) wishlistCount.textContent = total;
-    if (wishlistBtn) wishlistBtn.classList.toggle('active', state.wishlistOnly);
+    if (wishlistBtn) {
+      wishlistBtn.classList.toggle('active', state.wishlistOnly);
+      wishlistBtn.setAttribute('aria-pressed', String(state.wishlistOnly));
+    }
   }
 
   function resetStateFilters() {
@@ -99,6 +106,8 @@
     state.shoppingTag = 'all';
     state.currencyCategory = 'all';
     state.currencyTag = 'all';
+    state.curationCategory = 'all';
+    state.curationTag = 'all';
     state.guideCategory = 'all';
     state.guideTag = 'all';
     state.searchQuery = '';
@@ -360,7 +369,7 @@
       const el = document.getElementById(f.id);
       if (!el) return;
       const v = typeof f.value === 'function' ? f.value(item) : item[f.value];
-      if (f.as === 'html') el.innerHTML = v == null ? '' : v;
+      if (f.as === 'html') el.innerHTML = v == null ? '' : escapeHtml(v);
       else if (f.as === 'src') el.src = sanitizeImageUrl(v == null ? '' : v);
       else if (f.as === 'href') el.href = sanitizeUrl(v == null ? '' : v);
       else el.textContent = v == null ? '' : v;
@@ -490,4 +499,3 @@
     }
     el.innerHTML = list.map(li => `<li><span class="bullet">✔</span> ${escapeHtml(li)}</li>`).join('');
   }
-

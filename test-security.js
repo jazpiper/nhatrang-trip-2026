@@ -116,6 +116,22 @@ test('sanitizeImageUrl blocks script schemes, dangerous SVGs, and protocol-relat
   assert.strictEqual(app.sanitizeImageUrl('./images/thumb.jpg'), './images/thumb.jpg');
 });
 
+test('renderCurrencyCardsList escapes supportedCards items against XSS', () => {
+  const item = {
+    supportedCards: ['<script>alert("xss")</script>', 'NormalCard'],
+    feeFree: true
+  };
+  let outputHtml = '';
+  const mockEl = {
+    set innerHTML(val) {
+      outputHtml = val;
+    }
+  };
+  app.renderCurrencyCardsList(item, mockEl);
+  assert.ok(outputHtml.includes('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;'));
+  assert.ok(!outputHtml.includes('<script>'));
+});
+
 test('escapeHtml sanitizes all dangerous HTML characters and attribute breakout payloads', () => {
   assert.strictEqual(app.escapeHtml('<script>alert(1)</script>'), '&lt;script&gt;alert(1)&lt;/script&gt;');
   assert.strictEqual(app.escapeHtml('" onmouseover="alert(1)"'), '&quot; onmouseover=&quot;alert(1)&quot;');
@@ -125,6 +141,73 @@ test('escapeHtml sanitizes all dangerous HTML characters and attribute breakout 
   assert.strictEqual(app.escapeHtml(undefined), '');
 });
 
+test('openSpaModal escapes HTML in course dynamic fields (XSS Prevention)', () => {
+  const spaItem = {
+    id: 'spa-xss-test',
+    name: 'XSS Spa',
+    nameKo: 'XSS 스파',
+    categoryLabel: '스파',
+    courses: [
+      {
+        name: '<script>alert("xss-name")</script>',
+        durationMin: 60,
+        priceVnd: 500000,
+        priceKrw: 25000,
+        description: '<img src=x onerror=alert("xss-desc")>'
+      }
+    ]
+  };
+
+  const { installDom } = require('./test-dom-stub.js');
+  const dom = installDom();
+
+  try {
+    app.openSpaModal(spaItem);
+    const tbody = dom.doc.getElementById('spaModalCourseTableBody');
+    assert.ok(tbody, 'spaModalCourseTableBody must exist in DOM stub');
+    assert.ok(tbody.innerHTML.includes('&lt;script&gt;alert(&quot;xss-name&quot;)&lt;/script&gt;'), 'Course name must be HTML escaped');
+    assert.ok(tbody.innerHTML.includes('&lt;img src=x onerror=alert(&quot;xss-desc&quot;)&gt;'), 'Course description must be HTML escaped');
+    assert.ok(!tbody.innerHTML.includes('<script>'), 'Unescaped script tag must not exist');
+    assert.ok(!tbody.innerHTML.includes('<img src=x'), 'Unescaped img tag must not exist');
+  } finally {
+    dom.reset();
+  }
+});
+
+test("guideFlashcardsHTML sanitizes malicious inputs in flashcard objects", () => {
+  const src = fs.readFileSync(path.resolve(__dirname, "src/js/10_domain_guide.js"), "utf8");
+  assert.ok(src.includes("data-fc-id=\"${escapeHtml(fc.id)}\""), "fc.id must be escaped in data attribute");
+  assert.ok(src.includes("${escapeHtml(fc.ko)}"), "fc.ko must be escaped");
+  assert.ok(src.includes("${escapeHtml(fc.vi)}"), "fc.vi must be escaped");
+  assert.ok(src.includes("${escapeHtml(fc.pronunciation)}"), "fc.pronunciation must be escaped");
+  assert.ok(src.includes("${escapeHtml(fc.purpose)}"), "fc.purpose must be escaped");
+  assert.ok(src.includes("data-fc-copy=\"${escapeHtml(fc.vi)}\""), "fc.vi in data attribute must be escaped");
+});
+
+test('applyModalFields sanitizes HTML content when as="html"', () => {
+  const dummyEl = { innerHTML: '', src: '', href: '', textContent: '' };
+  const originalGetElementById = global.document ? global.document.getElementById : undefined;
+
+  global.document = global.document || {};
+  global.document.getElementById = (id) => (id === 'testHtmlField' ? dummyEl : null);
+
+  try {
+    const item = { xssContent: '<img src=x onerror=alert(1)>' };
+    const fields = [{ id: 'testHtmlField', value: 'xssContent', as: 'html' }];
+
+    app.applyModalFields(item, fields);
+
+    assert.strictEqual(
+      dummyEl.innerHTML,
+      '&lt;img src=x onerror=alert(1)&gt;',
+      'applyModalFields must escape HTML payloads when as="html"'
+    );
+  } finally {
+    if (originalGetElementById) {
+      global.document.getElementById = originalGetElementById;
+    }
+  }
+});
 console.log('\n--- Suite 2: LocalStorage Defense & Prototype Pollution Prevention ---');
 
 test('Storage deserializer prevents Object prototype pollution and returns null-prototype dictionaries', () => {
@@ -268,6 +351,166 @@ test('No local user paths or private absolute directories in index.html or js/ap
 test('No inline alert() onclick handlers exist in index.html', () => {
   const indexHtml = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf8');
   assert.ok(!indexHtml.includes('onclick="alert('), 'No inline onclick alert handlers');
+});
+
+
+console.log("\n--- Suite 5: Clipboard copyAddress & fallbackCopy Behavior ---");
+
+const { installDom, uninstallDom, makeElement } = require("./test-dom-stub.js");
+
+test("copyAddress with empty/falsy address is a no-op", () => {
+  const dom = installDom();
+  app.copyAddress("");
+  app.copyAddress(null);
+  app.copyAddress(undefined);
+  assert.strictEqual(dom.doc.body.children.length, 0, "No DOM elements or toasts should be created for empty address");
+  uninstallDom();
+});
+
+test("copyAddress uses navigator.clipboard.writeText when available and updates button state", async () => {
+  const dom = installDom();
+  let clipText = "";
+  Object.defineProperty(navigator, "clipboard", {
+    value: {
+      writeText: (txt) => {
+        clipText = txt;
+        return Promise.resolve();
+      }
+    },
+    configurable: true,
+    writable: true
+  });
+
+  const btn = makeElement("button");
+  btn.textContent = "복사";
+  app.copyAddress("123 Tran Phu", btn);
+
+  await new Promise(resolve => setTimeout(resolve, 10));
+
+  assert.strictEqual(clipText, "123 Tran Phu");
+  assert.strictEqual(btn.textContent, "✓ 복사완료");
+  const toastContainer = dom.doc.getElementById("toastContainer");
+  assert.ok(toastContainer, "Toast container should be created on success");
+  assert.ok(toastContainer.children[0].textContent.includes("베트남어 주소가 복사되었습니다"));
+  uninstallDom();
+});
+
+test("copyAddress falls back to fallbackCopy when navigator.clipboard.writeText rejects", async () => {
+  const dom = installDom();
+  Object.defineProperty(navigator, "clipboard", {
+    value: {
+      writeText: () => Promise.reject(new Error("Permission denied"))
+    },
+    configurable: true,
+    writable: true
+  });
+
+  let execCommandCalled = false;
+  dom.doc.execCommand = (cmd) => {
+    if (cmd === "copy") execCommandCalled = true;
+    return true;
+  };
+
+  const btn = makeElement("button");
+  btn.textContent = "복사";
+  app.copyAddress("456 Le Thanh Ton", btn);
+
+  await new Promise(resolve => setTimeout(resolve, 10));
+
+  assert.strictEqual(execCommandCalled, true, "execCommand should be called on clipboard promise rejection");
+  assert.strictEqual(btn.textContent, "✓ 복사완료");
+  uninstallDom();
+});
+
+test("copyAddress falls back to fallbackCopy when navigator.clipboard is undefined", () => {
+  const dom = installDom();
+  Object.defineProperty(navigator, "clipboard", {
+    value: undefined,
+    configurable: true,
+    writable: true
+  });
+
+  let execCommandCalled = false;
+  dom.doc.execCommand = (cmd) => {
+    if (cmd === "copy") execCommandCalled = true;
+    return true;
+  };
+
+  const btn = makeElement("button");
+  btn.textContent = "복사";
+  app.copyAddress("789 Nguyen Thien Thuat", btn);
+
+  assert.strictEqual(execCommandCalled, true, "execCommand should be called when clipboard API is missing");
+  assert.strictEqual(btn.textContent, "✓ 복사완료");
+  uninstallDom();
+});
+
+test("fallbackCopy creates fixed hidden textarea, executes copy command, calls callback, and removes element", () => {
+  const dom = installDom();
+  let createdElement = null;
+  let selectCalled = false;
+  let execCommandCalled = false;
+
+  const originalCreateElement = dom.doc.createElement;
+  dom.doc.createElement = (tag) => {
+    const el = originalCreateElement(tag);
+    if (tag === "textarea") {
+      createdElement = el;
+      el.select = () => { selectCalled = true; };
+    }
+    return el;
+  };
+
+  dom.doc.execCommand = (cmd) => {
+    if (cmd === "copy") execCommandCalled = true;
+    return true;
+  };
+
+  let callbackCalled = false;
+  app.fallbackCopy("39/17 Doan Tran Nghiep", () => { callbackCalled = true; });
+
+  assert.ok(createdElement, "textarea element should be created");
+  assert.strictEqual(createdElement.value, "39/17 Doan Tran Nghiep");
+  assert.strictEqual(createdElement.style.position, "fixed");
+  assert.strictEqual(createdElement.style.opacity, "0");
+  assert.strictEqual(selectCalled, true, "ta.select() should be called");
+  assert.strictEqual(execCommandCalled, true, "execCommand(\"copy\") should be called");
+  assert.strictEqual(callbackCalled, true, "callback should be invoked");
+  assert.strictEqual(dom.doc.body.children.length, 0, "textarea element should be removed from document body after copy");
+  uninstallDom();
+});
+
+test("fallbackCopy displays default toast notification when no callback is provided", () => {
+  const dom = installDom();
+  dom.doc.execCommand = (cmd) => true;
+
+  app.fallbackCopy("102 Nguyen Thi Minh Khai");
+
+  const toastContainer = dom.doc.getElementById("toastContainer");
+  assert.ok(toastContainer, "Toast container should be created");
+  assert.strictEqual(toastContainer.children[0].textContent, "📋 주소가 복사되었습니다!");
+  uninstallDom();
+});
+
+test("fallbackCopy triggers prompt fallback when execCommand throws an error", () => {
+  const dom = installDom();
+  dom.doc.execCommand = () => {
+    throw new Error("execCommand copy unsupported");
+  };
+
+  let promptMsg = "";
+  let promptText = "";
+  globalThis.prompt = (msg, text) => {
+    promptMsg = msg;
+    promptText = text;
+  };
+
+  app.fallbackCopy("55 Hung Vuong");
+
+  assert.strictEqual(promptMsg, "주소를 복사하세요:");
+  assert.strictEqual(promptText, "55 Hung Vuong");
+  assert.strictEqual(dom.doc.body.children.length, 0, "textarea element should be removed even when execCommand throws");
+  uninstallDom();
 });
 
 console.log(`\n========================================`);

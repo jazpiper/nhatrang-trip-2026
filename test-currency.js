@@ -17,6 +17,7 @@
  * 10. Filter & search driven through the real js/app.js getFilteredCurrency()
  * 11. Sorting driven through the real js/app.js comparator (recommended, rating)
  * 12. Security & Anti-XSS payload prevention
+ * 13. KRW Formatting Utility (formatKRW) Unit Tests
  * ============================================================================
  */
 
@@ -791,6 +792,68 @@ runner.test('Phone numbers follow standard international or local contact format
       `Spot '${spot.id}' phone '${spot.phone}' does not match expected telephone format`
     );
   });
+});
+
+
+// ==========================================
+// 13. KRW Formatting Utility (formatKRW) Unit Tests
+// ==========================================
+runner.suite('KRW Formatting Utility (formatKRW) Unit Tests');
+
+runner.test('formatKRW handles falsy, zero, and non-numeric inputs gracefully', () => {
+  runner.assertEqual(app.formatKRW(0), '약 0원');
+  runner.assertEqual(app.formatKRW(null), '약 0원');
+  runner.assertEqual(app.formatKRW(undefined), '약 0원');
+  runner.assertEqual(app.formatKRW(''), '약 0원');
+  runner.assertEqual(app.formatKRW(NaN), '약 0원');
+});
+
+runner.test('formatKRW uses fallback rate (0.054) when DEFAULT_EXCHANGE_RATE is undefined', () => {
+  const origRate = global.DEFAULT_EXCHANGE_RATE;
+  delete global.DEFAULT_EXCHANGE_RATE;
+  try {
+    // 100,000 VND * 0.054 = 5,400 KRW
+    runner.assertEqual(app.formatKRW(100000), '약 5,400원');
+  } finally {
+    global.DEFAULT_EXCHANGE_RATE = origRate;
+  }
+});
+
+runner.test('formatKRW uses global DEFAULT_EXCHANGE_RATE when defined', () => {
+  const origRate = global.DEFAULT_EXCHANGE_RATE;
+  global.DEFAULT_EXCHANGE_RATE = 0.060;
+  try {
+    // 100,000 VND * 0.060 = 6,000 KRW
+    runner.assertEqual(app.formatKRW(100000), '약 6,000원');
+  } finally {
+    global.DEFAULT_EXCHANGE_RATE = origRate;
+  }
+});
+
+runner.test('formatKRW correctly rounds output to the nearest hundred KRW', () => {
+  const origRate = global.DEFAULT_EXCHANGE_RATE;
+  global.DEFAULT_EXCHANGE_RATE = 0.0545;
+  try {
+    // 1,000 VND * 0.0545 = 54.5 KRW -> Math.round(0.545) * 100 = 100 KRW
+    runner.assertEqual(app.formatKRW(1000), '약 100원');
+    // 500 VND * 0.0545 = 27.25 KRW -> Math.round(0.2725) * 100 = 0 KRW
+    runner.assertEqual(app.formatKRW(500), '약 0원');
+    // 45,000 VND * 0.0545 = 2452.5 KRW -> Math.round(24.525) * 100 = 2,500 KRW
+    runner.assertEqual(app.formatKRW(45000), '약 2,500원');
+  } finally {
+    global.DEFAULT_EXCHANGE_RATE = origRate;
+  }
+});
+
+runner.test('formatKRW formats large numbers with thousands separators', () => {
+  const origRate = global.DEFAULT_EXCHANGE_RATE;
+  global.DEFAULT_EXCHANGE_RATE = 0.054;
+  try {
+    // 100,000,000 VND * 0.054 = 5,400,000 KRW
+    runner.assertEqual(app.formatKRW(100000000), '약 5,400,000원');
+  } finally {
+    global.DEFAULT_EXCHANGE_RATE = origRate;
+  }
 });
 
 // Run Summary & Exit
