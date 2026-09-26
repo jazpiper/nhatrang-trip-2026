@@ -54,6 +54,7 @@
       state,
       resetStateFilters,
       escapeHtml,
+      decodeHtmlEntities,
       sanitizeUrl,
       sanitizeImageUrl,
       formatVND,
